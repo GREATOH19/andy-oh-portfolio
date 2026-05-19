@@ -38,7 +38,7 @@ export function AboutPageContent({
   const {name, role, meta, portrait, bio, education, skillGroups, resumeUrl, resumeFilename} = about;
 
   const portraitSrc = portrait?.asset?._ref
-    ? urlForImage(portrait).width(900).height(900).fit("crop").quality(90).url()
+    ? urlForImage(portrait).width(900).height(1125).fit("crop").quality(90).url()
     : null;
 
   return (
@@ -54,19 +54,19 @@ export function AboutPageContent({
           <div className="sticky top-32">
             {portraitSrc ? (
               <motion.div
-                className="mb-6 w-full max-w-56"
+                className="mb-6 w-full max-w-xs"
                 initial={{opacity: 0, y: 30}}
                 whileInView={{opacity: 1, y: 0}}
                 transition={{duration: 0.8, delay: 0.1}}
                 viewport={{once: true}}
               >
-                <div className="relative aspect-square w-full overflow-hidden bg-slate-100">
+                <div className="relative aspect-[4/5] w-full overflow-hidden bg-slate-100">
                   <Image
                     src={portraitSrc}
                     alt={portrait?.alt ?? name}
                     fill
                     className="object-cover"
-                    sizes="(max-width: 1024px) 60vw, 224px"
+                    sizes="(max-width: 1024px) 70vw, 320px"
                   />
                 </div>
               </motion.div>
