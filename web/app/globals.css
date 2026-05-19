@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-magazine-serif);
+  --font-brand-dm: var(--font-brand-dm-sans);
+  --font-brand-instrument: var(--font-brand-instrument-serif);
+  --font-brand-pinyon: var(--font-brand-pinyon-script);
+  --font-brand-gloock: var(--font-brand-gloock-serif);
+  
+  --color-background: #ffffff;
+  --color-foreground: #111111;
+  --color-muted: #666666;
+  --color-border: #eeeeee;
+}
+
+:root {
+  --background-top: #c6f4ff;
+  --background-mid: #8fe3ff;
+  --background-accent: #4fd0ff;
+  --background-bottom: #bdefff;
+  --foreground: #111111;
+  /* SiteHeader uses this for h-*; intro mask uses the same for top offset */
+  --site-header-height: 4rem;
+}
+
+@media (max-width: 640px) {
+  :root {
+    --site-header-height: 3.5rem;
+  }
+}
+
+@layer base {
+  body {
+    background-color: #eafcff;
+    background-image:
+      radial-gradient(1100px 720px at 54% 18%, rgba(86, 205, 255, 0.30), rgba(86, 205, 255, 0) 66%),
+      radial-gradient(980px 820px at 16% 56%, rgba(112, 215, 255, 0.28), rgba(112, 215, 255, 0) 68%),
+      radial-gradient(820px 520px at 68% 66%, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0) 72%),
+      radial-gradient(760px 520px at 86% 50%, rgba(255, 255, 255, 0.48), rgba(255, 255, 255, 0) 74%),
+      radial-gradient(900px 580px at 26% 86%, rgba(255, 199, 44, 0.18), rgba(255, 199, 44, 0) 70%),
+      linear-gradient(180deg, rgba(230, 253, 255, 1) 0%, rgba(230, 253, 255, 1) 100%);
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    @apply text-foreground antialiased selection:bg-[#FFC72C] selection:text-black min-h-screen;
+    font-feature-settings: "ss01", "ss02", "cv01", "cv11";
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: -20%;
+    pointer-events: none;
+    z-index: -1;
+    background:
+      radial-gradient(46% 36% at 54% 18%, rgba(86, 205, 255, 0.34), rgba(86, 205, 255, 0) 74%),
+      radial-gradient(44% 40% at 16% 56%, rgba(112, 215, 255, 0.32), rgba(112, 215, 255, 0) 76%),
+      radial-gradient(52% 34% at 68% 66%, rgba(255, 255, 255, 0.64), rgba(255, 255, 255, 0) 76%);
+    filter: blur(62px);
+    opacity: 0.85;
+    transform: translateZ(0);
+  }
+
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+    background:
+      radial-gradient(120% 95% at 52% 52%, rgba(255, 255, 255, 0) 40%, rgba(255, 255, 255, 0.92) 100%),
+      linear-gradient(0deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.22));
+    opacity: 0.85;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-serif tracking-tight font-medium;
+  }
+}
+
+/* Gloock 텍스트는 slate-500에서 한 스탑 더 어두운 slate-600 (BIOGRAPHY 라벨보다 두 스탑).
+   단, Selected Work 섹션(#work) 내부에서는 원래 색을 유지 (예: 카드 위 흰 타이틀).
+   Tailwind utility(text-*)보다 우선하도록 일부러 @layer 밖에 둠. */
+.font-brand-gloock {
+  color: #475569;
+}
+#work .font-brand-gloock {
+  color: inherit;
+}
+
+@layer components {
+  .blessed-text {
+    position: relative;
+    display: inline-block;
+    color: #1b6f3e;
+    text-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.25),
+      0 10px 24px rgba(13, 40, 23, 0.16);
+    filter: saturate(1.05) contrast(1.03);
+  }
+
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .blessed-text {
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+      background-image:
+        radial-gradient(120% 110% at 20% 18%, rgba(146, 255, 198, 0.95) 0%, rgba(53, 214, 129, 0.88) 38%, rgba(14, 122, 70, 0.95) 100%),
+        linear-gradient(120deg, rgba(191, 255, 221, 0.75) 0%, rgba(33, 196, 120, 0.7) 45%, rgba(11, 94, 52, 0.85) 100%),
+        repeating-linear-gradient(
+          -12deg,
+          rgba(255, 255, 255, 0.06) 0 1px,
+          rgba(255, 255, 255, 0) 1px 4px
+        );
+      background-size: 100% 100%, 100% 100%, 14px 14px;
+      background-position: center, center, 0 0;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-stroke: 0.45px rgba(9, 64, 37, 0.35);
+    }
+  }
+
+  .container-wide {
+    @apply mx-auto max-w-[1400px] px-8 md:px-16 lg:px-24;
+  }
+
+  .container-more {
+    @apply mx-auto w-full px-5 md:px-8 lg:px-12 xl:px-14;
+  }
+
+  .nav-link {
+    @apply relative text-sm uppercase tracking-widest text-muted transition-colors hover:text-foreground;
+  }
+
+  .nav-link::after {
+    content: '';
+    @apply absolute -bottom-1 left-0 h-[1px] w-0 bg-[#FFC72C] transition-all duration-300;
+  }
+
+  .nav-link:hover::after {
+    @apply w-full;
+  }
+
+  .project-title {
+    @apply font-serif text-2xl md:text-3xl lg:text-4xl leading-tight;
+  }
+}
+
