@@ -213,7 +213,7 @@ export function ProjectCard({
                 href={href}
                 data-project-card-link
                 aria-label={`View project: ${project.title}`}
-                className="pointer-events-auto relative z-10 mt-8 inline-flex rounded-2xl border border-white/50 bg-transparent px-5 py-2.5 text-[0.6875rem] font-semibold uppercase tracking-[0.2em] text-white/95 transition-[border-color,background-color,color] duration-300 active:border-white/75 active:bg-white/10 active:text-white"
+                className="pointer-events-auto relative z-10 mt-8 inline-flex rounded-sm border border-white/50 bg-transparent px-5 py-2.5 text-[0.6875rem] font-semibold uppercase tracking-[0.2em] text-white/95 transition-[border-color,background-color,color] duration-300 active:border-white/75 active:bg-white/10 active:text-white"
                 onClick={(e) => e.stopPropagation()}
               >
                 View project
