@@ -23,6 +23,10 @@
   --foreground: #111111;
   /* SiteHeader uses this for h-*; intro mask uses the same for top offset */
   --site-header-height: 4rem;
+  /* Uniform gutters — reference ~30px row/column (2×2 grid) */
+  --work-grid-gap: 1.875rem;
+  /* Andy Oh display name tone (#4A5568) — project card hover scrim */
+  --project-card-scrim: 74 85 104;
 }
 
 @media (max-width: 640px) {
@@ -91,6 +95,58 @@
   color: inherit;
 }
 
+/* Work card hover title — Gloock: tight tracking */
+#work .project-card-gloock-title {
+  letter-spacing: -0.03em;
+}
+
+/* Project card hover title — outside @layer so it beats Tailwind utilities */
+.project-card-overlay-title {
+  font-size: 2rem;
+  line-height: 1.05;
+}
+
+@media (min-width: 640px) {
+  .project-card-overlay-title {
+    font-size: 2.375rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .project-card-overlay-title {
+    font-size: 2.875rem;
+  }
+}
+
+/* Work homepage thumbnails — between default card title and compact */
+#work .project-card-overlay-title {
+  font-size: 1.8125rem;
+}
+
+@media (min-width: 640px) {
+  #work .project-card-overlay-title {
+    font-size: 2.0625rem;
+  }
+}
+
+@media (min-width: 768px) {
+  #work .project-card-overlay-title {
+    font-size: 2.4375rem;
+  }
+}
+
+#work .project-card-overlay-body {
+  padding-inline: 1.875rem;
+}
+
+/* Main title only — Andy Oh tone drop shadow */
+#work .project-card-overlay-title-shadow {
+  text-shadow:
+    0 1px 2px rgb(82 94 117 / 0.55),
+    0 2px 14px rgb(74 85 104 / 0.5),
+    0 6px 28px rgb(74 85 104 / 0.38);
+}
+
 @layer components {
   .blessed-text {
     position: relative;
@@ -122,12 +178,93 @@
     }
   }
 
+  /* Work card hover — scrim + soft white corner vignette (original blur vibe) */
+  .project-card-hover-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 70% 55% at 0% 0%, rgb(255 255 255 / 0.38) 0%, transparent 58%),
+      radial-gradient(ellipse 70% 55% at 100% 0%, rgb(255 255 255 / 0.38) 0%, transparent 58%),
+      radial-gradient(ellipse 70% 55% at 100% 100%, rgb(255 255 255 / 0.38) 0%, transparent 58%),
+      radial-gradient(ellipse 70% 55% at 0% 100%, rgb(255 255 255 / 0.38) 0%, transparent 58%),
+      rgb(var(--project-card-scrim) / 0.32);
+  }
+
+  /* Header + home intro band (screenshot layout — not the Work grid width) */
+  .layout-chrome {
+    @apply mx-auto w-full max-w-[1370px] px-8 md:px-17 lg:px-25;
+  }
+
   .container-wide {
-    @apply mx-auto max-w-[1400px] px-8 md:px-16 lg:px-24;
+    width: 100%;
+    max-width: 1400px;
+    margin-inline: auto;
+    padding-inline: 2rem;
+  }
+
+  @media (min-width: 48rem) {
+    .container-wide {
+      padding-inline: 4rem;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .container-wide {
+      padding-inline: 6rem;
+    }
   }
 
   .container-more {
-    @apply mx-auto w-full px-5 md:px-8 lg:px-12 xl:px-14;
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+
+  @media (min-width: 48rem) {
+    .container-more {
+      padding-inline: 2rem;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .container-more {
+      padding-inline: 3rem;
+    }
+  }
+
+  @media (min-width: 80rem) {
+    .container-more {
+      padding-inline: 3.5rem;
+    }
+  }
+
+  /* Work homepage only — wider than About/More (container-wide) */
+  .container-work {
+    width: min(95vw, 100%);
+    max-width: 100%;
+    margin-inline: auto;
+  }
+
+  /* Work homepage grid — equal column/row gutters */
+  .work-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    column-gap: var(--work-grid-gap);
+    row-gap: var(--work-grid-gap);
+  }
+
+  @media (min-width: 640px) {
+    .work-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 768px) {
+    .work-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
   }
 
   .nav-link {

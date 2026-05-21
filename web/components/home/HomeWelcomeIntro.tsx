@@ -53,7 +53,7 @@ export function HomeWelcomeIntro({
       initial={reduceMotion ? false : {opacity: 0, y: 12}}
       animate={{opacity: 1, y: 0}}
       transition={{duration: 0.8, ease: [0.4, 0, 0.2, 1], delay: 0.4}}
-      className="pb-14 md:pb-20"
+      className="pb-14 text-center md:pb-20"
     >
       {heading ? (
         <h2 className={`text-5xl font-light text-slate-950 sm:text-6xl ${displayClass}`}>
@@ -61,7 +61,7 @@ export function HomeWelcomeIntro({
         </h2>
       ) : null}
       {body ? (
-        <p className="mt-5 max-w-2xl whitespace-pre-line text-base leading-relaxed text-slate-600 sm:max-w-none sm:whitespace-nowrap md:mt-7 md:text-lg">
+        <p className="mx-auto mt-5 max-w-2xl whitespace-pre-line text-base leading-relaxed text-slate-600 sm:max-w-none sm:whitespace-nowrap md:mt-7 md:text-lg">
           {body}
         </p>
       ) : null}

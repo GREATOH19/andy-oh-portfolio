@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useLayoutEffect, useState } from "react";
 import { BrandMark } from "@/components/BrandMark";
 import { MoreNavLink } from "@/components/MoreNavLink";
@@ -23,7 +24,10 @@ export function SiteHeader({
   moreNavDropdownItems?: MoreNavItem[];
   moreNavLabel?: string;
 }) {
+  const pathname = usePathname();
+  const isHome = pathname === "/";
   const [isScrolled, setIsScrolled] = useState(false);
+  const showScrolledHeader = isScrolled && !isHome;
 
   useLayoutEffect(() => {
     const update = () => {
@@ -39,12 +43,12 @@ export function SiteHeader({
       className={[
         "sticky top-0 z-50 relative flex h-[var(--site-header-height)] shrink-0 overflow-visible",
         "transition-[background-color,box-shadow,backdrop-filter] duration-300 ease-out",
-        isScrolled
+        showScrolledHeader
           ? "bg-[rgba(234,252,255,0.58)] backdrop-blur-md shadow-[inset_0_-1px_0_rgba(17,17,17,0.06)]"
           : "bg-transparent shadow-none",
       ].join(" ")}
     >
-      <div className="container-wide relative z-10 flex h-full w-full items-center justify-between overflow-visible">
+      <div className="layout-chrome relative z-10 mx-auto flex h-full w-full max-w-[1370px] items-center justify-between overflow-visible px-8 md:px-17 lg:px-25">
         <BrandMark brand={brand} variant="header" />
 
         <nav className="flex items-center gap-6 md:gap-10">

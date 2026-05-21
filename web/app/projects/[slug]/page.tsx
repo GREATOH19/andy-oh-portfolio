@@ -5,6 +5,7 @@ import { ProjectSections } from "@/components/ProjectSections";
 import { PhotoThumbnailGrid } from "@/components/more/PhotoThumbnailGrid";
 import { client } from "@/lib/sanity/client";
 import { sanityImageAssetId } from "@/lib/sanity/image";
+import { normalizeMediaList } from "@/lib/sanity/media";
 import { projectBySlugQuery, projectSlugsQuery } from "@/lib/sanity/queries";
 import type { ProjectDetail } from "@/lib/types/project";
 import type { Metadata } from "next";
@@ -43,7 +44,7 @@ export default async function ProjectPage({ params }: Props) {
       ? project.heroImage
       : project.coverImage;
   const sections = project.sections?.filter(Boolean) ?? [];
-  const gallery = project.gallery?.filter((g) => sanityImageAssetId(g)) ?? [];
+  const gallery = normalizeMediaList(project.gallery);
   const hasLegacyBody = (project.body?.length ?? 0) > 0 || gallery.length > 0;
 
   return (
@@ -55,7 +56,7 @@ export default async function ProjectPage({ params }: Props) {
         intrinsicHeight={project.projectHeroDimensions?.height}
       />
 
-      <article className="mx-auto w-full max-w-6xl flex-1 px-6 pb-20 md:px-10">
+      <article className="container-wide flex-1 pb-20 md:pb-24">
         <ProjectHeader project={project} />
 
         {sections.length > 0 && (

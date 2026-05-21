@@ -17,7 +17,7 @@ export default async function MorePage() {
   const sections = page.sections ?? [];
 
   return (
-    <div className="container-more pt-20 pb-20 md:pt-24 md:pb-32">
+    <div className="container-more mx-auto w-full px-5 md:px-8 lg:px-12 xl:px-14 pt-20 pb-20 md:pt-24 md:pb-32">
       <MoreBlocks page={page} />
 
       {sections.length > 0 ? (

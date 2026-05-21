@@ -2,10 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import {useCallback, useEffect, useMemo, useState} from "react";
+import {useCallback, useEffect, useLayoutEffect, useRef, useState} from "react";
 
 import {urlForImage} from "@/lib/sanity/image";
-import {useTypoClass} from "@/components/TypographyProvider";
+import {useSiteTypography, useTypoClass} from "@/components/TypographyProvider";
 import type {ProjectListItem} from "@/lib/types/project";
 
 function useTouchPrimary() {
@@ -22,41 +22,118 @@ function useTouchPrimary() {
   return touchPrimary;
 }
 
-export function ProjectCard({project}: {project: ProjectListItem}) {
+function ProjectCardOverlayTitle({title, className}: {title: string; className: string}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+
+  useLayoutEffect(() => {
+    const container = containerRef.current;
+    const el = titleRef.current;
+    if (!container || !el) return;
+
+    const fit = () => {
+      el.style.fontSize = "";
+      const maxPx = parseFloat(getComputedStyle(el).fontSize);
+      if (!maxPx) return;
+
+      const minPx = Math.max(13, maxPx * 0.45);
+      let size = maxPx;
+      el.style.fontSize = `${size}px`;
+
+      while (el.scrollWidth > container.clientWidth && size > minPx) {
+        size -= 0.5;
+        el.style.fontSize = `${size}px`;
+      }
+    };
+
+    fit();
+    void document.fonts?.ready.then(fit);
+
+    const observer = new ResizeObserver(fit);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [title]);
+
+  return (
+    <div ref={containerRef} className="w-full min-w-0 px-2">
+      <h2 ref={titleRef} className={`whitespace-nowrap ${className}`}>
+        {title}
+      </h2>
+    </div>
+  );
+}
+
+export function ProjectCard({
+  project,
+  touchOverlayOpen: touchOverlayOpenControlled,
+  onTouchOverlayToggle,
+}: {
+  project: ProjectListItem;
+  /** When set with onTouchOverlayToggle, only one card in the grid can be open (mobile). */
+  touchOverlayOpen?: boolean;
+  onTouchOverlayToggle?: () => void;
+}) {
   const displayClass = useTypoClass("display");
   const bodyClass = useTypoClass("body");
+  const typography = useSiteTypography();
+  const overlayTitleClass =
+    typography?.display === "gloock"
+      ? "project-card-gloock-title font-semibold"
+      : "font-semibold tracking-tight";
   const href = project.slug ? `/projects/${project.slug}` : "#";
   const touchPrimary = useTouchPrimary();
-  const [touchOverlayOpen, setTouchOverlayOpen] = useState(false);
+  const [touchOverlayOpenLocal, setTouchOverlayOpenLocal] = useState(false);
+  const touchControlled = onTouchOverlayToggle !== undefined;
+  const touchOverlayOpen = touchControlled
+    ? (touchOverlayOpenControlled ?? false)
+    : touchOverlayOpenLocal;
 
-  const thumb =
-    project.coverImage?.asset?._ref ? project.coverImage : project.heroImage?.asset?._ref ? project.heroImage : null;
-  const src = thumb?.asset?._ref
-    ? urlForImage(thumb).width(1600).height(1200).quality(90).url()
+  const thumbnail =
+    project.coverImage?.asset?._ref
+      ? project.coverImage
+      : project.heroImage?.asset?._ref
+        ? project.heroImage
+        : null;
+  const heroBackdrop =
+    project.heroImage?.asset?._ref
+      ? project.heroImage
+      : project.coverImage?.asset?._ref
+        ? project.coverImage
+        : null;
+
+  const thumbSrc = thumbnail?.asset?._ref
+    ? urlForImage(thumbnail).width(1600).height(1200).quality(90).url()
     : null;
-  const thumbAlt = thumb?.alt ?? project.title;
+  const heroSrc =
+    heroBackdrop?.asset?._ref && heroBackdrop !== thumbnail
+      ? urlForImage(heroBackdrop).width(1600).height(1200).quality(90).url()
+      : null;
+  const thumbAlt = thumbnail?.alt ?? project.title;
+  const heroAlt = heroBackdrop?.alt ?? project.title;
 
-  const tagline = useMemo(() => {
-    const s = project.subtitle?.trim();
-    if (s) return s;
-    const e = project.excerpt?.trim();
-    if (e) return e.length > 120 ? `${e.slice(0, 117)}…` : e;
-    return project.role?.trim() || null;
-  }, [project.subtitle, project.excerpt, project.role]);
+  const hasDistinctHero = Boolean(heroSrc);
+  const overlayOpen = touchPrimary && touchOverlayOpen;
+  const thumbHiddenClass = overlayOpen
+    ? "opacity-0"
+    : "opacity-100 [@media(hover:hover)]:group-hover:opacity-0 group-focus-within:opacity-0";
+  const heroOverlayClass = overlayOpen
+    ? "opacity-100 blur-[2px]"
+    : "opacity-0 blur-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:blur-[2px] group-focus-within:opacity-100 group-focus-within:blur-[2px]";
 
-  const imageBlurClass =
-    touchPrimary && touchOverlayOpen
-      ? "blur-xl"
-      : "[@media(hover:hover)]:group-hover:blur-xl group-focus-within:blur-xl";
+  const tagline = project.subtitle?.trim() || null;
 
   const onImageAreaClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (!touchPrimary) return;
       if ((e.target as HTMLElement).closest("a[data-project-card-link]")) return;
       e.preventDefault();
-      setTouchOverlayOpen((o) => !o);
+      if (touchControlled) {
+        onTouchOverlayToggle!();
+      } else {
+        setTouchOverlayOpenLocal((o) => !o);
+      }
     },
-    [touchPrimary],
+    [touchPrimary, touchControlled, onTouchOverlayToggle],
   );
 
   return (
@@ -65,12 +142,29 @@ export function ProjectCard({project}: {project: ProjectListItem}) {
         className="group relative aspect-[4/3] w-full cursor-default overflow-hidden bg-background transition-shadow duration-500 [@media(hover:hover)]:cursor-pointer [@media(hover:hover)]:group-hover:shadow-lg [@media(hover:none)]:cursor-pointer"
         onClick={onImageAreaClick}
       >
-        {src ? (
+        {hasDistinctHero && thumbSrc ? (
           <Image
-            src={src}
+            src={thumbSrc}
             alt={thumbAlt}
             fill
-            className={`object-cover transition-[filter] duration-500 ease-out ${imageBlurClass}`}
+            className={`object-cover transition-opacity duration-500 ease-out ${thumbHiddenClass}`}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          />
+        ) : null}
+        {heroSrc ? (
+          <Image
+            src={heroSrc}
+            alt={heroAlt}
+            fill
+            className={`object-cover transition-opacity duration-500 ease-out ${heroOverlayClass}`}
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          />
+        ) : thumbSrc ? (
+          <Image
+            src={thumbSrc}
+            alt={thumbAlt}
+            fill
+            className={`object-cover transition-[filter] duration-500 ease-out ${overlayOpen ? "blur-[2px]" : "blur-0"} [@media(hover:hover)]:group-hover:blur-[2px] group-focus-within:blur-[2px]`}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         ) : (
@@ -90,9 +184,9 @@ export function ProjectCard({project}: {project: ProjectListItem}) {
           }`}
         />
 
-        {/* Centered title + tagline over blurred image */}
+        {/* Centered title + tagline over hero image */}
         <div
-          className={`pointer-events-none absolute inset-0 z-[2] flex flex-col items-center justify-center px-6 text-center text-white transition-opacity duration-500 ease-out ${
+          className={`pointer-events-none absolute inset-0 z-[2] transition-opacity duration-500 ease-out ${
             touchPrimary
               ? touchOverlayOpen
                 ? "opacity-100"
@@ -100,29 +194,32 @@ export function ProjectCard({project}: {project: ProjectListItem}) {
               : "opacity-0 [@media(hover:hover)]:group-hover:opacity-100 group-focus-within:opacity-100"
           }`}
         >
-          <h2
-            className={`max-w-[18ch] text-3xl font-semibold leading-[1.05] tracking-tight sm:text-4xl md:text-[2.75rem] ${displayClass}`}
-          >
-            {project.title}
-          </h2>
-          {tagline ? (
-            <p
-              className={`mt-3 max-w-md text-sm font-normal leading-relaxed text-white/90 sm:text-base ${bodyClass}`}
-            >
-              {tagline}
-            </p>
-          ) : null}
+          <div className="project-card-hover-scrim" aria-hidden />
+          <div className="project-card-overlay-body relative z-10 flex h-full flex-col items-center justify-center px-6 text-center text-white">
+            <ProjectCardOverlayTitle
+              title={project.title}
+              className={`project-card-overlay-title project-card-overlay-title-shadow ${overlayTitleClass} ${displayClass}`}
+            />
+            {tagline ? (
+              <p
+                className={`mt-3 max-w-md text-base font-normal leading-relaxed text-white/90 sm:text-lg ${bodyClass}`}
+              >
+                {tagline}
+              </p>
+            ) : null}
 
-          {touchPrimary && touchOverlayOpen ? (
-            <Link
-              href={href}
-              data-project-card-link
-              className="pointer-events-auto mt-8 inline-flex border border-white/35 bg-white/10 px-5 py-2.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-white backdrop-blur-sm transition-colors hover:bg-white/20"
-              onClick={(e) => e.stopPropagation()}
-            >
-              View project
-            </Link>
-          ) : null}
+            {touchPrimary && touchOverlayOpen ? (
+              <Link
+                href={href}
+                data-project-card-link
+                aria-label={`View project: ${project.title}`}
+                className="pointer-events-auto relative z-10 mt-8 inline-flex border border-white/35 bg-white/10 px-5 py-2.5 text-[1.09375rem] font-bold tracking-wide text-white transition-colors hover:bg-white/20"
+                onClick={(e) => e.stopPropagation()}
+              >
+                View project
+              </Link>
+            ) : null}
+          </div>
         </div>
       </div>
     </article>

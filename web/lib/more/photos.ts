@@ -1,16 +1,14 @@
-import type {PhotoAlbum, SanityImageField} from "@/lib/types/project";
-import {sanityImageAssetId} from "@/lib/sanity/image";
+import type {PhotoAlbum, SanityMediaField} from "@/lib/types/project";
+import {normalizeMediaItem, normalizeMediaList} from "@/lib/sanity/media";
 import {parseYearNumber} from "@/lib/more/year";
 
 export const MORE_PREVIEW_LIMIT = 3;
 
-export function flattenAlbumImages(albums?: PhotoAlbum[] | null): SanityImageField[] {
+export function flattenAlbumImages(albums?: PhotoAlbum[] | null): SanityMediaField[] {
   if (!albums?.length) return [];
-  const out: SanityImageField[] = [];
+  const out: SanityMediaField[] = [];
   for (const album of albums) {
-    for (const img of album.images ?? []) {
-      if (img && sanityImageAssetId(img)) out.push(img);
-    }
+    out.push(...normalizeMediaList(album.images));
   }
   return out;
 }
@@ -19,7 +17,7 @@ export type PhotographyYearGroup = {
   yearLabel: string;
   yearSort: number;
   title?: string | null;
-  images: SanityImageField[];
+  images: SanityMediaField[];
 };
 
 /** Albums with a year → grouped sections; albums without year → one unlabeled group (page header is the title). */
@@ -27,10 +25,10 @@ export function groupPhotographyAlbums(albums?: PhotoAlbum[] | null): Photograph
   if (!albums?.length) return [];
 
   const withYear: PhotographyYearGroup[] = [];
-  const noYearImages: SanityImageField[] = [];
+  const noYearImages: SanityMediaField[] = [];
 
   for (const album of albums) {
-    const images = (album.images ?? []).filter((i) => i && sanityImageAssetId(i));
+    const images = normalizeMediaList(album.images);
     if (images.length === 0) continue;
 
     const yearLabel = album.year?.trim();
@@ -63,6 +61,9 @@ export function groupPhotographyAlbums(albums?: PhotoAlbum[] | null): Photograph
   return withYear;
 }
 
-export function filterValidImages(images?: SanityImageField[] | null): SanityImageField[] {
-  return (images ?? []).filter((i): i is NonNullable<SanityImageField> => Boolean(i && sanityImageAssetId(i)));
+export function filterValidMedia(images?: PhotoAlbum["images"]): SanityMediaField[] {
+  return normalizeMediaList(images);
 }
+
+/** @deprecated Use filterValidMedia */
+export const filterValidImages = filterValidMedia;

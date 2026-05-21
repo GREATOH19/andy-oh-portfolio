@@ -1,5 +1,12 @@
+"use client";
+
+import {useEffect, useRef, useState} from "react";
+
 import {ProjectCard} from "@/components/ProjectCard";
 import type {ProjectListItem} from "@/lib/types/project";
+
+/** Close mobile card overlay after this idle period (no taps in #work). */
+const TOUCH_OVERLAY_IDLE_MS = 10_000;
 
 export function SelectedWorkSection({
   projects,
@@ -8,6 +15,31 @@ export function SelectedWorkSection({
   projects: ProjectListItem[];
 }) {
   const visibleProjects = projects.filter((p) => p.slug);
+  const [openTouchCardId, setOpenTouchCardId] = useState<string | null>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!openTouchCardId) return;
+
+    const section = sectionRef.current;
+    if (!section) return;
+
+    let timeoutId = window.setTimeout(() => setOpenTouchCardId(null), TOUCH_OVERLAY_IDLE_MS);
+
+    const resetIdleTimer = () => {
+      window.clearTimeout(timeoutId);
+      timeoutId = window.setTimeout(() => setOpenTouchCardId(null), TOUCH_OVERLAY_IDLE_MS);
+    };
+
+    section.addEventListener("touchstart", resetIdleTimer, {passive: true});
+    section.addEventListener("pointerdown", resetIdleTimer);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      section.removeEventListener("touchstart", resetIdleTimer);
+      section.removeEventListener("pointerdown", resetIdleTimer);
+    };
+  }, [openTouchCardId]);
 
   if (visibleProjects.length === 0) {
     return (
@@ -18,11 +50,17 @@ export function SelectedWorkSection({
   }
 
   return (
-    <section id="work" className="scroll-mt-24">
-      <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-14 md:grid-cols-3 md:gap-x-6 md:gap-y-14">
+    <section id="work" ref={sectionRef} className="scroll-mt-24 pt-2 md:pt-4">
+      <div className="work-grid">
         {visibleProjects.map((project) => (
           <div key={project._id}>
-            <ProjectCard project={project} />
+            <ProjectCard
+              project={project}
+              touchOverlayOpen={openTouchCardId === project._id}
+              onTouchOverlayToggle={() =>
+                setOpenTouchCardId((id) => (id === project._id ? null : project._id))
+              }
+            />
           </div>
         ))}
       </div>

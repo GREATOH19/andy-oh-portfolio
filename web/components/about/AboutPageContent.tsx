@@ -42,7 +42,7 @@ export function AboutPageContent({
     : null;
 
   return (
-    <div className="container-wide py-20 md:py-32">
+    <div className="container-wide mx-auto w-full max-w-[1400px] px-8 md:px-16 lg:px-24 py-20 md:py-32">
       <div className="grid gap-16 lg:grid-cols-[1fr_1.5fr]">
         <motion.section
           className="-mt-20 md:-mt-32"
@@ -183,10 +183,10 @@ export function AboutPageContent({
           {resumeUrl ? (
             <motion.div
               className="pt-12"
-              initial={{opacity: 0, y: 50}}
+              initial={{opacity: 1, y: 0}}
               whileInView={{opacity: 1, y: 0}}
               transition={{duration: 0.8}}
-              viewport={{once: true}}
+              viewport={{once: true, amount: 0.2}}
             >
               <a
                 href={resumeUrl}

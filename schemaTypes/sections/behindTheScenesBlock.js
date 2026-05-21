@@ -25,9 +25,9 @@ export const behindTheScenesBlock = defineType({
     }),
     defineField({
       name: 'images',
-      title: 'Images',
+      title: 'Photos & videos',
       type: 'array',
-      of: [{type: 'cmsImage'}],
+      of: [{type: 'cmsMediaItem'}],
       description:
         'Unlimited. The More page previews 3; the full grid is on /more/behind-the-scenes (drag order).',
     }),
@@ -38,7 +38,7 @@ export const behindTheScenesBlock = defineType({
       const count = Array.isArray(images) ? images.length : 0
       return {
         title: heading || 'Behind the scene',
-        subtitle: `${enabled === false ? 'Hidden · ' : ''}${count} image${count === 1 ? '' : 's'}`,
+        subtitle: `${enabled === false ? 'Hidden · ' : ''}${count} item${count === 1 ? '' : 's'}`,
       }
     },
   },

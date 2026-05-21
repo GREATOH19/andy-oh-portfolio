@@ -2,27 +2,30 @@
 
 import {ClickablePhotoGrid} from "@/components/ClickablePhotoGrid";
 import {useTypoClass} from "@/components/TypographyProvider";
-import {sanityImageAssetId} from "@/lib/sanity/image";
-import type {SanityImageField} from "@/lib/types/project";
+import {imageSectionMedia} from "@/lib/sanity/imageSectionMedia";
+import type {CmsMediaItemRaw, SanityImageField} from "@/lib/types/project";
 
 export function ImageSection({
   image,
+  item,
   caption,
 }: {
   image?: SanityImageField;
+  item?: CmsMediaItemRaw;
   caption?: string | null;
 }) {
   const metaClass = useTypoClass("meta");
+  const items = imageSectionMedia({image, item});
 
-  if (image == null || !sanityImageAssetId(image)) return null;
+  if (items.length === 0) return null;
 
   return (
-    <figure className="mx-auto w-full max-w-3xl">
+    <figure className="w-full">
       <ClickablePhotoGrid
-        images={[image]}
+        images={items}
         gridClass="grid grid-cols-1 gap-3"
-        thumbMaxWidth={720}
-        sizes="(max-width: 768px) 100vw, 720px"
+        thumbMaxWidth={1600}
+        sizes="(max-width: 768px) 100vw, 1200px"
         quality={90}
       />
       {caption ? (

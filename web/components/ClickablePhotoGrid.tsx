@@ -2,9 +2,9 @@
 
 import {useState} from "react";
 import {PhotoLightbox} from "@/components/PhotoLightbox";
-import {SanityAspectImage} from "@/components/sections/SanityAspectImage";
-import {sanityImageAssetId} from "@/lib/sanity/image";
-import type {SanityImageField} from "@/lib/types/project";
+import {SanityAspectMedia} from "@/components/sections/SanityAspectMedia";
+import {isSanityImage, isSanityMedia, sanityMediaKey} from "@/lib/sanity/media";
+import type {SanityImageField, SanityMediaField} from "@/lib/types/project";
 
 export function ClickablePhotoGrid({
   images,
@@ -14,7 +14,7 @@ export function ClickablePhotoGrid({
   quality,
   className,
 }: {
-  images: SanityImageField[];
+  images: SanityMediaField[];
   gridClass: string;
   thumbMaxWidth?: number;
   sizes?: string;
@@ -22,38 +22,62 @@ export function ClickablePhotoGrid({
   className?: string;
 }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const validImages = images.filter((img) => img && sanityImageAssetId(img));
+  const validMedia = images.filter(isSanityMedia);
+  const lightboxImages = validMedia.filter(isSanityImage) as NonNullable<SanityImageField>[];
 
-  if (validImages.length === 0) return null;
+  if (validMedia.length === 0) return null;
+
+  const openLightbox = (index: number) => {
+    const item = validMedia[index];
+    if (!isSanityImage(item)) return;
+    const lightboxIndex = lightboxImages.indexOf(item);
+    if (lightboxIndex >= 0) setActiveIndex(lightboxIndex);
+  };
 
   return (
     <>
       <div className={className ? `${gridClass} ${className}` : gridClass}>
-        {validImages.map((img, i) => {
-          const alt = img?.alt ?? "";
+        {validMedia.map((item, i) => {
+          const alt = item?.alt ?? "";
+          const isImage = isSanityImage(item);
+
+          if (isImage) {
+            return (
+              <button
+                key={sanityMediaKey(item, i)}
+                type="button"
+                onClick={() => openLightbox(i)}
+                className="cursor-zoom-in text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
+                aria-label={alt ? `View ${alt}` : `View photo ${i + 1}`}
+              >
+                <SanityAspectMedia
+                  media={item}
+                  alt={alt}
+                  maxWidth={thumbMaxWidth}
+                  quality={quality}
+                  sizes={sizes}
+                />
+              </button>
+            );
+          }
+
           return (
-            <button
-              key={`${sanityImageAssetId(img)!}-${i}`}
-              type="button"
-              onClick={() => setActiveIndex(i)}
-              className="cursor-zoom-in text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
-              aria-label={alt ? `View ${alt}` : `View photo ${i + 1}`}
-            >
-              <SanityAspectImage
-                image={img!}
+            <div key={sanityMediaKey(item, i)} className="text-left">
+              <SanityAspectMedia
+                media={item}
                 alt={alt}
                 maxWidth={thumbMaxWidth}
                 quality={quality}
                 sizes={sizes}
               />
-            </button>
+            </div>
           );
         })}
       </div>
 
       {activeIndex !== null ? (
         <PhotoLightbox
-          images={validImages}
+          images={lightboxImages}
           index={activeIndex}
           onClose={() => setActiveIndex(null)}
           onIndexChange={setActiveIndex}

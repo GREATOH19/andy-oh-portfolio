@@ -6,6 +6,7 @@ import {page} from './page'
 import {siteSettings} from './siteSettings'
 
 import {cmsImage} from './objects/cmsImage'
+import {cmsMediaItem} from './objects/cmsMediaItem'
 import {photoAlbum} from './objects/photoAlbum'
 
 import {contactCtaSection} from './sections/contactCtaSection'
@@ -28,6 +29,7 @@ export const schemaTypes = [
   page,
   siteSettings,
   cmsImage,
+  cmsMediaItem,
   photoAlbum,
   contactCtaSection,
   gallerySection,

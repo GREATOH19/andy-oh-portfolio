@@ -18,36 +18,41 @@ export default async function HomePage() {
   const sections: HomeSection[] = home?.sections ?? [];
   const heroLottieUrl = siteSettings?.heroLottieUrl ?? null;
   const hasSelectedWorkSection = sections.some((s) => s._type === "selectedWorkSection");
+  const contactSections = sections.filter((s) => s._type === "contactCtaSection");
   const projectList = await resolveHomeFeaturedProjects(client, home?.featuredProjects);
 
   return (
     <HomePageShell heroLottieUrl={heroLottieUrl}>
-      <div className="container-wide pt-10 pb-20 md:pt-16 md:pb-32">
+      <div className="layout-chrome pt-6 md:pt-10">
         <HomeWelcomeIntro content={home?.welcomeIntro ?? null} />
+      </div>
+
+      <div
+        className={
+          contactSections.length > 0 ? "container-work pb-12 md:pb-16" : "container-work pb-20 md:pb-32"
+        }
+      >
         {!hasSelectedWorkSection ? (
           <SelectedWorkSection key="selected-work-fallback" projects={projectList} />
         ) : null}
         {sections.map((s, idx) => {
-          const key = `${s._type}-${idx}`;
-          switch (s._type) {
-            case "heroSection":
-              return null;
-            case "selectedWorkSection":
-              return <SelectedWorkSection key={key} projects={projectList} />;
-            case "contactCtaSection":
-              return (
-                <ContactCtaSection
-                  key={key}
-                  heading={s.heading}
-                  email={s.email}
-                  links={s.links}
-                />
-              );
-            default:
-              return null;
-          }
+          if (s._type !== "selectedWorkSection") return null;
+          return <SelectedWorkSection key={`selected-work-${idx}`} projects={projectList} />;
         })}
       </div>
+
+      {contactSections.length > 0 ? (
+        <div className="container-wide pb-20 md:pb-32">
+          {contactSections.map((s, idx) => (
+            <ContactCtaSection
+              key={`contact-cta-${idx}`}
+              heading={s.heading}
+              email={s.email}
+              links={s.links}
+            />
+          ))}
+        </div>
+      ) : null}
     </HomePageShell>
   );
 }

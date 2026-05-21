@@ -29,6 +29,53 @@ export const projectSlugsQuery = groq`
   *[_type == "project" && defined(slug.current)].slug.current
 `;
 
+const cmsMediaItemFields = groq`
+  ...,
+  _type == "cmsMediaItem" => {
+    _key,
+    _type,
+    mediaType,
+    loop,
+    alt,
+    image {
+      ...,
+      asset->{
+        "_ref": coalesce(_ref, _id),
+        metadata {
+          dimensions
+        }
+      }
+    },
+    video {
+      ...,
+      asset->{
+        "_ref": coalesce(_ref, _id),
+        url,
+        mimeType,
+        originalFilename
+      }
+    }
+  },
+  _type == "file" => {
+    ...,
+    asset->{
+      "_ref": coalesce(_ref, _id),
+      url,
+      mimeType,
+      originalFilename
+    }
+  },
+  _type == "image" => {
+    ...,
+    asset->{
+      "_ref": coalesce(_ref, _id),
+      metadata {
+        dimensions
+      }
+    }
+  }
+`;
+
 export const projectBySlugQuery = groq`
   *[_type == "project" && slug.current == $slug][0] {
     _id,
@@ -61,13 +108,7 @@ export const projectBySlugQuery = groq`
       coverImage.asset->metadata.dimensions
     ),
     "gallery": gallery[]{
-      ...,
-      asset->{
-        "_ref": coalesce(_ref, _id),
-        metadata {
-          dimensions
-        }
-      }
+      ${cmsMediaItemFields}
     },
     body,
     sections[] {
@@ -89,14 +130,11 @@ export const projectBySlugQuery = groq`
           }
         }
       },
+      "item": item{
+        ${cmsMediaItemFields}
+      },
       "images": images[]{
-        ...,
-        asset->{
-          "_ref": coalesce(_ref, _id),
-          metadata {
-            dimensions
-          }
-        }
+        ${cmsMediaItemFields}
       }
     }
   }
@@ -172,16 +210,6 @@ export const contactQuery = groq`
   }
 `;
 
-const cmsImageFields = groq`
-  ...,
-  asset->{
-    "_ref": coalesce(_ref, _id),
-    metadata {
-      dimensions
-    }
-  }
-`;
-
 export const morePageQuery = groq`
   *[_type == "page" && slug.current == "more"][0] {
     _id,
@@ -200,11 +228,11 @@ export const morePageQuery = groq`
         year,
         title,
         images[] {
-          ${cmsImageFields}
+          ${cmsMediaItemFields}
         }
       },
       images[] {
-        ${cmsImageFields}
+        ${cmsMediaItemFields}
       }
     },
     sections[] {
@@ -226,14 +254,11 @@ export const morePageQuery = groq`
           }
         }
       },
+      "item": item{
+        ${cmsMediaItemFields}
+      },
       "images": images[]{
-        ...,
-        asset->{
-          "_ref": coalesce(_ref, _id),
-          metadata {
-            dimensions
-          }
-        }
+        ${cmsMediaItemFields}
       }
     }
   }
@@ -257,11 +282,11 @@ export const pageBySlugQuery = groq`
         year,
         title,
         images[] {
-          ${cmsImageFields}
+          ${cmsMediaItemFields}
         }
       },
       images[] {
-        ${cmsImageFields}
+        ${cmsMediaItemFields}
       }
     },
     sections[] {
@@ -283,14 +308,11 @@ export const pageBySlugQuery = groq`
           }
         }
       },
+      "item": item{
+        ${cmsMediaItemFields}
+      },
       "images": images[]{
-        ...,
-        asset->{
-          "_ref": coalesce(_ref, _id),
-          metadata {
-            dimensions
-          }
-        }
+        ${cmsMediaItemFields}
       }
     }
   }

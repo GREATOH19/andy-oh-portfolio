@@ -24,6 +24,34 @@ export type SanityImageField = {
   alt?: string;
 } | null;
 
+export type SanityVideoField = {
+  _type?: "file";
+  asset?: {
+    _ref?: string;
+    _id?: string;
+    url?: string | null;
+    mimeType?: string | null;
+    originalFilename?: string | null;
+  } | null;
+  alt?: string;
+  loop?: boolean;
+} | null;
+
+export type SanityMediaField = SanityImageField | SanityVideoField;
+
+/** Raw CMS object before normalization (Studio-safe shape). */
+export type CmsMediaItemRaw = {
+  _type?: "cmsMediaItem";
+  _key?: string;
+  mediaType?: "image" | "video" | null;
+  image?: SanityImageField;
+  video?: SanityVideoField;
+  alt?: string | null;
+  loop?: boolean | null;
+} | null;
+
+export type CmsMediaInput = SanityMediaField | CmsMediaItemRaw;
+
 export type ProjectListItem = {
   _id: string;
   title: string;
@@ -63,7 +91,7 @@ export type ProjectDetail = ProjectListItem & {
   collaborators?: ProjectCollaborator[] | null;
   awards?: ProjectAward[] | null;
   mediumUrl?: string | null;
-  gallery?: SanityImageField[] | null;
+  gallery?: CmsMediaInput[] | null;
   body?: PortableTextBlock[] | null;
   sections?: ProjectSection[] | null;
 };
@@ -77,12 +105,13 @@ export type RichTextSection = {
 export type ImageSection = {
   _type: "imageSection";
   image?: SanityImageField;
+  item?: CmsMediaItemRaw;
   caption?: string | null;
 };
 
 export type GallerySection = {
   _type: "gallerySection";
-  images?: SanityImageField[] | null;
+  images?: CmsMediaInput[] | null;
   caption?: string | null;
   columns?: number | null;
 };
@@ -136,7 +165,7 @@ export type HomeWelcomeIntroContent = {
 export type PhotoAlbum = {
   year?: string | null;
   title?: string | null;
-  images?: SanityImageField[] | null;
+  images?: CmsMediaInput[] | null;
 };
 
 export type MoreBlockBase = {
@@ -158,7 +187,7 @@ export type PhotographyBlock = MoreBlockBase & {
 
 export type BehindTheScenesBlock = MoreBlockBase & {
   _type: "behindTheScenesBlock";
-  images?: SanityImageField[] | null;
+  images?: CmsMediaInput[] | null;
 };
 
 export type MoreBlock = ArchiveBlock | PhotographyBlock | BehindTheScenesBlock;

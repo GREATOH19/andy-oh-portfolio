@@ -1,7 +1,7 @@
 "use client";
 
 import {ClickablePhotoGrid} from "@/components/ClickablePhotoGrid";
-import type {SanityImageField} from "@/lib/types/project";
+import type {SanityMediaField} from "@/lib/types/project";
 
 function gridClass(columns: 1 | 2 | 3, fixedColumns: boolean) {
   if (columns === 1) return "grid grid-cols-1 gap-3";
@@ -21,7 +21,7 @@ export function PhotoThumbnailGrid({
   columns = 3,
   fixedColumns = false,
 }: {
-  images: SanityImageField[];
+  images: SanityMediaField[];
   columns?: 1 | 2 | 3;
   fixedColumns?: boolean;
 }) {

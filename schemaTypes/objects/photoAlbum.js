@@ -18,9 +18,9 @@ export const photoAlbum = defineType({
     }),
     defineField({
       name: 'images',
-      title: 'Images',
+      title: 'Photos & videos',
       type: 'array',
-      of: [{type: 'cmsImage'}],
+      of: [{type: 'cmsMediaItem'}],
       validation: (Rule) => Rule.min(1),
     }),
   ],
@@ -29,7 +29,7 @@ export const photoAlbum = defineType({
     prepare({year, title, images}) {
       const count = Array.isArray(images) ? images.length : 0
       const label = [year, title].filter(Boolean).join(' · ') || 'Album'
-      return {title: label, subtitle: `${count} image${count === 1 ? '' : 's'}`}
+      return {title: label, subtitle: `${count} item${count === 1 ? '' : 's'}`}
     },
   },
 })
