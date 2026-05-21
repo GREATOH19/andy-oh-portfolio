@@ -20,6 +20,26 @@ function shouldShowOnMount(): boolean {
   }
 }
 
+/** Mobile subcopy: line 1 ends at “Korea,” — line 2 is the rest (always 2 rows). */
+function splitWelcomeBodyAtKorea(body: string): [string, string] {
+  const normalized = body.replace(/\s+/g, " ").trim();
+  const koreaComma = /korea,\s*/i.exec(normalized);
+  if (koreaComma?.index !== undefined) {
+    const end = koreaComma.index + koreaComma[0].length;
+    return [normalized.slice(0, end).trimEnd(), normalized.slice(end).trim()];
+  }
+  const koreaCommaIdx = normalized.toLowerCase().indexOf("korea,");
+  if (koreaCommaIdx !== -1) {
+    const end = koreaCommaIdx + "korea,".length;
+    return [normalized.slice(0, end).trim(), normalized.slice(end).trim()];
+  }
+  const commaIdx = normalized.indexOf(",");
+  if (commaIdx !== -1) {
+    return [normalized.slice(0, commaIdx + 1).trim(), normalized.slice(commaIdx + 1).trim()];
+  }
+  return [normalized, ""];
+}
+
 export function HomeWelcomeIntro({
   content,
 }: {
@@ -32,6 +52,7 @@ export function HomeWelcomeIntro({
 
   const heading = content?.heading?.trim() ?? "";
   const body = content?.body?.trim() ?? "";
+  const mobileBodyLines = body ? splitWelcomeBodyAtKorea(body) : undefined;
   const hasContent = heading.length > 0 || body.length > 0;
 
   useEffect(() => {
@@ -53,17 +74,30 @@ export function HomeWelcomeIntro({
       initial={reduceMotion ? false : {opacity: 0, y: 12}}
       animate={{opacity: 1, y: 0}}
       transition={{duration: 0.8, ease: [0.4, 0, 0.2, 1], delay: 0.4}}
-      className="pb-14 text-center md:pb-20"
+      className="layout-chrome pb-10 pt-10 text-center md:pb-12 md:pt-12"
     >
       {heading ? (
-        <h2 className={`text-5xl font-light text-slate-950 sm:text-6xl ${displayClass}`}>
+        <h2
+          className={`whitespace-nowrap text-[clamp(1.875rem,7.5vw,3.75rem)] font-light leading-none text-slate-950 md:text-5xl md:leading-tight lg:text-6xl ${displayClass}`}
+        >
           {heading}
         </h2>
       ) : null}
-      {body ? (
-        <p className="mx-auto mt-5 max-w-2xl whitespace-pre-line text-base leading-relaxed text-slate-600 sm:max-w-none sm:whitespace-nowrap md:mt-7 md:text-lg">
-          {body}
-        </p>
+      {body && mobileBodyLines ? (
+        <>
+          <p
+            className="welcome-intro-subcopy mx-auto mt-5 w-full max-w-[100vw] px-3 text-center leading-snug text-slate-600 md:hidden"
+            aria-label={body}
+          >
+            <span className="block whitespace-nowrap">{mobileBodyLines[0]}</span>
+            {mobileBodyLines[1] ? (
+              <span className="block whitespace-nowrap">{mobileBodyLines[1]}</span>
+            ) : null}
+          </p>
+          <p className="mx-auto mt-5 hidden max-w-2xl text-base leading-relaxed text-slate-600 sm:max-w-none sm:whitespace-nowrap md:mt-7 md:block md:text-lg">
+            {body}
+          </p>
+        </>
       ) : null}
     </motion.section>
   );

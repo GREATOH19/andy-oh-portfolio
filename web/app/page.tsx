@@ -23,22 +23,22 @@ export default async function HomePage() {
 
   return (
     <HomePageShell heroLottieUrl={heroLottieUrl}>
-      <div className="layout-chrome pt-6 md:pt-10">
+      <div className="home-main-stack">
         <HomeWelcomeIntro content={home?.welcomeIntro ?? null} />
-      </div>
 
-      <div
-        className={
-          contactSections.length > 0 ? "container-work pb-12 md:pb-16" : "container-work pb-20 md:pb-32"
-        }
-      >
-        {!hasSelectedWorkSection ? (
-          <SelectedWorkSection key="selected-work-fallback" projects={projectList} />
-        ) : null}
-        {sections.map((s, idx) => {
-          if (s._type !== "selectedWorkSection") return null;
-          return <SelectedWorkSection key={`selected-work-${idx}`} projects={projectList} />;
-        })}
+        <div
+          className={
+            contactSections.length > 0 ? "container-work pb-12 md:pb-16" : "container-work pb-20 md:pb-32"
+          }
+        >
+          {!hasSelectedWorkSection ? (
+            <SelectedWorkSection key="selected-work-fallback" projects={projectList} />
+          ) : null}
+          {sections.map((s, idx) => {
+            if (s._type !== "selectedWorkSection") return null;
+            return <SelectedWorkSection key={`selected-work-${idx}`} projects={projectList} />;
+          })}
+        </div>
       </div>
 
       {contactSections.length > 0 ? (

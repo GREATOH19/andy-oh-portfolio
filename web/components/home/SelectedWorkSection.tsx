@@ -50,7 +50,7 @@ export function SelectedWorkSection({
   }
 
   return (
-    <section id="work" ref={sectionRef} className="scroll-mt-24 pt-2 md:pt-4">
+    <section id="work" ref={sectionRef} className="scroll-mt-24">
       <div className="work-grid">
         {visibleProjects.map((project) => (
           <div key={project._id}>

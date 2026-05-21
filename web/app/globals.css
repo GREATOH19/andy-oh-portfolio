@@ -153,6 +153,11 @@
     0 6px 28px rgb(74 85 104 / 0.38);
 }
 
+/* Home welcome subcopy — two nowrap rows that fit narrow viewports */
+.welcome-intro-subcopy {
+  font-size: clamp(0.6875rem, 3.2vw, 1rem);
+}
+
 @media (max-width: 639px) {
   #work .project-card-overlay-title-shadow {
     text-shadow:
@@ -275,6 +280,17 @@
     .container-work {
       width: min(95vw, 100%);
       padding-inline: 0;
+    }
+  }
+
+  /* Home: uniform header → welcome → grid rhythm (2.5rem / 3rem) */
+  .home-main-stack:not(:has(.layout-chrome)) .container-work {
+    padding-top: 2.5rem;
+  }
+
+  @media (min-width: 48rem) {
+    .home-main-stack:not(:has(.layout-chrome)) .container-work {
+      padding-top: 3rem;
     }
   }
 
