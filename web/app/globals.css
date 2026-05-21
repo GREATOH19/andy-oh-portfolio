@@ -118,9 +118,9 @@
   }
 }
 
-/* Work homepage thumbnails — between default card title and compact */
+/* Work homepage thumbnails — mobile matches pre-launch; larger from sm+ */
 #work .project-card-overlay-title {
-  font-size: 1.8125rem;
+  font-size: 1.875rem;
 }
 
 @media (min-width: 640px) {
@@ -136,15 +136,38 @@
 }
 
 #work .project-card-overlay-body {
-  padding-inline: 1.875rem;
+  padding-inline: 1.5rem;
 }
 
-/* Main title only — Andy Oh tone drop shadow */
+@media (min-width: 640px) {
+  #work .project-card-overlay-body {
+    padding-inline: 1.875rem;
+  }
+}
+
+/* Main title only — Andy Oh tone drop shadow (desktop / sm+) */
 #work .project-card-overlay-title-shadow {
   text-shadow:
     0 1px 2px rgb(82 94 117 / 0.55),
     0 2px 14px rgb(74 85 104 / 0.5),
     0 6px 28px rgb(74 85 104 / 0.38);
+}
+
+@media (max-width: 639px) {
+  #work .project-card-overlay-title-shadow {
+    text-shadow:
+      0 1px 2px rgb(15 23 42 / 0.22),
+      0 2px 8px rgb(15 23 42 / 0.14);
+  }
+
+  #work .project-card-hover-scrim {
+    background:
+      radial-gradient(ellipse 70% 55% at 0% 0%, rgb(255 255 255 / 0.32) 0%, transparent 58%),
+      radial-gradient(ellipse 70% 55% at 100% 0%, rgb(255 255 255 / 0.32) 0%, transparent 58%),
+      radial-gradient(ellipse 70% 55% at 100% 100%, rgb(255 255 255 / 0.32) 0%, transparent 58%),
+      radial-gradient(ellipse 70% 55% at 0% 100%, rgb(255 255 255 / 0.32) 0%, transparent 58%),
+      rgb(var(--project-card-scrim) / 0.22);
+  }
 }
 
 @layer components {
@@ -240,24 +263,34 @@
     }
   }
 
-  /* Work homepage only — wider than About/More (container-wide) */
+  /* Work homepage — mobile matches pre-launch container-wide; desktop uses 95vw */
   .container-work {
-    width: min(95vw, 100%);
+    width: 100%;
     max-width: 100%;
     margin-inline: auto;
+    padding-inline: 2rem;
   }
 
-  /* Work homepage grid — equal column/row gutters */
+  @media (min-width: 640px) {
+    .container-work {
+      width: min(95vw, 100%);
+      padding-inline: 0;
+    }
+  }
+
+  /* Work homepage grid — mobile gutters match pre-launch (gap-x-6 / gap-y-12) */
   .work-grid {
     display: grid;
     grid-template-columns: 1fr;
-    column-gap: var(--work-grid-gap);
-    row-gap: var(--work-grid-gap);
+    column-gap: 1.5rem;
+    row-gap: 3rem;
   }
 
   @media (min-width: 640px) {
     .work-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--work-grid-gap);
+      row-gap: var(--work-grid-gap);
     }
   }
 
