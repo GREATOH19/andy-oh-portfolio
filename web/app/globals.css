@@ -159,11 +159,6 @@
   }
 }
 
-/* Home welcome subcopy — two nowrap rows that fit narrow viewports */
-.welcome-intro-subcopy {
-  font-size: clamp(0.6875rem, 3.2vw, 1rem);
-}
-
 @media (max-width: 639px) {
   #work .project-card-hover-scrim {
     background:

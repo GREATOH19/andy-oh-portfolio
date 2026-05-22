@@ -86,7 +86,7 @@ export function HomeWelcomeIntro({
       {body && mobileBodyLines ? (
         <>
           <p
-            className="welcome-intro-subcopy mx-auto mt-5 w-full max-w-[100vw] px-3 text-center leading-snug text-slate-600 md:hidden"
+            className="mx-auto mt-5 w-full max-w-[100vw] px-3 text-center text-base font-normal leading-relaxed text-slate-600 md:hidden"
             aria-label={body}
           >
             <span className="block whitespace-nowrap">{mobileBodyLines[0]}</span>

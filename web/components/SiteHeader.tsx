@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useLayoutEffect, useState } from "react";
 import { BrandMark } from "@/components/BrandMark";
 import { MoreNavLink } from "@/components/MoreNavLink";
@@ -24,10 +23,8 @@ export function SiteHeader({
   moreNavDropdownItems?: MoreNavItem[];
   moreNavLabel?: string;
 }) {
-  const pathname = usePathname();
-  const isHome = pathname === "/";
   const [isScrolled, setIsScrolled] = useState(false);
-  const showScrolledHeader = isScrolled && !isHome;
+  const showScrolledHeader = isScrolled;
 
   useLayoutEffect(() => {
     const update = () => {
