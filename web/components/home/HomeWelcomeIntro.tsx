@@ -20,7 +20,7 @@ function shouldShowOnMount(): boolean {
   }
 }
 
-/** Mobile subcopy: line 1 ends at “Korea,” — line 2 is the rest (always 2 rows). */
+/** Mobile subcopy: prefer a break after “Korea,” when present. */
 function splitWelcomeBodyAtKorea(body: string): [string, string] {
   const normalized = body.replace(/\s+/g, " ").trim();
   const koreaComma = /korea,\s*/i.exec(normalized);
@@ -86,12 +86,12 @@ export function HomeWelcomeIntro({
       {body && mobileBodyLines ? (
         <>
           <p
-            className="mx-auto mt-5 w-full max-w-[100vw] px-3 text-center text-base font-normal leading-relaxed text-slate-600 md:hidden"
+            className="mx-auto mt-5 w-full min-w-0 max-w-full px-3 text-center text-base font-normal leading-relaxed text-pretty text-slate-600 md:hidden"
             aria-label={body}
           >
-            <span className="block whitespace-nowrap">{mobileBodyLines[0]}</span>
+            <span className="block">{mobileBodyLines[0]}</span>
             {mobileBodyLines[1] ? (
-              <span className="block whitespace-nowrap">{mobileBodyLines[1]}</span>
+              <span className="block">{mobileBodyLines[1]}</span>
             ) : null}
           </p>
           <p className="mx-auto mt-5 hidden max-w-2xl text-base leading-relaxed text-slate-600 sm:max-w-none sm:whitespace-nowrap md:mt-7 md:block md:text-lg">
