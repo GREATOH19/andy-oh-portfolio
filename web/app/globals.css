@@ -159,6 +159,19 @@
   }
 }
 
+/* Home welcome subcopy — mobile: exactly 2 nowrap lines, full viewport width (may extend past Work grid) */
+@media (max-width: 767px) {
+  .welcome-intro-subcopy-mobile {
+    position: relative;
+    left: 50%;
+    width: 100vw;
+    max-width: 100vw;
+    transform: translateX(-50%);
+    padding-inline: 1rem;
+    box-sizing: border-box;
+  }
+}
+
 @media (max-width: 639px) {
   #work .project-card-hover-scrim {
     background:

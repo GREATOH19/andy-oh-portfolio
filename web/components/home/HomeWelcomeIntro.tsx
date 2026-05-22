@@ -20,7 +20,7 @@ function shouldShowOnMount(): boolean {
   }
 }
 
-/** Mobile subcopy: prefer a break after “Korea,” when present. */
+/** Mobile subcopy: line 1 ends at “Korea,” — line 2 is the rest (always 2 rows). */
 function splitWelcomeBodyAtKorea(body: string): [string, string] {
   const normalized = body.replace(/\s+/g, " ").trim();
   const koreaComma = /korea,\s*/i.exec(normalized);
@@ -74,7 +74,7 @@ export function HomeWelcomeIntro({
       initial={reduceMotion ? false : {opacity: 0, y: 12}}
       animate={{opacity: 1, y: 0}}
       transition={{duration: 0.8, ease: [0.4, 0, 0.2, 1], delay: 0.4}}
-      className="layout-chrome pb-10 pt-10 text-center md:pb-12 md:pt-12"
+      className="layout-chrome overflow-x-visible pb-10 pt-10 text-center md:pb-12 md:pt-12"
     >
       {heading ? (
         <h2
@@ -86,12 +86,12 @@ export function HomeWelcomeIntro({
       {body && mobileBodyLines ? (
         <>
           <p
-            className="mx-auto mt-5 w-full min-w-0 max-w-full px-3 text-center text-base font-normal leading-relaxed text-pretty text-slate-600 md:hidden"
+            className="welcome-intro-subcopy-mobile mx-auto mt-5 text-center text-base font-normal leading-snug text-slate-600 md:hidden"
             aria-label={body}
           >
-            <span className="block">{mobileBodyLines[0]}</span>
+            <span className="block whitespace-nowrap">{mobileBodyLines[0]}</span>
             {mobileBodyLines[1] ? (
-              <span className="block">{mobileBodyLines[1]}</span>
+              <span className="block whitespace-nowrap">{mobileBodyLines[1]}</span>
             ) : null}
           </p>
           <p className="mx-auto mt-5 hidden max-w-2xl text-base leading-relaxed text-slate-600 sm:max-w-none sm:whitespace-nowrap md:mt-7 md:block md:text-lg">
