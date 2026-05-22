@@ -159,17 +159,9 @@
   }
 }
 
-/* Home welcome subcopy — mobile: exactly 2 nowrap lines, full viewport width (may extend past Work grid) */
-@media (max-width: 767px) {
-  .welcome-intro-subcopy-mobile {
-    position: relative;
-    left: 50%;
-    width: 100vw;
-    max-width: 100vw;
-    transform: translateX(-50%);
-    padding-inline: 1rem;
-    box-sizing: border-box;
-  }
+/* Home welcome subcopy — two nowrap rows that fit narrow viewports */
+.welcome-intro-subcopy {
+  font-size: clamp(0.6875rem, 3.2vw, 1rem);
 }
 
 @media (max-width: 639px) {
