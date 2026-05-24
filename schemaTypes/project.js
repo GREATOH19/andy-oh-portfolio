@@ -170,6 +170,14 @@ export const project = defineType({
       ],
     }),
     defineField({
+      name: 'cardOverlayScrim',
+      title: 'Hover text scrim',
+      type: 'boolean',
+      initialValue: false,
+      description:
+        'Turn on when the cover or hero is dark, so the white title and subtitle stay readable on card hover. Leave off for bright images.',
+    }),
+    defineField({
       name: 'coverImage',
       title: 'Cover image',
       type: 'image',

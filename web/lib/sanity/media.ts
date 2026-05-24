@@ -19,6 +19,16 @@ export function normalizeMediaItem(item: CmsMediaInput | null | undefined): Sani
 
   const raw = item as NonNullable<CmsMediaItemRaw>;
 
+  // Legacy flat image on hero/gallery (asset + crop + hotspot at root, pre–cmsMediaItem).
+  if (!raw.mediaType && sanityImageAssetId(item as SanityImageField)) {
+    const legacy = item as SanityImageField;
+    return {
+      _type: "image",
+      ...legacy,
+      alt: raw.alt ?? legacy?.alt,
+    };
+  }
+
   // cmsMediaItem shape — match by mediaType because Studio may store a legacy _type during schema migration.
   if (raw.mediaType === "video" && raw.video) {
     return {

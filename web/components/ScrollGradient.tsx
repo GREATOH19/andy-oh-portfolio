@@ -2,17 +2,7 @@
 
 import { useEffect } from "react";
 
-/** Tiled fractal noise — breaks 8-bit gradient banding with minimal visible grain */
-const GRAIN_TILE =
-  "data:image/svg+xml," +
-  encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256">' +
-      '<filter id="n" x="-20%" y="-20%" width="140%" height="140%">' +
-      '<feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/>' +
-      "</filter>" +
-      '<rect width="256" height="256" filter="url(#n)"/>' +
-      "</svg>"
-  );
+import { grainTileStyle } from "@/lib/grain";
 
 /** Softer than linear scroll — less “mechanical” drift */
 function smoothScrollT(t: number) {
@@ -96,11 +86,7 @@ export function ScrollGradient() {
       <div id="scroll-gradient" className="absolute inset-0" />
       <div
         className="absolute inset-0 mix-blend-soft-light opacity-[0.07]"
-        style={{
-          backgroundImage: `url("${GRAIN_TILE}")`,
-          backgroundRepeat: "repeat",
-          backgroundSize: "256px 256px",
-        }}
+        style={grainTileStyle}
       />
     </div>
   );

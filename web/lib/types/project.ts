@@ -78,6 +78,8 @@ export type ProjectListItem = {
   coverImage: SanityImageField;
   /** Detail-page hero; used as Work grid thumbnail when coverImage is empty */
   heroImage?: CmsMediaInput;
+  /** CMS: enable soft scrim behind hover title when cover/hero is dark */
+  cardOverlayScrim?: boolean | null;
 };
 
 export type ProjectMetaItem = {

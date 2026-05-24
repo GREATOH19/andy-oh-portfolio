@@ -40,6 +40,7 @@ const projectListItemFields = groq`
   role,
   excerpt,
   coverImage,
+  cardOverlayScrim,
   heroImage {
     ${cmsMediaItemFields}
   }

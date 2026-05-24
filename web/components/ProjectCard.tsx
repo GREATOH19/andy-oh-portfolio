@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {useCallback, useEffect, useLayoutEffect, useRef, useState} from "react";
 
+import {grainTileStyle} from "@/lib/grain";
 import {urlForImage} from "@/lib/sanity/image";
 import {isSanityImage, isSanityVideo, normalizeMediaItem, sanityVideoUrl} from "@/lib/sanity/media";
 import {useSiteTypography, useTypoClass} from "@/components/TypographyProvider";
@@ -160,8 +161,8 @@ export function ProjectCard({
     ? "opacity-0"
     : "opacity-100 [@media(hover:hover)]:group-hover:opacity-0 group-focus-within:opacity-0";
   const heroOverlayClass = overlayOpen
-    ? "opacity-100 blur-[2px]"
-    : "opacity-0 blur-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:blur-[2px] group-focus-within:opacity-100 group-focus-within:blur-[2px]";
+    ? "opacity-100 blur-[1px]"
+    : "opacity-0 blur-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:blur-[1px] group-focus-within:opacity-100 group-focus-within:blur-[1px]";
 
   const tagline = project.subtitle?.trim() || null;
 
@@ -226,7 +227,7 @@ export function ProjectCard({
             loop={heroVideo?.loop ?? true}
             alt={heroAlt}
             active
-            className={`absolute inset-0 h-full w-full object-cover transition-[filter] duration-500 ease-out ${overlayOpen ? "blur-[2px]" : "blur-0"} [@media(hover:hover)]:group-hover:blur-[2px] group-focus-within:blur-[2px]`}
+            className={`absolute inset-0 h-full w-full object-cover transition-[filter] duration-500 ease-out ${overlayOpen ? "blur-[1px]" : "blur-0"} [@media(hover:hover)]:group-hover:blur-[1px] group-focus-within:blur-[1px]`}
           />
         ) : null}
         {!hasDistinctHero && !hasVideoOnlyHero && thumbSrc ? (
@@ -234,7 +235,7 @@ export function ProjectCard({
             src={thumbSrc}
             alt={thumbAlt}
             fill
-            className={`object-cover transition-[filter] duration-500 ease-out ${overlayOpen ? "blur-[2px]" : "blur-0"} [@media(hover:hover)]:group-hover:blur-[2px] group-focus-within:blur-[2px]`}
+            className={`object-cover transition-[filter] duration-500 ease-out ${overlayOpen ? "blur-[1px]" : "blur-0"} [@media(hover:hover)]:group-hover:blur-[1px] group-focus-within:blur-[1px]`}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         ) : null}
@@ -265,15 +266,24 @@ export function ProjectCard({
               : "opacity-0 [@media(hover:hover)]:group-hover:opacity-100 group-focus-within:opacity-100"
           }`}
         >
-          <div className="project-card-hover-scrim" aria-hidden />
-          <div className="project-card-overlay-body relative z-10 flex h-full flex-col items-center justify-center px-6 text-center text-white">
+          <div className="project-card-glass" aria-hidden>
+            <div className="project-card-glass__backdrop" />
+            <div className="project-card-glass__tint" />
+            <div className="project-card-glass__specular" />
+            <div className="project-card-glass__grain" style={grainTileStyle} />
+          </div>
+          <div
+            className={`project-card-overlay-body relative z-10 flex h-full flex-col items-center justify-center px-6 text-center text-white${
+              project.cardOverlayScrim ? " project-card-overlay-body--scrim" : ""
+            }`}
+          >
             <ProjectCardOverlayTitle
               title={project.title}
-              className={`project-card-overlay-title project-card-overlay-title-shadow ${overlayTitleClass} ${displayClass}`}
+              className={`project-card-overlay-title project-card-overlay-title-shadow text-white ${overlayTitleClass} ${displayClass}`}
             />
             {tagline ? (
               <p
-                className={`mt-3 max-w-md text-base leading-relaxed text-white/90 sm:text-lg ${bodyClass}`}
+                className={`project-card-overlay-tagline mt-3 max-w-md text-base leading-relaxed sm:text-lg ${bodyClass}`}
               >
                 {tagline}
               </p>
@@ -284,7 +294,7 @@ export function ProjectCard({
                 href={href}
                 data-project-card-link
                 aria-label={`View project: ${project.title}`}
-                className="pointer-events-auto relative z-10 mt-8 inline-flex rounded-sm border border-white/50 bg-transparent px-5 py-2.5 text-[0.6875rem] font-semibold uppercase tracking-[0.2em] text-white/95 transition-[border-color,background-color,color] duration-300 active:border-white/75 active:bg-white/10 active:text-white"
+                className="pointer-events-auto relative z-10 mt-8 inline-flex rounded-sm border border-white/50 bg-white/10 px-5 py-2.5 text-[0.6875rem] font-semibold uppercase tracking-[0.2em] text-white/95 backdrop-blur-sm transition-[border-color,background-color,color] duration-300 active:border-white/75 active:bg-white/20 active:text-white"
                 onClick={(e) => e.stopPropagation()}
               >
                 View project
