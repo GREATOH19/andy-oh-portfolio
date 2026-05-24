@@ -69,6 +69,7 @@ export const projectBySlugQuery = groq`
     title,
     "slug": slug.current,
     subtitle,
+    cardOverlayScrim,
     year,
     role,
     excerpt,

@@ -52,12 +52,14 @@ export default async function ProjectPage({ params }: Props) {
       <ProjectHero
         media={heroMedia}
         alt={heroAlt}
+        title={project.title}
+        subtitle={project.subtitle}
         intrinsicWidth={project.projectHeroDimensions?.width}
         intrinsicHeight={project.projectHeroDimensions?.height}
       />
 
       <article className="container-wide flex-1 pb-20 md:pb-24">
-        <ProjectHeader project={project} />
+        <ProjectHeader project={project} titleInHero={Boolean(heroMedia)} />
 
         {sections.length > 0 && (
           <div className="mt-20">

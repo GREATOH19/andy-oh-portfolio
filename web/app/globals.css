@@ -3,6 +3,7 @@
 /* CMS picks fonts via cmsFontClass.ts — class names must exist in full for Tailwind to emit utilities */
 @source "../lib/cmsFontClass.ts";
 @source inline(
+  "project-hero-bottom-fade",
   "cms-title-tone",
   "font-serif",
   "font-sans",
@@ -44,6 +45,7 @@
   --background-mid: #8fe3ff;
   --background-accent: #4fd0ff;
   --background-bottom: #bdefff;
+  --cms-title-tone: #4a5568;
   --foreground: #111111;
   /* SiteHeader uses this for h-*; intro mask uses the same for top offset */
   --site-header-height: 4rem;
@@ -116,7 +118,7 @@
 
 /* CMS display / heading titles — Andy Oh tone (#4A5568), softer than slate-950 */
 .cms-title-tone {
-  color: #4a5568;
+  color: var(--cms-title-tone);
 }
 
 /* Gloock: same title tone site-wide; #work keeps inherited (e.g. white card titles). */
@@ -199,6 +201,46 @@
   text-shadow:
     0 1px 2px rgb(10 60 80 / 0.52),
     0 1px 12px rgb(10 70 95 / 0.45);
+}
+
+/* Detail hero — white text + drop shadow only (no backdrop blur) */
+.project-hero-overlay-text,
+.project-hero-bottom-bar .cms-title-tone,
+.project-hero-bottom-bar .font-brand-gloock {
+  color: #fff;
+}
+
+.project-hero-overlay-text {
+  text-shadow:
+    0 1px 2px rgb(0 0 0 / 0.55),
+    0 2px 10px rgb(0 0 0 / 0.45);
+}
+
+/* Project hero bottom fade — matte gray (title-tone L, no chroma, soft opacity) */
+.project-hero-bottom-fade {
+  background-image: linear-gradient(
+    to top,
+    rgba(84, 84, 84, 0.5) 0%,
+    rgba(84, 84, 84, 0.32) 20%,
+    rgba(84, 84, 84, 0.17) 42%,
+    rgba(84, 84, 84, 0.08) 62%,
+    rgba(84, 84, 84, 0.03) 82%,
+    transparent 100%
+  );
+}
+
+@supports (color: oklch(from #000 l c h)) {
+  .project-hero-bottom-fade {
+    background-image: linear-gradient(
+      to top,
+      oklch(from var(--cms-title-tone) calc(l + 0.05) 0 h / 0.5) 0%,
+      oklch(from var(--cms-title-tone) calc(l + 0.05) 0 h / 0.32) 20%,
+      oklch(from var(--cms-title-tone) calc(l + 0.05) 0 h / 0.17) 42%,
+      oklch(from var(--cms-title-tone) calc(l + 0.05) 0 h / 0.08) 62%,
+      oklch(from var(--cms-title-tone) calc(l + 0.05) 0 h / 0.03) 82%,
+      transparent 100%
+    );
+  }
 }
 
 /* CMS “Hover text scrim” — soft blur behind text only (no full-card wash) */

@@ -4,14 +4,21 @@ import Image from "next/image";
 import {SiMedium} from "react-icons/si";
 import {useTypoClass} from "@/components/TypographyProvider";
 import {urlForImage} from "@/lib/sanity/image";
+import {PROJECT_HERO_COMPACT} from "@/components/ProjectHero";
 import type {ProjectDetail} from "@/lib/types/project";
 
 /**
  * Two-column project intro shown below the hero.
- * Left column: title, subtitle, intro paragraphs (`excerpt`).
- * Right column: meta items, contributions, collaborators, award badges.
+ * Title/subtitle on the hero overlay (desktop); below the hero on compact mobile.
  */
-export function ProjectHeader({project}: {project: ProjectDetail}) {
+export function ProjectHeader({
+  project,
+  titleInHero = false,
+}: {
+  project: ProjectDetail;
+  /** When true, title/subtitle on full-bleed hero; omitted here except on compact mobile */
+  titleInHero?: boolean;
+}) {
   const displayClass = useTypoClass("display");
   const bodyClass = useTypoClass("body");
   const metaClass = useTypoClass("meta");
@@ -32,21 +39,37 @@ export function ProjectHeader({project}: {project: ProjectDetail}) {
     yearLine ||
     project.role;
 
+  const titleBlockClass = titleInHero ? `hidden ${PROJECT_HERO_COMPACT}` : "block";
+
   return (
     <header
       id="project-header"
-      className="scroll-mt-[var(--site-header-height)] pt-16 max-md:portrait:pt-8 md:pt-24 [@media(orientation:landscape)_and_(max-width:1024px)]:pt-8"
+      className={`scroll-mt-[var(--site-header-height)] pt-16 max-md:portrait:pt-8 [@media(orientation:landscape)_and_(max-width:1024px)]:pt-8 ${
+        titleInHero
+          ? "md:portrait:pt-16 [@media(orientation:landscape)_and_(min-width:1025px)]:pt-16"
+          : "md:pt-24"
+      }`}
     >
-      <h1
-        className={`text-4xl leading-[1.05] sm:text-5xl md:text-6xl ${displayClass}`}
-      >
-        {project.title}
-      </h1>
-      {project.subtitle && (
-        <p className={`mt-3 text-base text-zinc-500 sm:text-lg ${bodyClass}`}>{project.subtitle}</p>
-      )}
+      <div className={titleBlockClass}>
+        <h1
+          className={`text-4xl leading-[1.05] sm:text-5xl md:text-6xl ${displayClass}`}
+        >
+          {project.title}
+        </h1>
+        {project.subtitle && (
+          <p className={`mt-3 text-base text-zinc-500 sm:text-lg ${bodyClass}`}>
+            {project.subtitle}
+          </p>
+        )}
+      </div>
 
-      <div className="mt-8 border-t border-zinc-300/60" />
+      <div
+        className={`border-t border-zinc-300/60 ${
+          titleInHero
+            ? "mt-8 md:portrait:mt-0 [@media(orientation:landscape)_and_(min-width:1025px)]:mt-0"
+            : "mt-8"
+        }`}
+      />
 
       <div
         className={`mt-10 grid gap-x-12 gap-y-10 ${
