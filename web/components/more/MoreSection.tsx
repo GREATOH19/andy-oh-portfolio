@@ -20,7 +20,7 @@ export function MoreSection({
     <section className="w-full border-t border-slate-100 pt-10 first:border-t-0 first:pt-0">
       <div className="flex items-center justify-between gap-4 border-b border-slate-100 pb-4">
         <h2
-          className={`min-w-0 flex-1 truncate text-2xl font-medium text-slate-950 sm:text-3xl ${headingClass}`}
+          className={`min-w-0 flex-1 truncate text-2xl text-slate-950 sm:text-3xl ${headingClass}`}
         >
           {title}
         </h2>

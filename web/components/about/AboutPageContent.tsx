@@ -73,7 +73,7 @@ export function AboutPageContent({
             ) : null}
 
             <motion.h1
-              className={`text-5xl font-light text-slate-950 sm:text-6xl ${displayClass}`}
+              className={`display-name-tone text-5xl sm:text-6xl ${displayClass}`}
               initial={{opacity: 0, y: 30}}
               whileInView={{opacity: 1, y: 0}}
               transition={{duration: 0.8, delay: 0.2}}
@@ -95,7 +95,7 @@ export function AboutPageContent({
 
             {meta && meta.length > 0 ? (
               <motion.div
-                className={`mt-8 space-y-4 text-sm font-medium uppercase tracking-[0.2em] text-slate-400 ${metaClass}`}
+                className={`mt-8 space-y-4 text-sm uppercase tracking-[0.2em] text-slate-400 ${metaClass}`}
                 initial={{opacity: 0, y: 30}}
                 whileInView={{opacity: 1, y: 0}}
                 transition={{duration: 0.8, delay: 0.6}}
@@ -118,7 +118,7 @@ export function AboutPageContent({
               transition={{duration: 0.8}}
               viewport={{once: true}}
             >
-              <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Biography</h2>
+              <h2 className={`text-sm uppercase tracking-[0.2em] text-slate-400 ${metaClass}`}>Biography</h2>
               <div className={`space-y-6 text-lg leading-relaxed text-slate-600 md:text-xl ${bodyClass}`}>
                 <PortableText value={bio} components={bioComponents} />
               </div>
@@ -133,12 +133,12 @@ export function AboutPageContent({
               transition={{duration: 0.8}}
               viewport={{once: true}}
             >
-              <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Education</h2>
+              <h2 className={`text-sm uppercase tracking-[0.2em] text-slate-400 ${metaClass}`}>Education</h2>
               <div className="space-y-6">
                 {education.map((item, i) => (
                   <div key={i}>
                     <div className="flex items-baseline justify-between">
-                      <h3 className={`text-xl font-medium text-slate-950 ${headingClass}`}>
+                      <h3 className={`text-xl text-slate-950 ${headingClass}`}>
                         {item.school}
                       </h3>
                       {item.period ? (
@@ -162,11 +162,11 @@ export function AboutPageContent({
               transition={{duration: 0.8}}
               viewport={{once: true}}
             >
-              <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Skills</h2>
+              <h2 className={`text-sm uppercase tracking-[0.2em] text-slate-400 ${metaClass}`}>Skills</h2>
               <div className="grid grid-cols-2 gap-x-8 gap-y-12 sm:grid-cols-3">
                 {skillGroups.map((group, i) => (
                   <div key={i}>
-                    <h4 className={`mb-4 font-medium text-slate-950 ${headingClass}`}>{group.title}</h4>
+                    <h4 className={`mb-4 text-slate-950 ${headingClass}`}>{group.title}</h4>
                     {group.items && group.items.length > 0 ? (
                       <ul className="space-y-2 text-sm text-slate-500">
                         {group.items.map((item, j) => (

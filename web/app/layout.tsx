@@ -1,5 +1,14 @@
 import type { Metadata } from "next";
-import { DM_Sans, Geist, Geist_Mono, Gloock, Instrument_Serif, Pinyon_Script, Playfair_Display } from "next/font/google";
+import {
+  DM_Sans,
+  Geist,
+  Geist_Mono,
+  Gloock,
+  Instrument_Serif,
+  Pinyon_Script,
+  Playfair_Display,
+  Space_Grotesk,
+} from "next/font/google";
 import { ConditionalFooter } from "@/components/ConditionalFooter";
 import { ContactFooter } from "@/components/ContactFooter";
 import { DocumentOverflowReset } from "@/components/DocumentOverflowReset";
@@ -56,6 +65,12 @@ const brandGloock = Gloock({
   weight: ["400"],
 });
 
+const brandSpaceGrotesk = Space_Grotesk({
+  variable: "--font-brand-space-grotesk-sans",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+});
+
 export const metadata: Metadata = {
   title: {
     default: "Andy Oh - Industrial Design",
@@ -85,7 +100,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${brandDmSans.variable} ${brandInstrumentSerif.variable} ${brandPinyonScript.variable} ${brandGloock.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${brandDmSans.variable} ${brandInstrumentSerif.variable} ${brandPinyonScript.variable} ${brandGloock.variable} ${brandSpaceGrotesk.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="flex min-h-screen flex-col text-slate-900">

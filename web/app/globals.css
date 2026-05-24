@@ -1,5 +1,27 @@
 @import "tailwindcss";
 
+/* CMS picks fonts via cmsFontClass.ts — class names must exist in full for Tailwind to emit utilities */
+@source "../lib/cmsFontClass.ts";
+@source inline(
+  "font-serif",
+  "font-sans",
+  "font-mono",
+  "font-brand-dm",
+  "font-brand-instrument",
+  "font-brand-pinyon",
+  "font-brand-gloock",
+  "font-brand-space-grotesk",
+  "font-thin",
+  "font-extralight",
+  "font-light",
+  "font-normal",
+  "font-medium",
+  "font-semibold",
+  "font-bold",
+  "font-extrabold",
+  "font-black"
+);
+
 @theme {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -8,6 +30,7 @@
   --font-brand-instrument: var(--font-brand-instrument-serif);
   --font-brand-pinyon: var(--font-brand-pinyon-script);
   --font-brand-gloock: var(--font-brand-gloock-serif);
+  --font-brand-space-grotesk: var(--font-brand-space-grotesk-sans);
   
   --color-background: #ffffff;
   --color-foreground: #111111;
@@ -83,6 +106,11 @@
   h1, h2, h3, h4 {
     @apply font-serif tracking-tight font-medium;
   }
+}
+
+/* About / hero display name — Andy Oh tone (#4A5568), softer than slate-950 */
+.display-name-tone {
+  color: #4a5568;
 }
 
 /* Gloock 텍스트는 slate-500에서 한 스탑 더 어두운 slate-600 (BIOGRAPHY 라벨보다 두 스탑).

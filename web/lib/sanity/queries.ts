@@ -314,14 +314,19 @@ export const siteSettingsQuery = groq`
     _id,
     typography {
       display,
+      displayWeight,
       heading,
+      headingWeight,
       body,
-      meta
+      bodyWeight,
+      meta,
+      metaWeight
     },
     brand {
       mode,
       text,
       font,
+      fontWeight,
       alt,
       image
     },

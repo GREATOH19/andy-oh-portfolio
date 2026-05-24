@@ -38,7 +38,7 @@ export function ProjectHeader({project}: {project: ProjectDetail}) {
       className="scroll-mt-[var(--site-header-height)] pt-16 max-md:portrait:pt-8 md:pt-24 [@media(orientation:landscape)_and_(max-width:1024px)]:pt-8"
     >
       <h1
-        className={`text-4xl font-bold leading-[1.05] text-zinc-900 sm:text-5xl md:text-6xl ${displayClass}`}
+        className={`text-4xl leading-[1.05] text-zinc-900 sm:text-5xl md:text-6xl ${displayClass}`}
       >
         {project.title}
       </h1>

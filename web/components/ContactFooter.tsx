@@ -23,6 +23,7 @@ export function ContactFooter({
   footerBody?: PortableTextBlock[] | null;
 }) {
   const bodyClass = useTypoClass("body");
+  const metaClass = useTypoClass("meta");
   const safeLinks = links ?? [];
   const safeChannels = channels ?? [];
 
@@ -62,7 +63,7 @@ export function ContactFooter({
             })}
           </nav>
         ) : safeLinks.length > 0 ? (
-          <nav className="flex w-full flex-wrap justify-center gap-x-8 gap-y-3 pt-12 text-sm font-medium uppercase tracking-[0.2em] text-slate-400">
+          <nav className={`flex w-full flex-wrap justify-center gap-x-8 gap-y-3 pt-12 text-sm uppercase tracking-[0.2em] text-slate-400 ${metaClass}`}>
             {safeLinks.map((l) => {
               const isExternal =
                 /^https?:\/\//.test(l.href) || /^mailto:/.test(l.href) || /^tel:/.test(l.href);

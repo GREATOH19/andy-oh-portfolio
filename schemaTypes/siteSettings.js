@@ -1,6 +1,11 @@
 import {defineField, defineType} from 'sanity'
 
-import {CMS_FONT_OPTIONS, cmsFontField, typographyFields} from './fontStyle'
+import {
+  CMS_FONT_OPTIONS,
+  CMS_FONT_WEIGHT_OPTIONS,
+  cmsFontField,
+  typographyFields,
+} from './fontStyle'
 
 
 
@@ -87,6 +92,26 @@ export const siteSettings = defineType({
           },
 
           initialValue: 'serif',
+
+        }),
+
+        defineField({
+
+          name: 'fontWeight',
+
+          title: 'Logo text weight',
+
+          description: 'Used when Mode is Text. Default in the app: Medium (500).',
+
+          type: 'string',
+
+          options: {
+
+            list: CMS_FONT_WEIGHT_OPTIONS,
+
+            layout: 'dropdown',
+
+          },
 
         }),
 

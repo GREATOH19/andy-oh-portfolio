@@ -119,8 +119,8 @@ export function ProjectCard({
   const typography = useSiteTypography();
   const overlayTitleClass =
     typography?.display === "gloock"
-      ? "project-card-gloock-title font-semibold"
-      : "font-semibold tracking-tight";
+      ? "project-card-gloock-title tracking-tight"
+      : "tracking-tight";
   const href = project.slug ? `/projects/${project.slug}` : "#";
   const touchPrimary = useTouchPrimary();
   const [touchOverlayOpenLocal, setTouchOverlayOpenLocal] = useState(false);
@@ -273,7 +273,7 @@ export function ProjectCard({
             />
             {tagline ? (
               <p
-                className={`mt-3 max-w-md text-base font-normal leading-relaxed text-white/90 sm:text-lg ${bodyClass}`}
+                className={`mt-3 max-w-md text-base leading-relaxed text-white/90 sm:text-lg ${bodyClass}`}
               >
                 {tagline}
               </p>

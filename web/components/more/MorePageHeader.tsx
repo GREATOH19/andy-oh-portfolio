@@ -13,16 +13,17 @@ export function MorePageHeader({
   backLabel?: string;
 }) {
   const headingClass = useTypoClass("heading");
+  const metaClass = useTypoClass("meta");
 
   return (
     <header className="mb-5 border-b border-slate-100 pb-2.5 md:mb-6">
       <Link
         href={backHref}
-        className="mb-1.5 inline-block text-sm font-medium uppercase tracking-[0.2em] text-slate-400 transition-colors hover:text-slate-700"
+        className={`mb-1.5 inline-block text-sm uppercase tracking-[0.2em] text-slate-400 transition-colors hover:text-slate-700 ${metaClass}`}
       >
         ← {backLabel}
       </Link>
-      <h1 className={`text-2xl font-medium leading-tight text-slate-950 sm:text-3xl ${headingClass}`}>
+      <h1 className={`text-2xl leading-tight text-slate-950 sm:text-3xl ${headingClass}`}>
         {title}
       </h1>
     </header>

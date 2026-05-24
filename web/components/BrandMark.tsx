@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { cmsFontClassOrDefault } from "@/lib/cmsFontClass";
+import { cmsBrandTextClass } from "@/lib/cmsFontClass";
 import { urlForImage } from "@/lib/sanity/image";
 import type { SiteBrand } from "@/lib/types/project";
 
@@ -20,7 +20,7 @@ export function BrandMark({
 }) {
   const text = brand?.text?.trim() || defaultText;
   const alt = brand?.alt?.trim() || text;
-  const fontClass = cmsFontClassOrDefault(brand?.font, "serif");
+  const fontClass = cmsBrandTextClass(brand);
 
   const textClassName =
     variant === "header"

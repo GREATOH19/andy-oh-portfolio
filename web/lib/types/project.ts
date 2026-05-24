@@ -1,15 +1,30 @@
 import type {PortableTextBlock} from "@portabletext/types";
 
 /** CMS typography options — keep in sync with `schemaTypes/fontStyle.js` */
-export type SiteBrandFont = "serif" | "sans" | "mono" | "dmSans" | "instrument" | "pinyon" | "gloock";
+export type SiteBrandFont =
+  | "serif"
+  | "sans"
+  | "mono"
+  | "dmSans"
+  | "instrument"
+  | "pinyon"
+  | "gloock"
+  | "spaceGrotesk";
 
 export type TypographyRole = "display" | "heading" | "body" | "meta";
 
+/** CMS font weight options — keep in sync with `schemaTypes/fontStyle.js` */
+export type SiteFontWeight = "100" | "200" | "300" | "400" | "500" | "600" | "700" | "800" | "900";
+
 export type SiteTypography = {
   display?: SiteBrandFont | null;
+  displayWeight?: SiteFontWeight | null;
   heading?: SiteBrandFont | null;
+  headingWeight?: SiteFontWeight | null;
   body?: SiteBrandFont | null;
+  bodyWeight?: SiteFontWeight | null;
   meta?: SiteBrandFont | null;
+  metaWeight?: SiteFontWeight | null;
 };
 
 export type SanityImageField = {
@@ -260,6 +275,7 @@ export type SiteBrand = {
   mode?: "image" | "text" | null;
   text?: string | null;
   font?: SiteBrandFont | null;
+  fontWeight?: SiteFontWeight | null;
   alt?: string | null;
   image?: SanityImageField;
 };

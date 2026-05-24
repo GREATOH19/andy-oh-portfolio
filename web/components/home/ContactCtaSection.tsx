@@ -13,6 +13,7 @@ export function ContactCtaSection({
   links?: {label: string; href: string}[] | null;
 }) {
   const displayClass = useTypoClass("display");
+  const metaClass = useTypoClass("meta");
   const mailto = email ? `mailto:${email}` : null;
 
   return (
@@ -26,7 +27,7 @@ export function ContactCtaSection({
       <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
         <div className="max-w-2xl">
           {heading ? (
-            <h2 className={`text-4xl font-light leading-tight text-slate-950 sm:text-5xl ${displayClass}`}>
+            <h2 className={`text-4xl leading-tight text-slate-950 sm:text-5xl ${displayClass}`}>
               {heading}
             </h2>
           ) : null}
@@ -41,7 +42,7 @@ export function ContactCtaSection({
         </div>
 
         {links?.length ? (
-          <div className="flex flex-wrap gap-x-8 gap-y-3 text-sm font-medium uppercase tracking-[0.2em] text-slate-400">
+          <div className={`flex flex-wrap gap-x-8 gap-y-3 text-sm uppercase tracking-[0.2em] text-slate-400 ${metaClass}`}>
             {links.map((l) => (
               <a
                 key={l.href}

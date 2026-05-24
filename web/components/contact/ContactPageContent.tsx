@@ -73,7 +73,7 @@ export function ContactPageContent({
       <div className="max-w-4xl">
         {hasHeadline ? (
           <motion.h1
-            className={`text-5xl font-light text-slate-950 sm:text-7xl ${displayClass}`}
+            className={`text-5xl text-slate-950 sm:text-7xl ${displayClass}`}
             initial={{opacity: 0, y: 50}}
             whileInView={{opacity: 1, y: 0}}
             transition={{duration: 0.8}}
@@ -111,7 +111,7 @@ export function ContactPageContent({
                 >
                   <div className="flex items-center gap-3">
                     {Icon ? <Icon className="h-5 w-5 text-slate-400" /> : null}
-                    <h2 className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                    <h2 className={`text-[11px] uppercase tracking-[0.22em] text-slate-400 ${metaClass}`}>
                       {channel.label}
                     </h2>
                   </div>
