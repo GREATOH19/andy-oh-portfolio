@@ -73,7 +73,7 @@ export function AboutPageContent({
             ) : null}
 
             <motion.h1
-              className={`display-name-tone text-5xl sm:text-6xl ${displayClass}`}
+              className={`text-5xl sm:text-6xl ${displayClass}`}
               initial={{opacity: 0, y: 30}}
               whileInView={{opacity: 1, y: 0}}
               transition={{duration: 0.8, delay: 0.2}}
@@ -138,7 +138,7 @@ export function AboutPageContent({
                 {education.map((item, i) => (
                   <div key={i}>
                     <div className="flex items-baseline justify-between">
-                      <h3 className={`text-xl text-slate-950 ${headingClass}`}>
+                      <h3 className={`text-xl ${headingClass}`}>
                         {item.school}
                       </h3>
                       {item.period ? (
@@ -166,7 +166,7 @@ export function AboutPageContent({
               <div className="grid grid-cols-2 gap-x-8 gap-y-12 sm:grid-cols-3">
                 {skillGroups.map((group, i) => (
                   <div key={i}>
-                    <h4 className={`mb-4 text-slate-950 ${headingClass}`}>{group.title}</h4>
+                    <h4 className={`mb-4 ${headingClass}`}>{group.title}</h4>
                     {group.items && group.items.length > 0 ? (
                       <ul className="space-y-2 text-sm text-slate-500">
                         {group.items.map((item, j) => (

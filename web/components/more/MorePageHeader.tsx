@@ -23,7 +23,7 @@ export function MorePageHeader({
       >
         ← {backLabel}
       </Link>
-      <h1 className={`text-2xl leading-tight text-slate-950 sm:text-3xl ${headingClass}`}>
+      <h1 className={`text-2xl leading-tight sm:text-3xl ${headingClass}`}>
         {title}
       </h1>
     </header>

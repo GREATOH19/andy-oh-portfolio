@@ -25,12 +25,12 @@ export function BrandMark({
   const textClassName =
     variant === "header"
       ? `${fontClass} text-[1.6875rem] leading-tight tracking-tight`
-      : `${fontClass} text-4xl leading-[1.08] tracking-tight text-slate-950 sm:text-5xl md:text-6xl`;
+      : `${fontClass} text-4xl leading-[1.08] tracking-tight sm:text-5xl md:text-6xl`;
 
   const linkClassName =
     variant === "header"
       ? "inline-flex max-w-[min(100%,20rem)] items-center text-foreground transition-opacity hover:opacity-70"
-      : "inline-flex max-w-[min(100%,min(92vw,32rem))] items-center justify-center text-slate-950 transition-opacity hover:opacity-70";
+      : "inline-flex max-w-[min(100%,min(92vw,32rem))] items-center justify-center transition-opacity hover:opacity-70";
 
   if (shouldUseImage(brand)) {
     const pixelH = variant === "header" ? 88 : 150;

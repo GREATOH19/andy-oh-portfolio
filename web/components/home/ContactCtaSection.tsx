@@ -27,7 +27,7 @@ export function ContactCtaSection({
       <div className="flex flex-col gap-10 md:flex-row md:items-end md:justify-between">
         <div className="max-w-2xl">
           {heading ? (
-            <h2 className={`text-4xl leading-tight text-slate-950 sm:text-5xl ${displayClass}`}>
+            <h2 className={`text-4xl leading-tight sm:text-5xl ${displayClass}`}>
               {heading}
             </h2>
           ) : null}

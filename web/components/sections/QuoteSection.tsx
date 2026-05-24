@@ -16,7 +16,7 @@ export function QuoteSection({
 
   return (
     <figure>
-      <blockquote className={`text-2xl leading-snug text-zinc-900 ${displayClass}`}>“{quote}”</blockquote>
+      <blockquote className={`text-2xl leading-snug ${displayClass}`}>“{quote}”</blockquote>
       {attribution ? (
         <p className={`mt-3 text-sm text-zinc-600 ${metaClass}`}>— {attribution}</p>
       ) : null}

@@ -78,7 +78,7 @@ export function HomeWelcomeIntro({
     >
       {heading ? (
         <h2
-          className={`whitespace-nowrap text-[clamp(1.875rem,7.5vw,3.75rem)] leading-none text-slate-950 md:text-5xl md:leading-tight lg:text-6xl ${displayClass}`}
+          className={`whitespace-nowrap text-[clamp(1.875rem,7.5vw,3.75rem)] leading-none md:text-5xl md:leading-tight lg:text-6xl ${displayClass}`}
         >
           {heading}
         </h2>

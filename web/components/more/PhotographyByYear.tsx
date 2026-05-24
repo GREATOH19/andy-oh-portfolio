@@ -11,7 +11,7 @@ export function PhotographyByYear({albums}: {albums?: PhotoAlbum[] | null}) {
       {groups.map((group, index) => (
         <section key={group.yearLabel || `no-year-${index}`}>
           {group.yearLabel ? (
-            <h2 className="mb-2 font-serif text-3xl font-light text-slate-950 sm:text-4xl">{group.yearLabel}</h2>
+            <h2 className="cms-title-tone mb-2 font-serif text-3xl font-light sm:text-4xl">{group.yearLabel}</h2>
           ) : null}
           {group.title ? (
             <p className="mb-8 text-sm text-slate-500">{group.title}</p>

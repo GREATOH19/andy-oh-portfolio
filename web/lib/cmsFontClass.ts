@@ -62,11 +62,14 @@ export function cmsFontClassOrDefault(font?: string | null, fallback: SiteBrandF
   return cmsFontClass(font) || CMS_FONT_CLASSES[fallback];
 }
 
-/** Logo text: font + weight (default weight medium) */
+/** Shared title color (#4A5568) — matches About “Andy Oh” */
+export const CMS_TITLE_TONE_CLASS = "cms-title-tone";
+
+/** Logo text: font + weight + title tone */
 export function cmsBrandTextClass(brand?: SiteBrand | null): string {
   const font = cmsFontClassOrDefault(brand?.font, "serif");
   const weight = cmsFontWeightClass(brand?.fontWeight) || CMS_FONT_WEIGHT_CLASSES["500"];
-  return `${font} ${weight}`;
+  return `${font} ${weight} ${CMS_TITLE_TONE_CLASS}`;
 }
 
 /** Project / rich-text headings that default to Playfair (font-serif) */
@@ -96,7 +99,11 @@ export function typoRoleWeightClass(role: TypographyRole, typography?: SiteTypog
   return cmsFontWeightClass(weight) || CMS_FONT_WEIGHT_CLASSES[DEFAULT_ROLE_WEIGHT[role]];
 }
 
-/** Site-wide typography role → font + weight Tailwind classes */
+/** Site-wide typography role → font + weight (+ title tone for display / heading) */
 export function typoRoleClass(role: TypographyRole, typography?: SiteTypography | null): string {
-  return [typoRoleFontClass(role, typography), typoRoleWeightClass(role, typography)].filter(Boolean).join(" ");
+  const tone =
+    role === "display" || role === "heading" ? CMS_TITLE_TONE_CLASS : "";
+  return [typoRoleFontClass(role, typography), typoRoleWeightClass(role, typography), tone]
+    .filter(Boolean)
+    .join(" ");
 }

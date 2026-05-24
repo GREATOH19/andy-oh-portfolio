@@ -3,6 +3,7 @@
 /* CMS picks fonts via cmsFontClass.ts — class names must exist in full for Tailwind to emit utilities */
 @source "../lib/cmsFontClass.ts";
 @source inline(
+  "cms-title-tone",
   "font-serif",
   "font-sans",
   "font-mono",
@@ -108,16 +109,14 @@
   }
 }
 
-/* About / hero display name — Andy Oh tone (#4A5568), softer than slate-950 */
-.display-name-tone {
+/* CMS display / heading titles — Andy Oh tone (#4A5568), softer than slate-950 */
+.cms-title-tone {
   color: #4a5568;
 }
 
-/* Gloock 텍스트는 slate-500에서 한 스탑 더 어두운 slate-600 (BIOGRAPHY 라벨보다 두 스탑).
-   단, Selected Work 섹션(#work) 내부에서는 원래 색을 유지 (예: 카드 위 흰 타이틀).
-   Tailwind utility(text-*)보다 우선하도록 일부러 @layer 밖에 둠. */
+/* Gloock: same title tone site-wide; #work keeps inherited (e.g. white card titles). */
 .font-brand-gloock {
-  color: #475569;
+  color: #4a5568;
 }
 #work .font-brand-gloock {
   color: inherit;

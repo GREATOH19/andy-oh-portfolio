@@ -42,7 +42,7 @@ function SingleLineFitValue({text}: {text: string}) {
     <div ref={wrapRef} className="w-full min-w-0 overflow-hidden">
       <p
         ref={lineRef}
-        className="whitespace-nowrap font-medium leading-snug text-slate-950 transition-colors group-hover:text-slate-700"
+        className="cms-title-tone whitespace-nowrap font-medium leading-snug transition-colors group-hover:text-slate-600"
         style={{fontSize: `${VALUE_MAX_PX.base}px`}}
       >
         {text}
@@ -73,7 +73,7 @@ export function ContactPageContent({
       <div className="max-w-4xl">
         {hasHeadline ? (
           <motion.h1
-            className={`text-5xl text-slate-950 sm:text-7xl ${displayClass}`}
+            className={`text-5xl sm:text-7xl ${displayClass}`}
             initial={{opacity: 0, y: 50}}
             whileInView={{opacity: 1, y: 0}}
             transition={{duration: 0.8}}

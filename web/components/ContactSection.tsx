@@ -23,7 +23,7 @@ export function ContactSection({
       <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
         <div className="max-w-2xl">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Contact</p>
-          <h2 className="mt-4 font-serif text-4xl font-light leading-tight text-slate-950 sm:text-5xl">
+          <h2 className="cms-title-tone mt-4 font-serif text-4xl font-light leading-tight sm:text-5xl">
             {safeHeading}
           </h2>
           <p className="mt-4 text-base leading-relaxed text-slate-600">{safeSubheading}</p>

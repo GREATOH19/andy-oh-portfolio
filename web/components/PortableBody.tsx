@@ -10,10 +10,10 @@ const components: PortableTextComponents = {
       <p className="mb-5 text-[1.02rem] leading-[1.95] text-zinc-700">{children}</p>
     ),
     h2: ({ children }) => (
-      <h2 className="magazine-serif mb-4 mt-10 text-4xl leading-tight text-zinc-900">{children}</h2>
+      <h2 className="cms-title-tone magazine-serif mb-4 mt-10 text-4xl leading-tight">{children}</h2>
     ),
     h3: ({ children }) => (
-      <h3 className="magazine-serif mb-3 mt-8 text-2xl leading-tight text-zinc-900">{children}</h3>
+      <h3 className="cms-title-tone magazine-serif mb-3 mt-8 text-2xl leading-tight">{children}</h3>
     ),
   },
 };
@@ -24,10 +24,10 @@ const mutedComponents: PortableTextComponents = {
       <p className="mb-4 text-base leading-relaxed text-slate-600 last:mb-0">{children}</p>
     ),
     h2: ({ children }) => (
-      <h2 className="magazine-serif mb-3 mt-6 text-2xl leading-tight text-slate-900">{children}</h2>
+      <h2 className="cms-title-tone magazine-serif mb-3 mt-6 text-2xl leading-tight">{children}</h2>
     ),
     h3: ({ children }) => (
-      <h3 className="magazine-serif mb-2 mt-5 text-xl leading-tight text-slate-900">{children}</h3>
+      <h3 className="cms-title-tone magazine-serif mb-2 mt-5 text-xl leading-tight">{children}</h3>
     ),
   },
 };
