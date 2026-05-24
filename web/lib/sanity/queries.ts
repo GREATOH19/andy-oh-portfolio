@@ -1,5 +1,36 @@
 import {groq} from "next-sanity";
 
+const cmsMediaItemFields = groq`
+  ...,
+  mediaType,
+  loop,
+  alt,
+  image {
+    ...,
+    asset->{
+      "_ref": coalesce(_ref, _id),
+      metadata {
+        dimensions
+      }
+    }
+  },
+  video {
+    ...,
+    asset->{
+      "_ref": coalesce(_ref, _id),
+      url,
+      mimeType,
+      originalFilename
+    }
+  },
+  asset->{
+    "_ref": coalesce(_ref, _id),
+    metadata {
+      dimensions
+    }
+  }
+`;
+
 const projectListItemFields = groq`
   _id,
   title,
@@ -9,7 +40,9 @@ const projectListItemFields = groq`
   role,
   excerpt,
   coverImage,
-  heroImage
+  heroImage {
+    ${cmsMediaItemFields}
+  }
 `;
 
 export const projectsQuery = groq`
@@ -27,53 +60,6 @@ export const homeFeaturedProjectsFallbackQuery = groq`
 
 export const projectSlugsQuery = groq`
   *[_type == "project" && defined(slug.current)].slug.current
-`;
-
-const cmsMediaItemFields = groq`
-  ...,
-  _type == "cmsMediaItem" => {
-    _key,
-    _type,
-    mediaType,
-    loop,
-    alt,
-    image {
-      ...,
-      asset->{
-        "_ref": coalesce(_ref, _id),
-        metadata {
-          dimensions
-        }
-      }
-    },
-    video {
-      ...,
-      asset->{
-        "_ref": coalesce(_ref, _id),
-        url,
-        mimeType,
-        originalFilename
-      }
-    }
-  },
-  _type == "file" => {
-    ...,
-    asset->{
-      "_ref": coalesce(_ref, _id),
-      url,
-      mimeType,
-      originalFilename
-    }
-  },
-  _type == "image" => {
-    ...,
-    asset->{
-      "_ref": coalesce(_ref, _id),
-      metadata {
-        dimensions
-      }
-    }
-  }
 `;
 
 export const projectBySlugQuery = groq`
@@ -102,9 +88,14 @@ export const projectBySlugQuery = groq`
     },
     mediumUrl,
     coverImage,
-    heroImage,
+    heroImage {
+      ${cmsMediaItemFields}
+    },
     "projectHeroDimensions": coalesce(
-      heroImage.asset->metadata.dimensions,
+      select(
+        heroImage._type == "cmsMediaItem" && heroImage.mediaType == "image" => heroImage.image.asset->metadata.dimensions,
+        heroImage._type == "image" => heroImage.asset->metadata.dimensions
+      ),
       coverImage.asset->metadata.dimensions
     ),
     "gallery": gallery[]{

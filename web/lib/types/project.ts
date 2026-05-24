@@ -62,7 +62,7 @@ export type ProjectListItem = {
   excerpt?: string;
   coverImage: SanityImageField;
   /** Detail-page hero; used as Work grid thumbnail when coverImage is empty */
-  heroImage?: SanityImageField;
+  heroImage?: CmsMediaInput;
 };
 
 export type ProjectMetaItem = {
@@ -83,7 +83,6 @@ export type ProjectAward = {
 };
 
 export type ProjectDetail = ProjectListItem & {
-  heroImage?: SanityImageField;
   /** Width/height of the asset used for the detail hero (for compact layout). */
   projectHeroDimensions?: {width: number; height: number} | null;
   metaItems?: ProjectMetaItem[] | null;

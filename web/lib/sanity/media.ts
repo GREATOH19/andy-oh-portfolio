@@ -17,23 +17,22 @@ export function sanityVideoAssetId(
 export function normalizeMediaItem(item: CmsMediaInput | null | undefined): SanityMediaField | null {
   if (item == null || typeof item !== "object") return null;
 
-  if (item._type === "cmsMediaItem") {
-    const raw = item as NonNullable<CmsMediaItemRaw>;
-    if (raw.mediaType === "video" && raw.video) {
-      return {
-        _type: "file",
-        asset: raw.video.asset,
-        alt: raw.alt ?? raw.video.alt,
-        loop: raw.loop ?? false,
-      };
-    }
-    if (raw.mediaType === "image" && raw.image) {
-      return {
-        ...raw.image,
-        alt: raw.alt ?? raw.image.alt,
-      };
-    }
-    return null;
+  const raw = item as NonNullable<CmsMediaItemRaw>;
+
+  // cmsMediaItem shape — match by mediaType because Studio may store a legacy _type during schema migration.
+  if (raw.mediaType === "video" && raw.video) {
+    return {
+      _type: "file",
+      asset: raw.video.asset,
+      alt: raw.alt ?? raw.video.alt,
+      loop: raw.loop ?? false,
+    };
+  }
+  if (raw.mediaType === "image" && raw.image) {
+    return {
+      ...raw.image,
+      alt: raw.alt ?? raw.image.alt,
+    };
   }
 
   if (item._type === "image" && sanityImageAssetId(item)) {
@@ -71,9 +70,24 @@ export function isSanityMedia(
   return isSanityImage(source) || isSanityVideo(source);
 }
 
+function sanityFileUrlFromRef(ref: string): string | null {
+  const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
+  const dataset = process.env.NEXT_PUBLIC_SANITY_DATASET;
+  if (!projectId || !dataset) return null;
+
+  const match = ref.match(/^file-(.+)-(\w+)$/);
+  if (!match) return null;
+
+  const [, hash, ext] = match;
+  return `https://cdn.sanity.io/files/${projectId}/${dataset}/${hash}.${ext}`;
+}
+
 export function sanityVideoUrl(source: SanityVideoField | null | undefined): string | null {
   const url = source?.asset?.url;
-  return typeof url === "string" && url.length > 0 ? url : null;
+  if (typeof url === "string" && url.length > 0) return url;
+
+  const ref = sanityVideoAssetId(source);
+  return ref ? sanityFileUrlFromRef(ref) : null;
 }
 
 export function sanityMediaKey(source: SanityMediaField, index: number): string {

@@ -185,18 +185,10 @@ export const project = defineType({
     }),
     defineField({
       name: 'heroImage',
-      title: 'Hero image',
-      type: 'image',
-      options: {hotspot: true},
+      title: 'Hero image or video',
+      type: 'cmsMediaItem',
       description:
-        'Full-bleed image shown above the project header on the detail page. Falls back to the cover image if empty.',
-      fields: [
-        defineField({
-          name: 'alt',
-          type: 'string',
-          title: 'Alternative text',
-        }),
-      ],
+        'Full-bleed media shown above the project header on the detail page. Falls back to the cover image if empty.',
     }),
     defineField({
       name: 'gallery',

@@ -5,6 +5,7 @@ import Link from "next/link";
 import {useCallback, useEffect, useLayoutEffect, useRef, useState} from "react";
 
 import {urlForImage} from "@/lib/sanity/image";
+import {isSanityImage, isSanityVideo, normalizeMediaItem, sanityVideoUrl} from "@/lib/sanity/media";
 import {useSiteTypography, useTypoClass} from "@/components/TypographyProvider";
 import type {ProjectListItem} from "@/lib/types/project";
 
@@ -63,6 +64,46 @@ function ProjectCardOverlayTitle({title, className}: {title: string; className: 
   );
 }
 
+function ProjectCardHeroVideo({
+  src,
+  loop,
+  alt,
+  className,
+  active,
+}: {
+  src: string;
+  loop: boolean;
+  alt: string;
+  className: string;
+  active: boolean;
+}) {
+  const ref = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = ref.current;
+    if (!video) return;
+    if (active) {
+      void video.play().catch(() => {});
+    } else {
+      video.pause();
+      video.currentTime = 0;
+    }
+  }, [active, src]);
+
+  return (
+    <video
+      ref={ref}
+      src={src}
+      className={className}
+      muted
+      loop={loop}
+      playsInline
+      preload="metadata"
+      aria-label={alt || undefined}
+    />
+  );
+}
+
 export function ProjectCard({
   project,
   touchOverlayOpen: touchOverlayOpenControlled,
@@ -87,32 +128,34 @@ export function ProjectCard({
   const touchOverlayOpen = touchControlled
     ? (touchOverlayOpenControlled ?? false)
     : touchOverlayOpenLocal;
+  const [hovered, setHovered] = useState(false);
+
+  const coverMedia = normalizeMediaItem(project.coverImage);
+  const heroMedia = normalizeMediaItem(project.heroImage);
+  const heroVideo = isSanityVideo(heroMedia) ? heroMedia : null;
+  const heroImage = isSanityImage(heroMedia) ? heroMedia : null;
 
   const thumbnail =
-    project.coverImage?.asset?._ref
-      ? project.coverImage
-      : project.heroImage?.asset?._ref
-        ? project.heroImage
-        : null;
-  const heroBackdrop =
-    project.heroImage?.asset?._ref
-      ? project.heroImage
-      : project.coverImage?.asset?._ref
-        ? project.coverImage
-        : null;
+    isSanityImage(coverMedia) ? coverMedia : isSanityImage(heroMedia) ? heroMedia : null;
 
   const thumbSrc = thumbnail?.asset?._ref
     ? urlForImage(thumbnail).width(1600).height(1200).quality(90).url()
     : null;
-  const heroSrc =
-    heroBackdrop?.asset?._ref && heroBackdrop !== thumbnail
-      ? urlForImage(heroBackdrop).width(1600).height(1200).quality(90).url()
+  const heroImageSrc =
+    heroImage?.asset?._ref && heroImage !== thumbnail
+      ? urlForImage(heroImage).width(1600).height(1200).quality(90).url()
       : null;
-  const thumbAlt = thumbnail?.alt ?? project.title;
-  const heroAlt = heroBackdrop?.alt ?? project.title;
+  const heroVideoSrc = heroVideo ? sanityVideoUrl(heroVideo) : null;
 
-  const hasDistinctHero = Boolean(heroSrc);
+  const thumbAlt = thumbnail?.alt ?? project.title;
+  const heroAlt = heroVideo?.alt ?? heroImage?.alt ?? project.title;
+
+  const hasDistinctHeroImage = Boolean(heroImageSrc);
+  const hasDistinctHeroVideo = Boolean(heroVideoSrc && thumbSrc);
+  const hasVideoOnlyHero = Boolean(heroVideoSrc && !thumbSrc);
+  const hasDistinctHero = hasDistinctHeroImage || hasDistinctHeroVideo;
   const overlayOpen = touchPrimary && touchOverlayOpen;
+  const heroVideoActive = hovered || overlayOpen;
   const thumbHiddenClass = overlayOpen
     ? "opacity-0"
     : "opacity-100 [@media(hover:hover)]:group-hover:opacity-0 group-focus-within:opacity-0";
@@ -141,6 +184,14 @@ export function ProjectCard({
       <div
         className="group relative aspect-[4/3] w-full cursor-default overflow-hidden bg-background transition-shadow duration-500 [@media(hover:hover)]:cursor-pointer [@media(hover:hover)]:group-hover:shadow-lg [@media(hover:none)]:cursor-pointer"
         onClick={onImageAreaClick}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        onFocusCapture={() => setHovered(true)}
+        onBlurCapture={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+            setHovered(false);
+          }
+        }}
       >
         {hasDistinctHero && thumbSrc ? (
           <Image
@@ -151,15 +202,34 @@ export function ProjectCard({
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         ) : null}
-        {heroSrc ? (
+        {hasDistinctHeroVideo && heroVideoSrc ? (
+          <ProjectCardHeroVideo
+            src={heroVideoSrc}
+            loop={heroVideo?.loop ?? true}
+            alt={heroAlt}
+            active={heroVideoActive}
+            className={`absolute inset-0 z-0 h-full w-full object-cover transition-opacity duration-500 ease-out ${heroOverlayClass}`}
+          />
+        ) : null}
+        {heroImageSrc ? (
           <Image
-            src={heroSrc}
+            src={heroImageSrc}
             alt={heroAlt}
             fill
             className={`object-cover transition-opacity duration-500 ease-out ${heroOverlayClass}`}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
-        ) : thumbSrc ? (
+        ) : null}
+        {hasVideoOnlyHero && heroVideoSrc ? (
+          <ProjectCardHeroVideo
+            src={heroVideoSrc}
+            loop={heroVideo?.loop ?? true}
+            alt={heroAlt}
+            active
+            className={`absolute inset-0 h-full w-full object-cover transition-[filter] duration-500 ease-out ${overlayOpen ? "blur-[2px]" : "blur-0"} [@media(hover:hover)]:group-hover:blur-[2px] group-focus-within:blur-[2px]`}
+          />
+        ) : null}
+        {!hasDistinctHero && !hasVideoOnlyHero && thumbSrc ? (
           <Image
             src={thumbSrc}
             alt={thumbAlt}
@@ -167,11 +237,12 @@ export function ProjectCard({
             className={`object-cover transition-[filter] duration-500 ease-out ${overlayOpen ? "blur-[2px]" : "blur-0"} [@media(hover:hover)]:group-hover:blur-[2px] group-focus-within:blur-[2px]`}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
-        ) : (
+        ) : null}
+        {!hasDistinctHero && !hasVideoOnlyHero && !thumbSrc ? (
           <div className="flex h-full items-center justify-center text-[10px] uppercase tracking-[0.2em] text-muted">
             Project Image
           </div>
-        )}
+        ) : null}
 
         {/* Use next/link here too (not a raw <a>): matches touch “View project” path so client navigation / history stays consistent. */}
         <Link

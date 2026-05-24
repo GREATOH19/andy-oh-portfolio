@@ -1,10 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import {useState} from "react";
+import {useState, type CSSProperties} from "react";
 import {PhotoLightbox} from "@/components/PhotoLightbox";
 import {urlForImage} from "@/lib/sanity/image";
-import type {SanityImageField} from "@/lib/types/project";
+import {isSanityImage, isSanityVideo, sanityVideoUrl} from "@/lib/sanity/media";
+import type {SanityMediaField} from "@/lib/types/project";
+
 const COMPACT_BLOCK =
   "hidden max-md:portrait:block [@media(orientation:landscape)_and_(max-width:1024px)]:block";
 const COMPACT_HIDDEN =
@@ -43,18 +45,46 @@ function HeroScrollNavigator() {
   );
 }
 
+function HeroVideo({
+  src,
+  alt,
+  loop,
+  className,
+  style,
+}: {
+  src: string;
+  alt: string;
+  loop: boolean;
+  className?: string;
+  style?: CSSProperties;
+}) {
+  return (
+    <video
+      src={src}
+      className={className}
+      style={style}
+      playsInline
+      muted
+      loop={loop}
+      autoPlay
+      controls={!loop}
+      aria-label={alt || undefined}
+    />
+  );
+}
+
 /**
  * Full-bleed cover above the project header.
- * Default: pulls up with `-mt-[var(--site-header-height)]` so the image sits under the sticky header.
+ * Default: pulls up with `-mt-[var(--site-header-height)]` so the media sits under the sticky header.
  * Compact (narrow portrait or landscape ≤1024px): flush below the header, intrinsic image height (no vertical letterboxing).
  */
 export function ProjectHero({
-  image,
+  media,
   alt,
   intrinsicWidth,
   intrinsicHeight,
 }: {
-  image: SanityImageField;
+  media: SanityMediaField;
   alt: string;
   /** From Sanity `asset.metadata.dimensions` for correct compact layout */
   intrinsicWidth?: number;
@@ -62,57 +92,53 @@ export function ProjectHero({
 }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
-  if (!image?.asset?._ref) {    // #region agent log
-    void fetch("http://127.0.0.1:7874/ingest/30e55b5c-45b0-4b40-95bc-fb3850ef4ee0", {
-      method: "POST",
-      headers: {"Content-Type": "application/json", "X-Debug-Session-Id": "76da51"},
-      body: JSON.stringify({
-        sessionId: "76da51",
-        runId: "pre-fix",
-        hypothesisId: "B",
-        location: "ProjectHero.tsx:nullBranch",
-        message: "ProjectHero returning null (no asset._ref)",
-        data: {
-          hasImageObject: image != null,
-          assetKeys: image?.asset ? Object.keys(image.asset) : [],
-        },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-    // #endregion
+  if (isSanityVideo(media)) {
+    const src = sanityVideoUrl(media);
+    if (!src) return null;
+
+    const loop = media.loop ?? true;
+    const videoAlt = media.alt?.trim() || alt;
+    const layoutW = intrinsicWidth && intrinsicHeight ? intrinsicWidth : 1920;
+    const layoutH = intrinsicWidth && intrinsicHeight ? intrinsicHeight : 1080;
+
+    return (
+      <>
+        <section
+          aria-label="Project cover"
+          className={`relative -mt-[var(--site-header-height)] h-[100dvh] w-full overflow-hidden bg-zinc-100 ${COMPACT_HIDDEN}`}
+        >
+          <HeroVideo
+            src={src}
+            alt={videoAlt}
+            loop={loop}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <HeroScrollNavigator />
+        </section>
+
+        <section
+          aria-label="Project cover"
+          className={`relative mt-0 w-full bg-zinc-100 leading-none ${COMPACT_BLOCK}`}
+        >
+          <HeroVideo
+            src={src}
+            alt={videoAlt}
+            loop={loop}
+            className="block h-auto w-full max-w-full object-cover"
+            style={{aspectRatio: `${layoutW} / ${layoutH}`}}
+          />
+          <HeroScrollNavigator />
+        </section>
+      </>
+    );
+  }
+
+  if (!isSanityImage(media)) {
     return null;
   }
+
+  const image = media;
   const src = urlForImage(image).width(2400).quality(92).url();
-  // #region agent log
-  void fetch("http://127.0.0.1:7874/ingest/30e55b5c-45b0-4b40-95bc-fb3850ef4ee0", {
-    method: "POST",
-    headers: {"Content-Type": "application/json", "X-Debug-Session-Id": "76da51"},
-    body: JSON.stringify({
-      sessionId: "76da51",
-      runId: "pre-fix",
-      hypothesisId: "D",
-      location: "ProjectHero.tsx:beforeRender",
-      message: "ProjectHero built CDN src",
-      data: {
-        srcHost: (() => {
-          try {
-            return new URL(src).hostname;
-          } catch {
-            return "invalid-url";
-          }
-        })(),
-        srcPathPrefix: (() => {
-          try {
-            return new URL(src).pathname.slice(0, 24);
-          } catch {
-            return "";
-          }
-        })(),
-      },
-      timestamp: Date.now(),
-    }),
-  }).catch(() => {});
-  // #endregion
 
   const layoutW = intrinsicWidth && intrinsicHeight ? intrinsicWidth : 2400;
   const layoutH = intrinsicWidth && intrinsicHeight ? intrinsicHeight : 1600;

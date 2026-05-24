@@ -4,8 +4,7 @@ import { ProjectHero } from "@/components/ProjectHero";
 import { ProjectSections } from "@/components/ProjectSections";
 import { PhotoThumbnailGrid } from "@/components/more/PhotoThumbnailGrid";
 import { client } from "@/lib/sanity/client";
-import { sanityImageAssetId } from "@/lib/sanity/image";
-import { normalizeMediaList } from "@/lib/sanity/media";
+import { isSanityImage, normalizeMediaItem, normalizeMediaList } from "@/lib/sanity/media";
 import { projectBySlugQuery, projectSlugsQuery } from "@/lib/sanity/queries";
 import type { ProjectDetail } from "@/lib/types/project";
 import type { Metadata } from "next";
@@ -39,10 +38,11 @@ export default async function ProjectPage({ params }: Props) {
   });
   if (!project || !project.slug) notFound();
 
-  const heroImage =
-    sanityImageAssetId(project.heroImage) && project.heroImage != null
-      ? project.heroImage
-      : project.coverImage;
+  const normalizedHero = normalizeMediaItem(project.heroImage);
+  const normalizedCover = normalizeMediaItem(project.coverImage);
+  const heroMedia =
+    normalizedHero ?? (isSanityImage(normalizedCover) ? normalizedCover : null);
+  const heroAlt = heroMedia?.alt ?? project.title;
   const sections = project.sections?.filter(Boolean) ?? [];
   const gallery = normalizeMediaList(project.gallery);
   const hasLegacyBody = (project.body?.length ?? 0) > 0 || gallery.length > 0;
@@ -50,8 +50,8 @@ export default async function ProjectPage({ params }: Props) {
   return (
     <>
       <ProjectHero
-        image={heroImage}
-        alt={heroImage?.alt ?? project.title}
+        media={heroMedia}
+        alt={heroAlt}
         intrinsicWidth={project.projectHeroDimensions?.width}
         intrinsicHeight={project.projectHeroDimensions?.height}
       />
