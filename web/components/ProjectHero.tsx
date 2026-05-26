@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import {useState, type CSSProperties} from "react";
+import {MediaLightbox} from "@/components/MediaLightbox";
 import {PhotoLightbox} from "@/components/PhotoLightbox";
 import {useTypoClass} from "@/components/TypographyProvider";
 import {urlForImage} from "@/lib/sanity/image";
@@ -137,7 +138,6 @@ function HeroVideo({
       muted
       loop={loop}
       autoPlay
-      controls={!loop}
       aria-label={alt || undefined}
     />
   );
@@ -174,6 +174,7 @@ export function ProjectHero({
     const videoAlt = media.alt?.trim() || alt;
     const layoutW = intrinsicWidth && intrinsicHeight ? intrinsicWidth : 1920;
     const layoutH = intrinsicWidth && intrinsicHeight ? intrinsicHeight : 1080;
+    const viewLabel = videoAlt ? `Play ${videoAlt}` : "Play project cover video";
 
     return (
       <>
@@ -181,12 +182,19 @@ export function ProjectHero({
           aria-label="Project cover"
           className={`relative -mt-[var(--site-header-height)] h-[100dvh] w-full overflow-hidden bg-zinc-100 ${COMPACT_HIDDEN}`}
         >
-          <HeroVideo
-            src={src}
-            alt={videoAlt}
-            loop={loop}
-            className="absolute inset-0 z-0 h-full w-full object-cover"
-          />
+          <button
+            type="button"
+            onClick={() => setLightboxOpen(true)}
+            className="absolute inset-0 z-0 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/80 [&_video]:pointer-events-none"
+            aria-label={viewLabel}
+          >
+            <HeroVideo
+              src={src}
+              alt={videoAlt}
+              loop={loop}
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          </button>
           <ProjectHeroChrome title={title} subtitle={subtitle} />
         </section>
 
@@ -194,15 +202,31 @@ export function ProjectHero({
           aria-label="Project cover"
           className={`relative mt-0 w-full bg-zinc-100 leading-none ${COMPACT_BLOCK}`}
         >
-          <HeroVideo
-            src={src}
-            alt={videoAlt}
-            loop={loop}
-            className="block h-auto w-full max-w-full object-cover"
-            style={{aspectRatio: `${layoutW} / ${layoutH}`}}
-          />
+          <button
+            type="button"
+            onClick={() => setLightboxOpen(true)}
+            className="block w-full cursor-pointer text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400 [&_video]:pointer-events-none"
+            aria-label={viewLabel}
+          >
+            <HeroVideo
+              src={src}
+              alt={videoAlt}
+              loop={loop}
+              className="block h-auto w-full max-w-full object-cover"
+              style={{aspectRatio: `${layoutW} / ${layoutH}`}}
+            />
+          </button>
           <HeroMobileScrollNavigator />
         </section>
+
+        {lightboxOpen ? (
+          <MediaLightbox
+            items={[media]}
+            index={0}
+            onClose={() => setLightboxOpen(false)}
+            onIndexChange={() => {}}
+          />
+        ) : null}
       </>
     );
   }

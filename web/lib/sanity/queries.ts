@@ -31,6 +31,30 @@ const cmsMediaItemFields = groq`
   }
 `;
 
+const siteBrandFields = groq`
+  mode,
+  text,
+  font,
+  fontWeight,
+  alt,
+  bannerFocus,
+  image {
+    ...,
+    hotspot,
+    crop,
+    asset->{
+      "_ref": coalesce(_ref, _id),
+      metadata {
+        dimensions {
+          width,
+          height,
+          aspectRatio
+        }
+      }
+    }
+  }
+`;
+
 const projectListItemFields = groq`
   _id,
   title,
@@ -38,10 +62,25 @@ const projectListItemFields = groq`
   subtitle,
   year,
   role,
-  excerpt,
   coverImage,
   cardOverlayScrim,
   heroImage {
+    ${cmsMediaItemFields}
+  }
+`;
+
+const projectStoryFields = groq`
+  _type,
+  title,
+  body,
+  quote,
+  attribution,
+  caption,
+  columns,
+  media {
+    ${cmsMediaItemFields}
+  },
+  images[] {
     ${cmsMediaItemFields}
   }
 `;
@@ -72,13 +111,13 @@ export const projectBySlugQuery = groq`
     cardOverlayScrim,
     year,
     role,
-    excerpt,
-    metaItems[] {
+    lead,
+    details[] {
       label,
       value
     },
-    contributions,
-    collaborators[] {
+    highlights,
+    partners[] {
       name,
       logo,
       href
@@ -88,7 +127,7 @@ export const projectBySlugQuery = groq`
       label,
       href
     },
-    mediumUrl,
+    articleUrl,
     coverImage,
     heroImage {
       ${cmsMediaItemFields}
@@ -100,35 +139,8 @@ export const projectBySlugQuery = groq`
       ),
       coverImage.asset->metadata.dimensions
     ),
-    "gallery": gallery[]{
-      ${cmsMediaItemFields}
-    },
-    body,
-    sections[] {
-      _type,
-      title,
-      body,
-      quote,
-      attribution,
-      caption,
-      columns,
-      left,
-      right,
-      "image": image{
-        ...,
-        asset->{
-          "_ref": coalesce(_ref, _id),
-          metadata {
-            dimensions
-          }
-        }
-      },
-      "item": item{
-        ${cmsMediaItemFields}
-      },
-      "images": images[]{
-        ${cmsMediaItemFields}
-      }
+    story[] {
+      ${projectStoryFields}
     }
   }
 `;
@@ -325,12 +337,10 @@ export const siteSettingsQuery = groq`
       metaWeight
     },
     brand {
-      mode,
-      text,
-      font,
-      fontWeight,
-      alt,
-      image
+      ${siteBrandFields}
+    },
+    workHomeLogo {
+      ${siteBrandFields}
     },
     "heroLottieUrl": heroIntroLottie.asset->url,
     contactSection {

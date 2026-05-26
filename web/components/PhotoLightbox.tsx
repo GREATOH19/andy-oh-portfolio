@@ -31,11 +31,18 @@ export function PhotoLightbox({
   index,
   onClose,
   onIndexChange,
+  embedded = false,
+  onZoomChange,
+  onRegisterReset,
 }: {
   images: SanityImageField[];
   index: number;
   onClose: () => void;
   onIndexChange: (index: number) => void;
+  /** Render only the zoomable viewport (parent provides overlay chrome). */
+  embedded?: boolean;
+  onZoomChange?: (zoomed: boolean) => void;
+  onRegisterReset?: (reset: () => void) => void;
 }) {
   const image = images[index];
   const assetId = image ? sanityImageAssetId(image) : null;
@@ -89,14 +96,24 @@ export function PhotoLightbox({
   }, [index, resetZoom]);
 
   useEffect(() => {
+    onZoomChange?.(scale > 1);
+  }, [onZoomChange, scale]);
+
+  useEffect(() => {
+    onRegisterReset?.(resetZoom);
+  }, [onRegisterReset, resetZoom]);
+
+  useEffect(() => {
+    if (embedded) return;
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = prevOverflow;
     };
-  }, []);
+  }, [embedded]);
 
   useEffect(() => {
+    if (embedded) return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         if (scaleRef.current > 1) {
@@ -111,7 +128,7 @@ export function PhotoLightbox({
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [goNext, goPrev, hasMultiple, onClose, resetZoom]);
+  }, [embedded, goNext, goPrev, hasMultiple, onClose, resetZoom]);
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -217,6 +234,43 @@ export function PhotoLightbox({
   const alt = image.alt ?? "";
   const isZoomed = scale > 1;
 
+  const viewport = (
+    <div
+      ref={viewportRef}
+      className={`relative flex touch-none select-none items-center justify-center overflow-hidden ${
+        embedded
+          ? "h-full w-full"
+          : `h-[min(100dvh,100vh)] w-[min(100dvw,100vw)] p-4 pt-14 sm:p-8 sm:pt-16`
+      } ${isZoomed ? (isDragging ? "cursor-grabbing" : "cursor-grab") : "cursor-zoom-in"}`}
+      onClick={(e) => {
+        if (!embedded) e.stopPropagation();
+      }}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        if (scaleRef.current > 1.05) resetZoom();
+      }}
+      onPointerDown={handlePointerDown}
+      onDragStart={(e) => e.preventDefault()}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt={alt}
+        draggable={false}
+        className="pointer-events-none max-h-[calc(100dvh-5rem)] max-w-[calc(100dvw-2rem)] select-none object-contain will-change-transform sm:max-h-[calc(100dvh-8rem)] sm:max-w-[calc(100dvw-4rem)]"
+        style={{
+          transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
+        }}
+      />
+    </div>
+  );
+
+  if (embedded) return viewport;
+
   return createPortal(
     <div
       role="dialog"
@@ -275,34 +329,7 @@ export function PhotoLightbox({
         {isZoomed ? "Scroll to zoom · Drag to pan · Esc to reset" : "Click or scroll to zoom"}
       </p>
 
-      <div
-        ref={viewportRef}
-        className={`relative flex h-[min(100dvh,100vh)] w-[min(100dvw,100vw)] touch-none select-none items-center justify-center overflow-hidden p-4 pt-14 sm:p-8 sm:pt-16 ${
-          isZoomed ? (isDragging ? "cursor-grabbing" : "cursor-grab") : "cursor-zoom-in"
-        }`}
-        onClick={(e) => e.stopPropagation()}
-        onDoubleClick={(e) => {
-          e.stopPropagation();
-          if (scaleRef.current > 1.05) resetZoom();
-        }}
-        onPointerDown={handlePointerDown}
-        onDragStart={(e) => e.preventDefault()}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onTouchCancel={handleTouchEnd}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={src}
-          alt={alt}
-          draggable={false}
-          className="pointer-events-none max-h-[calc(100dvh-5rem)] max-w-[calc(100dvw-2rem)] select-none object-contain will-change-transform sm:max-h-[calc(100dvh-8rem)] sm:max-w-[calc(100dvw-4rem)]"
-          style={{
-            transform: `translate(${offset.x}px, ${offset.y}px) scale(${scale})`,
-          }}
-        />
-      </div>
+      <div onClick={(e) => e.stopPropagation()}>{viewport}</div>
     </div>,
     document.body,
   );

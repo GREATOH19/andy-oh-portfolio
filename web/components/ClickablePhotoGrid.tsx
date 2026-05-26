@@ -1,10 +1,10 @@
 "use client";
 
 import {useState} from "react";
-import {PhotoLightbox} from "@/components/PhotoLightbox";
+import {MediaLightbox} from "@/components/MediaLightbox";
 import {SanityAspectMedia} from "@/components/sections/SanityAspectMedia";
-import {isSanityImage, isSanityMedia, sanityMediaKey} from "@/lib/sanity/media";
-import type {SanityImageField, SanityMediaField} from "@/lib/types/project";
+import {isSanityImage, isSanityMedia, isSanityVideo, sanityMediaKey} from "@/lib/sanity/media";
+import type {SanityMediaField} from "@/lib/types/project";
 
 export function ClickablePhotoGrid({
   images,
@@ -22,16 +22,12 @@ export function ClickablePhotoGrid({
   className?: string;
 }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const validMedia = images.filter(isSanityMedia);
-  const lightboxImages = validMedia.filter(isSanityImage) as NonNullable<SanityImageField>[];
+  const validMedia = images.filter(isSanityMedia) as NonNullable<SanityMediaField>[];
 
   if (validMedia.length === 0) return null;
 
   const openLightbox = (index: number) => {
-    const item = validMedia[index];
-    if (!isSanityImage(item)) return;
-    const lightboxIndex = lightboxImages.indexOf(item);
-    if (lightboxIndex >= 0) setActiveIndex(lightboxIndex);
+    setActiveIndex(index);
   };
 
   return (
@@ -39,16 +35,25 @@ export function ClickablePhotoGrid({
       <div className={className ? `${gridClass} ${className}` : gridClass}>
         {validMedia.map((item, i) => {
           const alt = item?.alt ?? "";
-          const isImage = isSanityImage(item);
+          const isClickable = isSanityImage(item) || isSanityVideo(item);
+          const label = isSanityVideo(item)
+            ? alt
+              ? `Play ${alt}`
+              : `Play video ${i + 1}`
+            : alt
+              ? `View ${alt}`
+              : `View photo ${i + 1}`;
 
-          if (isImage) {
+          if (isClickable) {
             return (
               <button
                 key={sanityMediaKey(item, i)}
                 type="button"
                 onClick={() => openLightbox(i)}
-                className="cursor-zoom-in text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400"
-                aria-label={alt ? `View ${alt}` : `View photo ${i + 1}`}
+                className={`text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400 ${
+                  isSanityImage(item) ? "cursor-zoom-in" : "cursor-pointer"
+                } [&_video]:pointer-events-none`}
+                aria-label={label}
               >
                 <SanityAspectMedia
                   media={item}
@@ -76,8 +81,8 @@ export function ClickablePhotoGrid({
       </div>
 
       {activeIndex !== null ? (
-        <PhotoLightbox
-          images={lightboxImages}
+        <MediaLightbox
+          items={validMedia}
           index={activeIndex}
           onClose={() => setActiveIndex(null)}
           onIndexChange={setActiveIndex}

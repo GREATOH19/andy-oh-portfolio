@@ -22,7 +22,6 @@ export function ContactFooter({
   channels?: ContactChannel[] | null;
   footerBody?: PortableTextBlock[] | null;
 }) {
-  const bodyClass = useTypoClass("body");
   const metaClass = useTypoClass("meta");
   const safeLinks = links ?? [];
   const safeChannels = channels ?? [];
@@ -35,7 +34,7 @@ export function ContactFooter({
         </div>
 
         {footerBody?.length ? (
-          <div className={`mx-auto w-full max-w-2xl px-4 pt-4 text-center ${bodyClass}`}>
+          <div className={`mx-auto w-full max-w-2xl px-4 pt-4 text-center ${metaClass}`}>
             <PortableBody value={footerBody} muted />
           </div>
         ) : null}

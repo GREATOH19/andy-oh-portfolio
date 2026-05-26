@@ -8,6 +8,7 @@ import {siteSettings} from './siteSettings'
 import {cmsImage} from './objects/cmsImage'
 import {cmsMediaItem} from './objects/cmsMediaItem'
 import {photoAlbum} from './objects/photoAlbum'
+import {siteBrand} from './objects/siteBrand'
 
 import {contactCtaSection} from './sections/contactCtaSection'
 import {gallerySection} from './sections/gallerySection'
@@ -21,6 +22,14 @@ import {archiveBlock} from './sections/archiveBlock'
 import {photographyBlock} from './sections/photographyBlock'
 import {behindTheScenesBlock} from './sections/behindTheScenesBlock'
 
+import {detailLine} from './project/detailLine'
+import {partner} from './project/partner'
+import {projectAward} from './project/projectAward'
+import {projectChapter} from './project/projectChapter'
+import {projectGallery} from './project/projectGallery'
+import {projectMedia} from './project/projectMedia'
+import {projectQuote} from './project/projectQuote'
+
 export const schemaTypes = [
   about,
   contact,
@@ -31,6 +40,14 @@ export const schemaTypes = [
   cmsImage,
   cmsMediaItem,
   photoAlbum,
+  siteBrand,
+  detailLine,
+  partner,
+  projectAward,
+  projectChapter,
+  projectMedia,
+  projectGallery,
+  projectQuote,
   contactCtaSection,
   gallerySection,
   heroSection,

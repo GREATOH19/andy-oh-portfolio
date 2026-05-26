@@ -1,11 +1,6 @@
 import {defineField, defineType} from 'sanity'
 
-import {
-  CMS_FONT_OPTIONS,
-  CMS_FONT_WEIGHT_OPTIONS,
-  cmsFontField,
-  typographyFields,
-} from './fontStyle'
+import {cmsFontField, typographyFields} from './fontStyle'
 
 
 
@@ -22,125 +17,18 @@ export const siteSettings = defineType({
     typographyFields(),
 
     defineField({
-
       name: 'brand',
+      title: 'Header logo',
+      description: 'Top navigation bar (and site footer).',
+      type: 'siteBrand',
+    }),
 
-      title: 'Brand / Logo',
-
-      type: 'object',
-
-      fields: [
-
-        defineField({
-
-          name: 'mode',
-
-          title: 'Mode',
-
-          type: 'string',
-
-          options: {
-
-            list: [
-
-              {title: 'Image (PNG/JPG)', value: 'image'},
-
-              {title: 'Text', value: 'text'},
-
-            ],
-
-            layout: 'radio',
-
-          },
-
-          initialValue: 'text',
-
-          validation: (Rule) => Rule.required(),
-
-        }),
-
-        defineField({
-
-          name: 'text',
-
-          title: 'Logo Text',
-
-          type: 'string',
-
-          initialValue: 'Andy Oh',
-
-        }),
-
-        defineField({
-
-          name: 'font',
-
-          title: 'Logo text font',
-
-          description:
-
-            'Used when Mode is Text. Same option list as Typography above (see fontStyle.js).',
-
-          type: 'string',
-
-          options: {
-
-            list: CMS_FONT_OPTIONS,
-
-            layout: 'dropdown',
-
-          },
-
-          initialValue: 'serif',
-
-        }),
-
-        defineField({
-
-          name: 'fontWeight',
-
-          title: 'Logo text weight',
-
-          description: 'Used when Mode is Text. Default in the app: Medium (500).',
-
-          type: 'string',
-
-          options: {
-
-            list: CMS_FONT_WEIGHT_OPTIONS,
-
-            layout: 'dropdown',
-
-          },
-
-        }),
-
-        defineField({
-
-          name: 'image',
-
-          title: 'Logo Image',
-
-          type: 'image',
-
-          options: {hotspot: true},
-
-        }),
-
-        defineField({
-
-          name: 'alt',
-
-          title: 'Image Alt Text',
-
-          type: 'string',
-
-          initialValue: 'Site logo',
-
-        }),
-
-      ],
-
+    defineField({
+      name: 'workHomeLogo',
+      title: 'Work homepage logo',
+      description:
+        'Large logo area above the project grid on Work (/). Independent from the header logo.',
+      type: 'siteBrand',
     }),
 
     defineField({
@@ -167,7 +55,7 @@ export const siteSettings = defineType({
 
       description:
 
-        'Site-wide footer: logo comes from Brand above; social icons use the Contact (About page) document channels.',
+        'Site-wide footer: logo comes from Header logo above; social icons use the Contact (About page) document channels.',
 
       type: 'object',
 

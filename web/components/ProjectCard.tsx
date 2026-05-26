@@ -5,6 +5,11 @@ import Link from "next/link";
 import {useCallback, useEffect, useLayoutEffect, useRef, useState} from "react";
 
 import {grainTileStyle} from "@/lib/grain";
+import {
+  getProjectCardImage,
+  getProjectCardImageUrl,
+  projectCardHasVideoHero,
+} from "@/lib/projectCardMedia";
 import {urlForImage} from "@/lib/sanity/image";
 import {isSanityImage, isSanityVideo, normalizeMediaItem, sanityVideoUrl} from "@/lib/sanity/media";
 import {useSiteTypography, useTypoClass} from "@/components/TypographyProvider";
@@ -131,17 +136,13 @@ export function ProjectCard({
     : touchOverlayOpenLocal;
   const [hovered, setHovered] = useState(false);
 
-  const coverMedia = normalizeMediaItem(project.coverImage);
   const heroMedia = normalizeMediaItem(project.heroImage);
   const heroVideo = isSanityVideo(heroMedia) ? heroMedia : null;
   const heroImage = isSanityImage(heroMedia) ? heroMedia : null;
 
-  const thumbnail =
-    isSanityImage(coverMedia) ? coverMedia : isSanityImage(heroMedia) ? heroMedia : null;
+  const thumbnail = getProjectCardImage(project);
 
-  const thumbSrc = thumbnail?.asset?._ref
-    ? urlForImage(thumbnail).width(1600).height(1200).quality(90).url()
-    : null;
+  const thumbSrc = getProjectCardImageUrl(project, {width: 1600, height: 1200});
   const heroImageSrc =
     heroImage?.asset?._ref && heroImage !== thumbnail
       ? urlForImage(heroImage).width(1600).height(1200).quality(90).url()
@@ -153,7 +154,7 @@ export function ProjectCard({
 
   const hasDistinctHeroImage = Boolean(heroImageSrc);
   const hasDistinctHeroVideo = Boolean(heroVideoSrc && thumbSrc);
-  const hasVideoOnlyHero = Boolean(heroVideoSrc && !thumbSrc);
+  const hasVideoOnlyHero = projectCardHasVideoHero(project) && Boolean(heroVideoSrc && !thumbSrc);
   const hasDistinctHero = hasDistinctHeroImage || hasDistinctHeroVideo;
   const overlayOpen = touchPrimary && touchOverlayOpen;
   const heroVideoActive = hovered || overlayOpen;

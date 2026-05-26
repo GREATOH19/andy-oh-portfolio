@@ -1,6 +1,5 @@
 import {ContactCtaSection} from "@/components/home/ContactCtaSection";
 import {HomePageShell} from "@/components/home/HomePageShell";
-import {HomeWelcomeIntro} from "@/components/home/HomeWelcomeIntro";
 import {SelectedWorkSection} from "@/components/home/SelectedWorkSection";
 import {client} from "@/lib/sanity/client";
 import {resolveHomeFeaturedProjects} from "@/lib/sanity/homeProjects";
@@ -14,31 +13,37 @@ export default async function HomePage() {
     client.fetch<HomeDocument | null>(homeQuery),
     client.fetch<SiteSettingsDocument | null>(siteSettingsQuery),
   ]);
+  const workHomeLogo = siteSettings?.workHomeLogo ?? null;
 
   const sections: HomeSection[] = home?.sections ?? [];
-  const heroLottieUrl = siteSettings?.heroLottieUrl ?? null;
   const hasSelectedWorkSection = sections.some((s) => s._type === "selectedWorkSection");
   const contactSections = sections.filter((s) => s._type === "contactCtaSection");
   const projectList = await resolveHomeFeaturedProjects(client, home?.featuredProjects);
 
   return (
-    <HomePageShell heroLottieUrl={heroLottieUrl}>
+    <HomePageShell skipIntro>
       <div className="home-main-stack">
-        <HomeWelcomeIntro content={home?.welcomeIntro ?? null} />
-
-        <div
-          className={
-            contactSections.length > 0 ? "container-work pb-12 md:pb-16" : "container-work pb-20 md:pb-32"
-          }
-        >
-          {!hasSelectedWorkSection ? (
-            <SelectedWorkSection key="selected-work-fallback" projects={projectList} />
-          ) : null}
-          {sections.map((s, idx) => {
-            if (s._type !== "selectedWorkSection") return null;
-            return <SelectedWorkSection key={`selected-work-${idx}`} projects={projectList} />;
-          })}
-        </div>
+        {!hasSelectedWorkSection ? (
+          <SelectedWorkSection
+            key="selected-work-fallback"
+            projects={projectList}
+            workHomeLogo={workHomeLogo}
+            welcomeIntro={home?.welcomeIntro}
+            compactBottomPadding={contactSections.length > 0}
+          />
+        ) : null}
+        {sections.map((s, idx) => {
+          if (s._type !== "selectedWorkSection") return null;
+          return (
+            <SelectedWorkSection
+              key={`selected-work-${idx}`}
+              projects={projectList}
+              workHomeLogo={workHomeLogo}
+              welcomeIntro={home?.welcomeIntro}
+              compactBottomPadding={contactSections.length > 0}
+            />
+          );
+        })}
       </div>
 
       {contactSections.length > 0 ? (

@@ -25,9 +25,11 @@ type HomePageShellProps = {
   children: React.ReactNode;
   /** Optional Sanity-managed Lottie URL. Falls back to /public/lottie/oh-logo.json. */
   heroLottieUrl?: string | null;
+  /** When true, skip the fullscreen first-visit intro (logo lives in the Work fold instead). */
+  skipIntro?: boolean;
 };
 
-export function HomePageShell({children, heroLottieUrl}: HomePageShellProps) {
+export function HomePageShell({children, heroLottieUrl, skipIntro = false}: HomePageShellProps) {
   const [phase, setPhase] = useState<HomeIntroPhase>(getInitialIntroPhase);
   const reduceMotion = useReducedMotion();
 
@@ -42,6 +44,10 @@ export function HomePageShell({children, heroLottieUrl}: HomePageShellProps) {
 
   /** Before paint: skip intro when already seen (e.g. back from a project). */
   useLayoutEffect(() => {
+    if (skipIntro) {
+      setPhase("done");
+      return;
+    }
     try {
       if (sessionStorage.getItem(INTRO_SEEN_SESSION_KEY) === "1") {
         // eslint-disable-next-line react-hooks/set-state-in-effect -- sessionStorage is external; must run before paint.
@@ -50,9 +56,14 @@ export function HomePageShell({children, heroLottieUrl}: HomePageShellProps) {
     } catch {
       /* treat as first visit */
     }
-  }, []);
+  }, [skipIntro]);
 
   useEffect(() => {
+    if (skipIntro) {
+      finalizeIntro();
+      return;
+    }
+
     let introSeen = false;
     try {
       introSeen = sessionStorage.getItem(INTRO_SEEN_SESSION_KEY) === "1";
@@ -75,7 +86,7 @@ export function HomePageShell({children, heroLottieUrl}: HomePageShellProps) {
     }
 
     setPhase("intro");
-  }, [reduceMotion, finalizeIntro]);
+  }, [reduceMotion, finalizeIntro, skipIntro]);
 
   useEffect(() => {
     const onPageShow = (e: PageTransitionEvent) => {

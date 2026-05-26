@@ -6,7 +6,8 @@
     "dev": "sanity dev",
     "build": "sanity build",
     "deploy": "sanity deploy",
-    "migrate:media": "sanity exec ./scripts/migrate-legacy-cms-media.mjs --with-user-token"
+    "migrate:media": "sanity exec ./scripts/migrate-legacy-cms-media.mjs --with-user-token",
+    "migrate:project-cms": "sanity exec ./scripts/migrate-project-cms.mjs --with-user-token"
   },
   "dependencies": {
     "@sanity/orderable-document-list": "^1.5.1",

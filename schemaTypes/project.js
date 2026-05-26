@@ -6,18 +6,28 @@ export const project = defineType({
   title: 'Project',
   type: 'document',
   orderings: [orderRankOrdering],
+  groups: [
+    {name: 'listing', title: 'Card & listing', default: true},
+    {name: 'cover', title: 'Cover'},
+    {name: 'intro', title: 'Intro'},
+    {name: 'story', title: 'Story'},
+  ],
   fields: [
     orderRankField({type: 'project'}),
+
+    // —— Card & listing ——
     defineField({
       name: 'title',
       title: 'Title',
       type: 'string',
+      group: 'listing',
       validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'slug',
       title: 'Slug',
       type: 'slug',
+      group: 'listing',
       options: {source: 'title', maxLength: 96},
       validation: (Rule) => Rule.required(),
     }),
@@ -25,201 +35,115 @@ export const project = defineType({
       name: 'subtitle',
       title: 'Subtitle',
       type: 'string',
+      group: 'listing',
       description:
-        'Short tagline shown under the title on the detail page (e.g. "autonomous data collection system for precision farming"). Also used in card hover overlays later.',
+        'One line under the title on cards and the hero — e.g. "autonomous data collection for precision farming".',
     }),
     defineField({
       name: 'year',
       title: 'Year',
       type: 'string',
-      description:
-        'Shown on project cards, detail pages, and /more/archive (grouped by year). Single year (e.g. 2024) or a range (e.g. 2022 ~ 2024). Homepage placement uses Featured on Work, not drag order here.',
+      group: 'listing',
+      description: 'Shown on cards and intro — e.g. 2024 or 2022 ~ 2024.',
     }),
     defineField({
       name: 'role',
-      title: 'Role',
+      title: 'Your role',
       type: 'string',
-      description: 'e.g. Industrial design, CMF, UX',
+      group: 'listing',
+      description: 'e.g. Industrial design · CMF · Prototyping',
     }),
     defineField({
-      name: 'excerpt',
-      title: 'Excerpt / intro body',
+      name: 'coverImage',
+      title: 'Card thumbnail',
+      type: 'image',
+      group: 'listing',
+      options: {hotspot: true},
+      description: 'Image for the Work grid.',
+      fields: [defineField({name: 'alt', type: 'string', title: 'Alternative text'})],
+    }),
+    defineField({
+      name: 'cardOverlayScrim',
+      title: 'Dark card overlay',
+      type: 'boolean',
+      group: 'listing',
+      initialValue: false,
+      description: 'Turn on when the cover is dark so hover titles stay readable.',
+    }),
+
+    // —— Cover ——
+    defineField({
+      name: 'heroImage',
+      title: 'Hero image or video',
+      type: 'cmsMediaItem',
+      group: 'cover',
+      description:
+        'Full-bleed cover at the top of the project page. Falls back to the card thumbnail if empty.',
+    }),
+
+    // —— Intro (below hero) ——
+    defineField({
+      name: 'lead',
+      title: 'Lead',
       type: 'text',
-      rows: 6,
+      rows: 8,
+      group: 'intro',
       description:
-        'Longer description shown in the detail header (left column). Use blank lines to separate paragraphs.',
+        '2–3 short paragraphs for the intro block. Separate paragraphs with a blank line.',
     }),
     defineField({
-      name: 'metaItems',
-      title: 'Meta items',
+      name: 'details',
+      title: 'Project details',
       type: 'array',
-      description:
-        'Right-side meta column lines (e.g. "Team: Indalecio Gaytan", "Duration: 12 weeks").',
-      of: [
-        {
-          type: 'object',
-          name: 'metaItem',
-          fields: [
-            defineField({
-              name: 'label',
-              type: 'string',
-              description: 'Optional label prefix (e.g. "Team", "Duration"). Leave empty for a plain line.',
-            }),
-            defineField({
-              name: 'value',
-              type: 'string',
-              validation: (Rule) => Rule.required(),
-            }),
-          ],
-          preview: {
-            select: {label: 'label', value: 'value'},
-            prepare: ({label, value}) => ({
-              title: value,
-              subtitle: label || undefined,
-            }),
-          },
-        },
-      ],
+      group: 'intro',
+      description: 'Sidebar lines — Client, Duration, Team, etc.',
+      of: [{type: 'detailLine'}],
     }),
     defineField({
-      name: 'contributions',
-      title: 'Contributions',
+      name: 'highlights',
+      title: 'What you did',
       type: 'array',
-      description: 'Your contributions (e.g. "Ideation", "CAD", "Rendering + Animation").',
+      group: 'intro',
       of: [{type: 'string'}],
       options: {layout: 'tags'},
+      description: 'Your contributions — e.g. Form development, CMF, Prototyping.',
     }),
     defineField({
-      name: 'collaborators',
+      name: 'partners',
       title: 'Collaborators',
       type: 'array',
-      description: 'Partners shown under "In collaboration with" with their logos.',
-      of: [
-        {
-          type: 'object',
-          name: 'collaborator',
-          fields: [
-            defineField({
-              name: 'name',
-              type: 'string',
-              validation: (Rule) => Rule.required(),
-            }),
-            defineField({
-              name: 'logo',
-              type: 'image',
-              options: {hotspot: true},
-              fields: [
-                defineField({name: 'alt', type: 'string', title: 'Alternative text'}),
-              ],
-            }),
-            defineField({
-              name: 'href',
-              title: 'Link (optional)',
-              type: 'url',
-            }),
-          ],
-          preview: {
-            select: {title: 'name', media: 'logo'},
-          },
-        },
-      ],
-    }),
-    defineField({
-      name: 'mediumUrl',
-      title: 'Medium article',
-      type: 'url',
-      description:
-        'Optional link to a Medium post about this project. Shown in the detail page meta column.',
+      group: 'intro',
+      of: [{type: 'partner'}],
     }),
     defineField({
       name: 'awards',
       title: 'Awards',
       type: 'array',
-      description: 'Award badges shown in the top of the meta column.',
-      of: [
-        {
-          type: 'object',
-          name: 'award',
-          fields: [
-            defineField({
-              name: 'image',
-              type: 'image',
-              options: {hotspot: true},
-              validation: (Rule) => Rule.required(),
-              fields: [
-                defineField({name: 'alt', type: 'string', title: 'Alternative text'}),
-              ],
-            }),
-            defineField({
-              name: 'label',
-              title: 'Caption (optional)',
-              type: 'string',
-              description: 'e.g. "Core77 Design Awards 2024 Winner".',
-            }),
-            defineField({
-              name: 'href',
-              title: 'Link (optional)',
-              type: 'url',
-            }),
-          ],
-          preview: {
-            select: {label: 'label', media: 'image'},
-            prepare: ({label, media}) => ({title: label || 'Award', media}),
-          },
-        },
-      ],
+      group: 'intro',
+      validation: (Rule) => Rule.max(3),
+      of: [{type: 'projectAward'}],
     }),
     defineField({
-      name: 'cardOverlayScrim',
-      title: 'Hover text scrim',
-      type: 'boolean',
-      initialValue: false,
+      name: 'articleUrl',
+      title: 'Article link',
+      type: 'url',
+      group: 'intro',
+      description: 'Optional — Medium or case study URL.',
+    }),
+
+    // —— Story (scroll) ——
+    defineField({
+      name: 'story',
+      title: 'Story',
+      type: 'array',
+      group: 'story',
       description:
-        'Turn on when the cover or hero is dark, so the white title and subtitle stay readable on card hover. Leave off for bright images.',
-    }),
-    defineField({
-      name: 'coverImage',
-      title: 'Cover image',
-      type: 'image',
-      options: {hotspot: true},
-      description: 'Thumbnail used in the Work grid.',
-      fields: [
-        defineField({
-          name: 'alt',
-          type: 'string',
-          title: 'Alternative text',
-        }),
-      ],
-    }),
-    defineField({
-      name: 'heroImage',
-      title: 'Hero image or video',
-      type: 'cmsMediaItem',
-      description:
-        'Full-bleed media shown above the project header on the detail page. Falls back to the cover image if empty.',
-    }),
-    defineField({
-      name: 'gallery',
-      title: 'Gallery',
-      type: 'array',
-      of: [{type: 'cmsMediaItem'}],
-    }),
-    defineField({
-      name: 'body',
-      title: 'Body',
-      type: 'array',
-      of: [{type: 'block'}],
-    }),
-    defineField({
-      name: 'sections',
-      title: 'Sections',
-      type: 'array',
+        'Build the case study top to bottom: chapters for text, full-width media for hero moments, grids for process shots, pull quotes for emphasis.',
       of: [
-        {type: 'richTextSection'},
-        {type: 'imageSection'},
-        {type: 'gallerySection'},
-        {type: 'twoColumnSection'},
-        {type: 'quoteSection'},
+        {type: 'projectChapter'},
+        {type: 'projectMedia'},
+        {type: 'projectGallery'},
+        {type: 'projectQuote'},
       ],
     }),
   ],

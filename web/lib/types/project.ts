@@ -27,6 +27,13 @@ export type SiteTypography = {
   metaWeight?: SiteFontWeight | null;
 };
 
+export type SanityImageHotspot = {
+  x?: number | null;
+  y?: number | null;
+  width?: number | null;
+  height?: number | null;
+};
+
 export type SanityImageField = {
   _type?: "image";
   asset?: {
@@ -37,7 +44,11 @@ export type SanityImageField = {
     } | null;
   } | null;
   alt?: string;
+  hotspot?: SanityImageHotspot | null;
+  crop?: {top?: number; bottom?: number; left?: number; right?: number} | null;
 } | null;
+
+export type BannerFocus = "auto" | "top" | "center" | "lower";
 
 export type SanityVideoField = {
   _type?: "file";
@@ -74,7 +85,6 @@ export type ProjectListItem = {
   subtitle?: string | null;
   year?: string | null;
   role?: string;
-  excerpt?: string;
   coverImage: SanityImageField;
   /** Detail-page hero; used as Work grid thumbnail when coverImage is empty */
   heroImage?: CmsMediaInput;
@@ -82,12 +92,12 @@ export type ProjectListItem = {
   cardOverlayScrim?: boolean | null;
 };
 
-export type ProjectMetaItem = {
+export type DetailLine = {
   label?: string | null;
   value: string;
 };
 
-export type ProjectCollaborator = {
+export type ProjectPartner = {
   name: string;
   logo?: SanityImageField;
   href?: string | null;
@@ -99,17 +109,47 @@ export type ProjectAward = {
   href?: string | null;
 };
 
+export type ProjectChapterBlock = {
+  _type: "projectChapter";
+  title?: string | null;
+  body?: PortableTextBlock[] | null;
+};
+
+export type ProjectMediaBlock = {
+  _type: "projectMedia";
+  media?: CmsMediaItemRaw;
+  caption?: string | null;
+};
+
+export type ProjectGalleryBlock = {
+  _type: "projectGallery";
+  images?: CmsMediaInput[] | null;
+  caption?: string | null;
+  columns?: number | null;
+};
+
+export type ProjectQuoteBlock = {
+  _type: "projectQuote";
+  quote?: string | null;
+  attribution?: string | null;
+};
+
+export type ProjectStoryBlock =
+  | ProjectChapterBlock
+  | ProjectMediaBlock
+  | ProjectGalleryBlock
+  | ProjectQuoteBlock;
+
 export type ProjectDetail = ProjectListItem & {
   /** Width/height of the asset used for the detail hero (for compact layout). */
   projectHeroDimensions?: {width: number; height: number} | null;
-  metaItems?: ProjectMetaItem[] | null;
-  contributions?: string[] | null;
-  collaborators?: ProjectCollaborator[] | null;
+  lead?: string | null;
+  details?: DetailLine[] | null;
+  highlights?: string[] | null;
+  partners?: ProjectPartner[] | null;
   awards?: ProjectAward[] | null;
-  mediumUrl?: string | null;
-  gallery?: CmsMediaInput[] | null;
-  body?: PortableTextBlock[] | null;
-  sections?: ProjectSection[] | null;
+  articleUrl?: string | null;
+  story?: ProjectStoryBlock[] | null;
 };
 
 export type RichTextSection = {
@@ -280,6 +320,8 @@ export type SiteBrand = {
   fontWeight?: SiteFontWeight | null;
   alt?: string | null;
   image?: SanityImageField;
+  /** Work homepage banner crop anchor (ignored for header logo). */
+  bannerFocus?: BannerFocus | null;
 };
 
 export type SiteSettingsDocument = {
@@ -287,7 +329,10 @@ export type SiteSettingsDocument = {
   typography?: SiteTypography | null;
   heroLottieUrl?: string | null;
   contactSection?: ContactSection | null;
+  /** Header + footer */
   brand?: SiteBrand | null;
+  /** Work homepage fold — separate from header */
+  workHomeLogo?: SiteBrand | null;
 };
 
 export type AboutDocument = {
