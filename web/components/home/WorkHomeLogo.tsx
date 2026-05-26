@@ -1,17 +1,18 @@
 import {BrandMark} from "@/components/BrandMark";
-import {hasSiteBrandContent} from "@/lib/siteBrand";
+import {hasSiteBrandContent, resolveWorkHomeLogo} from "@/lib/siteBrand";
 import type {SiteBrand} from "@/lib/types/project";
 
 type WorkHomeLogoProps = {
-  /** Work homepage logo from Site Settings → Work homepage logo (not the header). */
-  brand?: SiteBrand | null;
+  /** Site Settings → Work homepage logo (banner). */
+  workHomeLogo?: SiteBrand | null;
+  /** Site Settings → Header logo (fallback when banner logo unset). */
+  headerBrand?: SiteBrand | null;
 };
 
-/**
- * Fold logo slot on Work (/). Renders CMS `workHomeLogo` when set; otherwise leaves
- * `.work-home-logo__slot` empty for a custom asset in this file.
- */
-export function WorkHomeLogo({brand}: WorkHomeLogoProps) {
+/** Desktop fold banner — `workHomeLogo`, else header logo. */
+export function WorkHomeLogo({workHomeLogo, headerBrand}: WorkHomeLogoProps) {
+  const brand = resolveWorkHomeLogo(workHomeLogo, headerBrand);
+
   return (
     <div className="work-home-logo hidden md:flex" aria-label="Studio logo">
       <div className="work-home-logo__slot">

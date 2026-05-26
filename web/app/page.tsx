@@ -14,6 +14,7 @@ export default async function HomePage() {
     client.fetch<SiteSettingsDocument | null>(siteSettingsQuery),
   ]);
   const workHomeLogo = siteSettings?.workHomeLogo ?? null;
+  const headerBrand = siteSettings?.brand ?? null;
 
   const sections: HomeSection[] = home?.sections ?? [];
   const hasSelectedWorkSection = sections.some((s) => s._type === "selectedWorkSection");
@@ -28,6 +29,7 @@ export default async function HomePage() {
             key="selected-work-fallback"
             projects={projectList}
             workHomeLogo={workHomeLogo}
+            headerBrand={headerBrand}
             welcomeIntro={home?.welcomeIntro}
             compactBottomPadding={contactSections.length > 0}
           />
@@ -39,6 +41,7 @@ export default async function HomePage() {
               key={`selected-work-${idx}`}
               projects={projectList}
               workHomeLogo={workHomeLogo}
+              headerBrand={headerBrand}
               welcomeIntro={home?.welcomeIntro}
               compactBottomPadding={contactSections.length > 0}
             />

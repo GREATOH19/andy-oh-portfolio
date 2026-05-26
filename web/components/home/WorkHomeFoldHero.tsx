@@ -3,10 +3,8 @@
 import {motion, useReducedMotion} from "framer-motion";
 import {useLayoutEffect, useState} from "react";
 
-import {BrandMark} from "@/components/BrandMark";
 import {useTypoClass} from "@/components/TypographyProvider";
-import {hasSiteBrandContent} from "@/lib/siteBrand";
-import type {HomeWelcomeIntroContent, SiteBrand} from "@/lib/types/project";
+import type {HomeWelcomeIntroContent} from "@/lib/types/project";
 
 const WELCOME_SEEN_SESSION_KEY = "portfolio-home-welcome-seen";
 
@@ -30,78 +28,60 @@ function splitWelcomeBodyAtKorea(body: string): [string, string] {
   return [normalized, ""];
 }
 
-type HeroMode = "logo" | "welcome";
-
-type WorkHomeFoldHeroProps = {
-  brand?: SiteBrand | null;
-  welcomeIntro?: HomeWelcomeIntroContent | null;
-};
-
 /**
- * Mobile fold hero only (md+ uses WorkHomeLogo). First session: welcome heading in the
- * logo slot (same size + rhythm); later visits: CMS Work homepage logo.
+ * Mobile-only first-visit welcome (no banner logo on mobile — that lives in the footer).
  */
-export function WorkHomeFoldHero({brand, welcomeIntro}: WorkHomeFoldHeroProps) {
+export function WorkHomeFoldHero({
+  welcomeIntro,
+}: {
+  welcomeIntro?: HomeWelcomeIntroContent | null;
+}) {
   const heading = welcomeIntro?.heading?.trim() ?? "";
   const body = welcomeIntro?.body?.trim() ?? "";
   const mobileBodyLines = body ? splitWelcomeBodyAtKorea(body) : undefined;
   const hasWelcome = heading.length > 0 || body.length > 0;
-  const hasLogo = hasSiteBrandContent(brand);
 
-  const [heroMode, setHeroMode] = useState<HeroMode | null>(() => (hasWelcome ? null : "logo"));
+  const [visible, setVisible] = useState(false);
   const reduceMotion = useReducedMotion();
   const displayClass = useTypoClass("display");
 
   useLayoutEffect(() => {
-    if (!hasWelcome) {
-      setHeroMode("logo");
-      return;
-    }
+    if (!hasWelcome) return;
     try {
-      if (sessionStorage.getItem(WELCOME_SEEN_SESSION_KEY) === "1") {
-        setHeroMode("logo");
-        return;
-      }
+      if (sessionStorage.getItem(WELCOME_SEEN_SESSION_KEY) === "1") return;
       sessionStorage.setItem(WELCOME_SEEN_SESSION_KEY, "1");
     } catch {
-      setHeroMode("logo");
       return;
     }
-    setHeroMode("welcome");
+    setVisible(true);
   }, [hasWelcome]);
 
-  const showWelcome = heroMode === "welcome";
-  const showLogo = heroMode === "logo" && hasLogo;
-  const ariaLabel = showWelcome ? "Welcome introduction" : "Studio logo";
+  if (!visible) return null;
 
   return (
-    <div className="work-home-logo flex md:hidden" aria-label={ariaLabel}>
+    <div className="work-home-logo flex md:hidden" aria-label="Welcome introduction">
       <div className="work-home-logo__slot">
-        {showWelcome ? (
-          <motion.div
-            className="work-home-logo__wrapper work-home-welcome"
-            initial={reduceMotion ? false : {opacity: 0, y: 12}}
-            animate={{opacity: 1, y: 0}}
-            transition={{duration: 0.8, ease: [0.4, 0, 0.2, 1], delay: 0.4}}
-          >
-            {heading ? (
-              <h2 className={`work-home-logo__text whitespace-nowrap ${displayClass}`}>{heading}</h2>
-            ) : null}
-            {body && mobileBodyLines ? (
-              <p
-                className="work-home-welcome__body welcome-intro-subcopy mx-auto mt-5 w-full max-w-[100vw] px-3 text-center leading-snug text-slate-600"
-                aria-label={body}
-              >
-                <span className="block whitespace-nowrap">{mobileBodyLines[0]}</span>
-                {mobileBodyLines[1] ? (
-                  <span className="block whitespace-nowrap">{mobileBodyLines[1]}</span>
-                ) : null}
-              </p>
-            ) : null}
-          </motion.div>
-        ) : showLogo ? (
-          <BrandMark brand={brand} variant="workHome" linkable={false} />
-        ) : null}
+        <motion.div
+          className="work-home-logo__wrapper work-home-welcome"
+          initial={reduceMotion ? false : {opacity: 0, y: 12}}
+          animate={{opacity: 1, y: 0}}
+          transition={{duration: 0.8, ease: [0.4, 0, 0.2, 1], delay: 0.4}}
+        >
+          {heading ? (
+            <h2 className={`work-home-logo__text whitespace-nowrap ${displayClass}`}>{heading}</h2>
+          ) : null}
+          {body && mobileBodyLines ? (
+            <p
+              className="work-home-welcome__body welcome-intro-subcopy mx-auto mt-5 w-full max-w-[100vw] px-3 text-center leading-snug text-slate-600"
+              aria-label={body}
+            >
+              <span className="block whitespace-nowrap">{mobileBodyLines[0]}</span>
+              {mobileBodyLines[1] ? (
+                <span className="block whitespace-nowrap">{mobileBodyLines[1]}</span>
+              ) : null}
+            </p>
+          ) : null}
+        </motion.div>
       </div>
     </div>
   );

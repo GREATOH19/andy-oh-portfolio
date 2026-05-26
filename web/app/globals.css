@@ -573,19 +573,50 @@
 
   @media (max-width: 767px) {
     .work-home-fold {
-      grid-template-rows: minmax(6rem, auto) auto;
+      grid-template-rows: auto;
       height: auto;
       min-height: 0;
-      gap: clamp(0.75rem, 1.6vh, 1.25rem);
+      gap: 0;
       padding-bottom: 0;
     }
 
+    .work-home-fold:has(.work-home-welcome) {
+      grid-template-rows: minmax(6rem, auto) auto;
+      gap: clamp(0.75rem, 1.6vh, 1.25rem);
+    }
+
     .work-home-fold-chrome {
+      padding-top: 2.5rem;
+    }
+
+    .work-home-fold:has(.work-home-welcome) .work-home-fold-chrome {
       padding-top: 0;
     }
 
-    .work-home-logo {
+    .work-home-logo:has(.work-home-welcome) {
       min-height: 6rem;
+    }
+
+    .footer-work-home-logo .work-home-logo__wrapper {
+      position: relative;
+      display: flex;
+      width: 100%;
+      min-height: 0;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .footer-work-home-logo .work-home-logo__text {
+      font-size: min(12vw, 4.5rem);
+    }
+
+    .footer-work-home-logo .work-home-logo__image {
+      display: block;
+      width: auto;
+      height: auto;
+      max-width: min(92vw, 360px);
+      max-height: 7rem;
+      object-fit: contain;
     }
   }
 

@@ -94,6 +94,7 @@ export default async function RootLayout({
   ]);
   const contact = settings?.contactSection ?? null;
   const brand = settings?.brand ?? null;
+  const workHomeLogo = settings?.workHomeLogo ?? null;
   const typography = settings?.typography ?? null;
   const moreNavDropdownItems = getMoreNavDropdownItems(morePage);
 
@@ -119,6 +120,7 @@ export default async function RootLayout({
               <ContactFooter
                 links={contact?.links ?? []}
                 brand={brand}
+                workHomeLogo={workHomeLogo}
                 channels={contactDoc?.channels ?? []}
                 footerBody={contact?.footerBody ?? undefined}
               />

@@ -15,14 +15,17 @@ const FOLD_ROW_COUNT = 3;
 export function SelectedWorkSection({
   projects,
   workHomeLogo,
+  headerBrand,
   welcomeIntro,
   compactBottomPadding = false,
 }: {
   /** Featured projects from Work homepage → Featured on Work (max 9). */
   projects: ProjectListItem[];
-  /** Site Settings → Work homepage logo (separate from header). */
+  /** Site Settings → Work homepage logo (desktop banner; mobile footer). */
   workHomeLogo?: SiteBrand | null;
-  /** First-visit welcome copy — same fold slot + size as the homepage logo. */
+  /** Site Settings → Header logo (fallback when banner logo unset). */
+  headerBrand?: SiteBrand | null;
+  /** Mobile first-visit welcome copy (no banner logo on mobile). */
   welcomeIntro?: HomeWelcomeIntroContent | null;
   compactBottomPadding?: boolean;
 }) {
@@ -80,8 +83,8 @@ export function SelectedWorkSection({
   return (
     <section id="work" ref={sectionRef} className="scroll-mt-24">
       <div className="work-home-fold">
-        <WorkHomeLogo brand={workHomeLogo} />
-        <WorkHomeFoldHero brand={workHomeLogo} welcomeIntro={welcomeIntro} />
+        <WorkHomeLogo workHomeLogo={workHomeLogo} headerBrand={headerBrand} />
+        <WorkHomeFoldHero welcomeIntro={welcomeIntro} />
 
         {foldProjects.length > 0 ? (
           <div

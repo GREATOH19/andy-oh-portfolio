@@ -5,6 +5,7 @@ import { BrandMark } from "@/components/BrandMark";
 import { PortableBody } from "@/components/PortableBody";
 import { useTypoClass } from "@/components/TypographyProvider";
 import { CONTACT_ICON_MAP } from "@/lib/contactIcons";
+import { hasSiteBrandContent, resolveWorkHomeLogo } from "@/lib/siteBrand";
 import type { ContactChannel, SiteBrand } from "@/lib/types/project";
 import type { PortableTextBlock } from "@portabletext/types";
 
@@ -13,11 +14,15 @@ type ContactLink = { label: string; href: string };
 export function ContactFooter({
   links = [],
   brand = null,
+  workHomeLogo = null,
   channels = [],
   footerBody,
 }: {
   links?: ContactLink[] | null;
+  /** Header logo — desktop footer. */
   brand?: SiteBrand | null;
+  /** Work homepage banner logo — mobile footer (falls back to header logo). */
+  workHomeLogo?: SiteBrand | null;
   /** Same `channels` as Contact page — bottom icon row */
   channels?: ContactChannel[] | null;
   footerBody?: PortableTextBlock[] | null;
@@ -25,13 +30,20 @@ export function ContactFooter({
   const metaClass = useTypoClass("meta");
   const safeLinks = links ?? [];
   const safeChannels = channels ?? [];
+  const mobileFooterBrand = resolveWorkHomeLogo(workHomeLogo, brand);
 
   return (
     <footer className="relative z-[1] mt-auto border-t border-slate-100 py-14">
       <div className="container-wide flex flex-col items-center text-center">
-        <div className="flex w-full justify-center border-b border-slate-100 pb-4 pt-2">
+        <div className="hidden w-full justify-center border-b border-slate-100 pb-4 pt-2 md:flex">
           <BrandMark brand={brand} variant="footer" />
         </div>
+
+        {hasSiteBrandContent(mobileFooterBrand) ? (
+          <div className="footer-work-home-logo flex w-full justify-center border-b border-slate-100 pb-6 pt-4 md:hidden">
+            <BrandMark brand={mobileFooterBrand} variant="workHome" linkable={false} />
+          </div>
+        ) : null}
 
         {footerBody?.length ? (
           <div className={`mx-auto w-full max-w-2xl px-4 pt-4 text-center ${metaClass}`}>
