@@ -40,7 +40,7 @@ export function ContactFooter({
         </div>
 
         {hasSiteBrandContent(mobileFooterBrand) ? (
-          <div className="footer-work-home-logo flex w-full justify-center border-b border-slate-100 pb-6 pt-4 md:hidden">
+          <div className="footer-work-home-logo flex w-full flex-col items-center justify-center border-b border-slate-100 pb-6 pt-4 md:hidden">
             <BrandMark brand={mobileFooterBrand} variant="workHome" linkable={false} />
           </div>
         ) : null}

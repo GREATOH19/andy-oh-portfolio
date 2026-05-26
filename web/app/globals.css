@@ -597,17 +597,26 @@
       min-height: 6rem;
     }
 
+    .footer-work-home-logo {
+      align-items: center;
+    }
+
     .footer-work-home-logo .work-home-logo__wrapper {
       position: relative;
-      display: flex;
-      width: 100%;
+      display: inline-flex;
+      width: auto;
+      max-width: min(96vw, 100%);
+      height: auto;
       min-height: 0;
+      margin-inline: auto;
       align-items: center;
       justify-content: center;
     }
 
     .footer-work-home-logo .work-home-logo__text {
       font-size: min(12vw, 4.5rem);
+      text-align: center;
+      margin-inline: auto;
     }
 
     .footer-work-home-logo .work-home-logo__image {
@@ -616,7 +625,9 @@
       height: auto;
       max-width: min(92vw, 360px);
       max-height: 7rem;
+      margin-inline: auto;
       object-fit: contain;
+      object-position: center;
     }
   }
 
