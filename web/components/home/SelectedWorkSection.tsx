@@ -3,8 +3,7 @@
 import {useEffect, useRef, useState} from "react";
 
 import {ProjectCard} from "@/components/ProjectCard";
-import {WorkHomeFoldHero} from "@/components/home/WorkHomeFoldHero";
-import {WorkHomeLogo} from "@/components/home/WorkHomeLogo";
+import {WorkHomeBanner} from "@/components/home/WorkHomeBanner";
 import type {HomeWelcomeIntroContent, ProjectListItem, SiteBrand} from "@/lib/types/project";
 
 /** Close mobile card overlay after this idle period (no taps in #work). */
@@ -25,7 +24,7 @@ export function SelectedWorkSection({
   workHomeLogo?: SiteBrand | null;
   /** Site Settings → Header logo (fallback when banner logo unset). */
   headerBrand?: SiteBrand | null;
-  /** Mobile first-visit welcome copy (no banner logo on mobile). */
+  /** First-visit welcome copy (replaces desktop banner once; mobile has no fold banner). */
   welcomeIntro?: HomeWelcomeIntroContent | null;
   compactBottomPadding?: boolean;
 }) {
@@ -83,8 +82,11 @@ export function SelectedWorkSection({
   return (
     <section id="work" ref={sectionRef} className="scroll-mt-24">
       <div className="work-home-fold">
-        <WorkHomeLogo workHomeLogo={workHomeLogo} headerBrand={headerBrand} />
-        <WorkHomeFoldHero welcomeIntro={welcomeIntro} />
+        <WorkHomeBanner
+          workHomeLogo={workHomeLogo}
+          headerBrand={headerBrand}
+          welcomeIntro={welcomeIntro}
+        />
 
         {foldProjects.length > 0 ? (
           <div

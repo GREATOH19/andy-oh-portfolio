@@ -544,17 +544,15 @@
     font-size: min(14vw, 22vh, 9rem);
   }
 
-  @media (max-width: 767px) {
-    .work-home-welcome {
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
+  .work-home-welcome {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
 
-    .work-home-welcome__body {
-      max-width: 96%;
-    }
+  .work-home-welcome__body {
+    max-width: 96%;
   }
 
   .work-grid--fold-row {
