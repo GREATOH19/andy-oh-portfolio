@@ -544,15 +544,71 @@
     font-size: min(14vw, 22vh, 9rem);
   }
 
+  .work-home-logo:has(.work-home-welcome),
+  .work-home-logo__slot:has(.work-home-welcome) {
+    align-items: center;
+    justify-content: center;
+  }
+
   .work-home-welcome {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    width: 100%;
+    margin-inline: auto;
     text-align: center;
   }
 
+  .work-home-welcome .work-home-logo__text {
+    width: fit-content;
+    max-width: min(96vw, 100%);
+    margin-inline: auto;
+    text-align: center;
+  }
+
+  /* Welcome heading — one line on phones (scale down vs. banner logo size) */
+  @media (max-width: 639px) {
+    .work-home-welcome .work-home-logo__text {
+      width: fit-content;
+      max-width: min(96vw, 100%);
+      white-space: nowrap;
+      font-size: clamp(1.25rem, 6.2vw, 2rem);
+      line-height: 1.08;
+    }
+  }
+
+  .work-home-welcome__copy {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+  }
+
   .work-home-welcome__body {
-    max-width: 96%;
+    width: fit-content;
+    max-width: min(96vw, 42rem);
+    margin-inline: auto;
+    text-align: center;
+    font-size: clamp(0.9375rem, 3.8vw, 1.125rem);
+    line-height: 1.45;
+  }
+
+  .work-home-welcome__body--stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2em;
+  }
+
+  .work-home-welcome__body--stack > span {
+    display: block;
+    max-width: 100%;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .work-home-welcome .welcome-intro-subcopy {
+    font-size: clamp(0.9375rem, 3.8vw, 1.125rem);
   }
 
   .work-grid--fold-row {
@@ -580,7 +636,7 @@
 
     .work-home-fold:has(.work-home-welcome) {
       grid-template-rows: minmax(6rem, auto) auto;
-      gap: clamp(0.75rem, 1.6vh, 1.25rem);
+      gap: clamp(1.25rem, 2.4vh, 1.75rem);
     }
 
     .work-home-fold-chrome {
@@ -629,9 +685,128 @@
     }
   }
 
+  @media (min-width: 640px) {
+    .work-home-welcome__body {
+      font-size: clamp(1.0625rem, 1.65vw, 1.375rem);
+      line-height: 1.5;
+    }
+
+    .work-home-welcome__body--desktop {
+      white-space: nowrap;
+      max-width: min(96vw, 100%);
+    }
+
+    .work-home-logo__wrapper.work-home-welcome {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: auto;
+      width: 100%;
+    }
+  }
+
   @media (min-width: 768px) {
     .work-home-fold-chrome {
       padding-top: 0;
+    }
+
+    .work-home-logo__slot--welcome {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .work-home-welcome-backdrop {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+      isolation: isolate;
+    }
+
+    .work-home-welcome-backdrop__sharp,
+    .work-home-welcome-backdrop__blur {
+      position: absolute;
+      inset: 0;
+    }
+
+    .work-home-welcome-backdrop__blur {
+      z-index: 1;
+    }
+
+    .work-home-welcome-backdrop .work-home-logo__wrapper {
+      position: absolute;
+      inset: 0;
+      display: block;
+      height: 100%;
+      width: 100%;
+    }
+
+    /* Sharp layer — keeps banner silhouette readable under frost */
+    .work-home-welcome-backdrop__sharp .work-home-logo__image {
+      filter: saturate(1.06) contrast(1.04);
+      opacity: 0.85;
+    }
+
+    .work-home-welcome-backdrop__sharp .work-home-logo__text {
+      opacity: 0.88;
+    }
+
+    /* Frost layer — blur only on banner art, blended over sharp base */
+    .work-home-welcome-backdrop__blur .work-home-logo__image {
+      filter: blur(19px) saturate(1.11) brightness(1.035);
+      opacity: 0.5;
+      transform: scale(1.06);
+      transform-origin: center;
+    }
+
+    .work-home-welcome-backdrop__blur .work-home-logo__text {
+      filter: blur(13px);
+      opacity: 0.42;
+      transform: scale(1.04);
+      transform-origin: center;
+    }
+
+    .work-home-welcome-backdrop::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 90% 75% at 50% 45%, rgba(255, 255, 255, 0.17), transparent 74%),
+        linear-gradient(
+          165deg,
+          rgba(234, 252, 255, 0.2) 0%,
+          rgba(255, 255, 255, 0.08) 50%,
+          rgba(234, 252, 255, 0.15) 100%
+        );
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+
+    .work-home-welcome--overlay {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      padding: clamp(1rem, 3vh, 2rem);
+      text-align: center;
+    }
+
+    .work-home-welcome--overlay .work-home-logo__text {
+      text-shadow:
+        0 0 28px rgba(234, 252, 255, 0.95),
+        0 1px 2px rgba(255, 255, 255, 0.85);
+    }
+
+    .work-home-welcome--overlay .work-home-welcome__body {
+      text-shadow: 0 0 20px rgba(234, 252, 255, 0.9);
     }
 
     .work-home-logo__wrapper {

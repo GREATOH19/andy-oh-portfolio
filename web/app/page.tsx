@@ -22,7 +22,7 @@ export default async function HomePage() {
   const projectList = await resolveHomeFeaturedProjects(client, home?.featuredProjects);
 
   return (
-    <HomePageShell skipIntro>
+    <HomePageShell heroLottieUrl={siteSettings?.heroLottieUrl}>
       <div className="home-main-stack">
         {!hasSelectedWorkSection ? (
           <SelectedWorkSection

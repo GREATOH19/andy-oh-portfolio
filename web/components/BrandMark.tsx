@@ -34,12 +34,14 @@ export function BrandMark({
         ? `${fontClass} work-home-logo__text leading-[0.95] tracking-tight`
         : `${fontClass} text-4xl leading-[1.08] tracking-tight sm:text-5xl md:text-6xl`;
 
+  const linkableClass = linkable ? "transition-opacity hover:opacity-70" : "";
+
   const wrapperClassName =
     variant === "header"
-      ? "inline-flex max-w-[min(100%,20rem)] items-center text-foreground transition-opacity hover:opacity-70"
+      ? `inline-flex max-w-[min(100%,20rem)] items-center text-foreground ${linkableClass}`
       : variant === "workHome"
-        ? "work-home-logo__wrapper relative block h-full w-full min-h-0 min-w-0 text-foreground"
-        : "inline-flex max-w-[min(100%,min(92vw,32rem))] items-center justify-center text-foreground transition-opacity hover:opacity-70";
+        ? `work-home-logo__wrapper relative block h-full w-full min-h-0 min-w-0 text-foreground ${linkableClass}`
+        : `inline-flex max-w-[min(100%,min(92vw,32rem))] items-center justify-center text-foreground ${linkableClass}`;
 
   const pixelH = variant === "header" ? 88 : 150;
   const imageWidth = variant === "header" ? 280 : 480;

@@ -1,7 +1,7 @@
 "use client";
 
 import {motion, useReducedMotion} from "framer-motion";
-import {useLayoutEffect, useState} from "react";
+import {useEffect, useLayoutEffect, useState} from "react";
 
 import {BrandMark} from "@/components/BrandMark";
 import {useTypoClass} from "@/components/TypographyProvider";
@@ -36,7 +36,60 @@ function WorkHomeWelcomeContent({
   mobileBodyLines,
   displayClass,
   reduceMotion,
+  overlay = false,
 }: {
+  heading: string;
+  body: string;
+  mobileBodyLines?: [string, string];
+  displayClass: string;
+  reduceMotion: boolean | null;
+  /** Desktop: text over blurred banner + glass layer. */
+  overlay?: boolean;
+}) {
+  return (
+    <motion.div
+      className={
+        overlay
+          ? "work-home-welcome work-home-welcome--overlay"
+          : "work-home-logo__wrapper work-home-welcome"
+      }
+      initial={reduceMotion ? false : {opacity: 0, y: 12}}
+      animate={{opacity: 1, y: 0}}
+      transition={{duration: 0.8, ease: [0.4, 0, 0.2, 1], delay: 0.4}}
+    >
+      {heading ? (
+        <h2 className={`work-home-logo__text text-center ${displayClass}`}>{heading}</h2>
+      ) : null}
+      {body && mobileBodyLines ? (
+        <div className="work-home-welcome__copy mt-5 sm:mt-7">
+          <p
+            className="work-home-welcome__body work-home-welcome__body--stack welcome-intro-subcopy text-slate-600 sm:hidden"
+            aria-label={body}
+          >
+            <span>{mobileBodyLines[0]}</span>
+            {mobileBodyLines[1] ? <span>{mobileBodyLines[1]}</span> : null}
+          </p>
+          <p className="work-home-welcome__body work-home-welcome__body--desktop hidden text-slate-600 sm:block">
+            {body}
+          </p>
+        </div>
+      ) : null}
+    </motion.div>
+  );
+}
+
+/** Desktop first visit: blurred banner image only + welcome copy on top (no full-panel frost). */
+function WorkHomeDesktopWelcome({
+  brand,
+  hasLogo,
+  heading,
+  body,
+  mobileBodyLines,
+  displayClass,
+  reduceMotion,
+}: {
+  brand: SiteBrand | null;
+  hasLogo: boolean;
   heading: string;
   body: string;
   mobileBodyLines?: [string, string];
@@ -44,32 +97,26 @@ function WorkHomeWelcomeContent({
   reduceMotion: boolean | null;
 }) {
   return (
-    <motion.div
-      className="work-home-logo__wrapper work-home-welcome"
-      initial={reduceMotion ? false : {opacity: 0, y: 12}}
-      animate={{opacity: 1, y: 0}}
-      transition={{duration: 0.8, ease: [0.4, 0, 0.2, 1], delay: 0.4}}
-    >
-      {heading ? (
-        <h2 className={`work-home-logo__text whitespace-nowrap ${displayClass}`}>{heading}</h2>
+    <div className="work-home-logo__slot work-home-logo__slot--welcome">
+      {hasLogo ? (
+        <div className="work-home-welcome-backdrop" aria-hidden>
+          <div className="work-home-welcome-backdrop__sharp">
+            <BrandMark brand={brand} variant="workHome" linkable={false} />
+          </div>
+          <div className="work-home-welcome-backdrop__blur">
+            <BrandMark brand={brand} variant="workHome" linkable={false} />
+          </div>
+        </div>
       ) : null}
-      {body && mobileBodyLines ? (
-        <>
-          <p
-            className="work-home-welcome__body welcome-intro-subcopy mx-auto mt-5 w-full max-w-[100vw] px-3 text-center leading-snug text-slate-600 md:hidden"
-            aria-label={body}
-          >
-            <span className="block whitespace-nowrap">{mobileBodyLines[0]}</span>
-            {mobileBodyLines[1] ? (
-              <span className="block whitespace-nowrap">{mobileBodyLines[1]}</span>
-            ) : null}
-          </p>
-          <p className="work-home-welcome__body mx-auto mt-5 hidden max-w-2xl text-base leading-relaxed text-slate-600 sm:max-w-none sm:whitespace-nowrap md:mt-7 md:block md:text-lg">
-            {body}
-          </p>
-        </>
-      ) : null}
-    </motion.div>
+      <WorkHomeWelcomeContent
+        overlay
+        heading={heading}
+        body={body}
+        mobileBodyLines={mobileBodyLines}
+        displayClass={displayClass}
+        reduceMotion={reduceMotion}
+      />
+    </div>
   );
 }
 
@@ -80,8 +127,8 @@ type WorkHomeBannerProps = {
 };
 
 /**
- * Work fold banner slot: first session shows welcome (replaces banner on desktop + mobile);
- * every later visit shows the CMS banner logo on desktop (mobile logo lives in the footer).
+ * Work fold banner slot: first session shows welcome copy (desktop: blurred banner + glass;
+ * mobile: text only — banner logo lives in footer). Later visits show the CMS banner on desktop.
  */
 export function WorkHomeBanner({workHomeLogo, headerBrand, welcomeIntro}: WorkHomeBannerProps) {
   const heading = welcomeIntro?.heading?.trim() ?? "";
@@ -101,36 +148,42 @@ export function WorkHomeBanner({workHomeLogo, headerBrand, welcomeIntro}: WorkHo
       return;
     }
     try {
-      if (sessionStorage.getItem(WELCOME_SEEN_SESSION_KEY) === "1") {
-        setShowWelcome(false);
-        return;
-      }
-      sessionStorage.setItem(WELCOME_SEEN_SESSION_KEY, "1");
+      setShowWelcome(sessionStorage.getItem(WELCOME_SEEN_SESSION_KEY) !== "1");
     } catch {
       setShowWelcome(false);
-      return;
     }
-    setShowWelcome(true);
   }, [hasWelcome]);
+
+  /** Mark seen only after committing to show — avoids Strict Mode double-mount hiding welcome. */
+  useEffect(() => {
+    if (showWelcome !== true) return;
+    try {
+      sessionStorage.setItem(WELCOME_SEEN_SESSION_KEY, "1");
+    } catch {
+      /* private mode / quota */
+    }
+  }, [showWelcome]);
 
   const desktopAriaLabel = showWelcome ? "Welcome introduction" : "Studio logo";
 
   return (
     <>
       <div className="work-home-logo hidden md:flex" aria-label={desktopAriaLabel}>
-        <div className="work-home-logo__slot">
-          {showWelcome === true ? (
-            <WorkHomeWelcomeContent
-              heading={heading}
-              body={body}
-              mobileBodyLines={mobileBodyLines}
-              displayClass={displayClass}
-              reduceMotion={reduceMotion}
-            />
-          ) : showWelcome === false && hasLogo ? (
+        {showWelcome === true ? (
+          <WorkHomeDesktopWelcome
+            brand={brand}
+            hasLogo={hasLogo}
+            heading={heading}
+            body={body}
+            mobileBodyLines={mobileBodyLines}
+            displayClass={displayClass}
+            reduceMotion={reduceMotion}
+          />
+        ) : showWelcome === false && hasLogo ? (
+          <div className="work-home-logo__slot">
             <BrandMark brand={brand} variant="workHome" linkable={false} />
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </div>
 
       {showWelcome === true ? (

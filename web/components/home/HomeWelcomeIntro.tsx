@@ -58,13 +58,17 @@ export function HomeWelcomeIntro({
   useEffect(() => {
     if (!hasContent) return;
     if (!shouldShowOnMount()) return;
+    setVisible(true);
+  }, [hasContent]);
+
+  useEffect(() => {
+    if (!visible) return;
     try {
       sessionStorage.setItem(WELCOME_SEEN_SESSION_KEY, "1");
     } catch {
       /* private mode / quota */
     }
-    setVisible(true);
-  }, [hasContent]);
+  }, [visible]);
 
   if (!visible) return null;
 
