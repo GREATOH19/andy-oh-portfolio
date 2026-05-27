@@ -1,6 +1,6 @@
 "use client";
 
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useMemo, useRef, useState} from "react";
 
 import {ProjectCard} from "@/components/ProjectCard";
 import {WorkHomeBanner} from "@/components/home/WorkHomeBanner";
@@ -9,7 +9,7 @@ import type {HomeWelcomeIntroContent, ProjectListItem, SiteBrand} from "@/lib/ty
 /** Close mobile card overlay after this idle period (no taps in #work). */
 const TOUCH_OVERLAY_IDLE_MS = 10_000;
 
-const FOLD_ROW_COUNT = 3;
+const FOLD_ROW_COUNT_DESKTOP = 3;
 
 export function SelectedWorkSection({
   projects,
@@ -32,8 +32,30 @@ export function SelectedWorkSection({
   const [openTouchCardId, setOpenTouchCardId] = useState<string | null>(null);
   const sectionRef = useRef<HTMLElement>(null);
 
-  const foldProjects = visibleProjects.slice(0, FOLD_ROW_COUNT);
-  const restProjects = visibleProjects.slice(FOLD_ROW_COUNT);
+  /**
+   * Desktop-only composition: first viewport shows banner + first 3 cards.
+   * On mobile / 2-column widths, keep one continuous grid to avoid a “gap jump”
+   * between the 3rd and 4th cards caused by the fold split.
+   */
+  const [useFoldSplit, setUseFoldSplit] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const sync = () => setUseFoldSplit(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  const {foldProjects, restProjects} = useMemo(() => {
+    if (!useFoldSplit) {
+      return {foldProjects: [] as ProjectListItem[], restProjects: visibleProjects};
+    }
+    return {
+      foldProjects: visibleProjects.slice(0, FOLD_ROW_COUNT_DESKTOP),
+      restProjects: visibleProjects.slice(FOLD_ROW_COUNT_DESKTOP),
+    };
+  }, [useFoldSplit, visibleProjects]);
 
   useEffect(() => {
     if (!openTouchCardId) return;
@@ -81,35 +103,47 @@ export function SelectedWorkSection({
 
   return (
     <section id="work" ref={sectionRef} className="scroll-mt-24">
-      <div className="work-home-fold work-home-fold--fullbleed">
-        <WorkHomeBanner
-          workHomeLogo={workHomeLogo}
-          headerBrand={headerBrand}
-          welcomeIntro={welcomeIntro}
-        />
+      {useFoldSplit ? (
+        <>
+          <div className="work-home-fold work-home-fold--fullbleed">
+            <WorkHomeBanner
+              workHomeLogo={workHomeLogo}
+              headerBrand={headerBrand}
+              welcomeIntro={welcomeIntro}
+            />
 
-        {foldProjects.length > 0 ? (
-          <div
-            className={`layout-chrome work-home-fold-chrome${restProjects.length === 0 ? ` ${belowFoldPadding}` : ""}`}
-          >
-            <div className="work-grid work-grid--fold-row" aria-label="Featured projects, row one">
-              {foldProjects.map((project) => (
-                <div key={project._id}>{renderCard(project)}</div>
-              ))}
-            </div>
+            {foldProjects.length > 0 ? (
+              <div
+                className={`layout-chrome work-home-fold-chrome${restProjects.length === 0 ? ` ${belowFoldPadding}` : ""}`}
+              >
+                <div className="work-grid work-grid--fold-row" aria-label="Featured projects, row one">
+                  {foldProjects.map((project) => (
+                    <div key={project._id}>{renderCard(project)}</div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
-        ) : null}
-      </div>
 
-      {restProjects.length > 0 ? (
+          {restProjects.length > 0 ? (
+            <div className={`layout-chrome work-page-chrome ${belowFoldPadding}`}>
+              <div id="work-grid-rest" className="work-grid work-grid--below-fold">
+                {restProjects.map((project) => (
+                  <div key={project._id}>{renderCard(project)}</div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </>
+      ) : (
         <div className={`layout-chrome work-page-chrome ${belowFoldPadding}`}>
           <div id="work-grid-rest" className="work-grid work-grid--below-fold">
-            {restProjects.map((project) => (
+            {visibleProjects.map((project) => (
               <div key={project._id}>{renderCard(project)}</div>
             ))}
           </div>
         </div>
-      ) : null}
+      )}
     </section>
   );
 }
