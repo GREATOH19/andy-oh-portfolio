@@ -162,8 +162,8 @@ export function ProjectCard({
     ? "opacity-0"
     : "opacity-100 [@media(hover:hover)]:group-hover:opacity-0 group-focus-within:opacity-0";
   const heroOverlayClass = overlayOpen
-    ? "opacity-100 blur-[1px]"
-    : "opacity-0 blur-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:blur-[1px] group-focus-within:opacity-100 group-focus-within:blur-[1px]";
+    ? "opacity-100"
+    : "opacity-0 [@media(hover:hover)]:group-hover:opacity-100 group-focus-within:opacity-100";
 
   const tagline = project.subtitle?.trim() || null;
 
@@ -228,7 +228,7 @@ export function ProjectCard({
             loop={heroVideo?.loop ?? true}
             alt={heroAlt}
             active
-            className={`absolute inset-0 h-full w-full object-cover transition-[filter] duration-500 ease-out ${overlayOpen ? "blur-[1px]" : "blur-0"} [@media(hover:hover)]:group-hover:blur-[1px] group-focus-within:blur-[1px]`}
+            className="absolute inset-0 h-full w-full object-cover"
           />
         ) : null}
         {!hasDistinctHero && !hasVideoOnlyHero && thumbSrc ? (
@@ -236,7 +236,7 @@ export function ProjectCard({
             src={thumbSrc}
             alt={thumbAlt}
             fill
-            className={`object-cover transition-[filter] duration-500 ease-out ${overlayOpen ? "blur-[1px]" : "blur-0"} [@media(hover:hover)]:group-hover:blur-[1px] group-focus-within:blur-[1px]`}
+            className="object-cover"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         ) : null}
