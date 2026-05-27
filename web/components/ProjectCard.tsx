@@ -162,8 +162,8 @@ export function ProjectCard({
     ? "opacity-0"
     : "opacity-100 [@media(hover:hover)]:group-hover:opacity-0 group-focus-within:opacity-0";
   const heroOverlayClass = overlayOpen
-    ? "opacity-100"
-    : "opacity-0 [@media(hover:hover)]:group-hover:opacity-100 group-focus-within:opacity-100";
+    ? "opacity-100 blur-[1px]"
+    : "opacity-0 blur-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:blur-[1px] group-focus-within:opacity-100 group-focus-within:blur-[1px]";
 
   const tagline = project.subtitle?.trim() || null;
 
@@ -228,7 +228,7 @@ export function ProjectCard({
             loop={heroVideo?.loop ?? true}
             alt={heroAlt}
             active
-            className="absolute inset-0 h-full w-full object-cover"
+            className={`absolute inset-0 h-full w-full object-cover transition-[filter] duration-500 ease-out ${overlayOpen ? "blur-[1px]" : "blur-0"} [@media(hover:hover)]:group-hover:blur-[1px] group-focus-within:blur-[1px]`}
           />
         ) : null}
         {!hasDistinctHero && !hasVideoOnlyHero && thumbSrc ? (
@@ -236,7 +236,7 @@ export function ProjectCard({
             src={thumbSrc}
             alt={thumbAlt}
             fill
-            className="object-cover"
+            className={`object-cover transition-[filter] duration-500 ease-out ${overlayOpen ? "blur-[1px]" : "blur-0"} [@media(hover:hover)]:group-hover:blur-[1px] group-focus-within:blur-[1px]`}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         ) : null}
@@ -295,7 +295,7 @@ export function ProjectCard({
                 href={href}
                 data-project-card-link
                 aria-label={`View project: ${project.title}`}
-                className="pointer-events-auto relative z-10 mt-8 inline-flex rounded-sm border border-white/50 bg-white/10 px-5 py-2.5 text-[0.6875rem] font-semibold uppercase tracking-[0.2em] text-white/95 backdrop-blur-sm transition-[border-color,background-color,color] duration-300 active:border-white/75 active:bg-white/20 active:text-white"
+                className="pointer-events-auto relative z-10 mt-8 inline-flex rounded-sm border border-white/50 bg-white/10 px-5 py-2.5 text-[0.6875rem] font-semibold uppercase tracking-[0.2em] text-white/95 transition-[border-color,background-color,color] duration-300 active:border-white/75 active:bg-white/20 active:text-white"
                 onClick={(e) => e.stopPropagation()}
               >
                 View project
