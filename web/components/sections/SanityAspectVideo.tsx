@@ -15,7 +15,7 @@ export function SanityAspectVideo({video}: {video: NonNullable<SanityVideoField>
     >
       <video
         src={src}
-        className="h-full w-full object-contain"
+        className="block h-full w-full object-contain"
         playsInline
         muted={loop}
         loop={loop}
