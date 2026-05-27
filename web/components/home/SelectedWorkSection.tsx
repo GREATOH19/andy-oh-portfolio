@@ -136,13 +136,22 @@ export function SelectedWorkSection({
           ) : null}
         </>
       ) : (
-        <div className={`layout-chrome work-page-chrome ${belowFoldPadding}`}>
-          <div id="work-grid-rest" className="work-grid work-grid--below-fold">
-            {visibleProjects.map((project) => (
-              <div key={project._id}>{renderCard(project)}</div>
-            ))}
+        <>
+          <div className="layout-chrome">
+            <WorkHomeBanner
+              workHomeLogo={workHomeLogo}
+              headerBrand={headerBrand}
+              welcomeIntro={welcomeIntro}
+            />
           </div>
-        </div>
+          <div className={`layout-chrome work-page-chrome ${belowFoldPadding}`}>
+            <div id="work-grid-rest" className="work-grid work-grid--below-fold">
+              {visibleProjects.map((project) => (
+                <div key={project._id}>{renderCard(project)}</div>
+              ))}
+            </div>
+          </div>
+        </>
       )}
     </section>
   );
