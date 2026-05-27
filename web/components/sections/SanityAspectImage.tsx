@@ -21,7 +21,7 @@ export function SanityAspectImage({
 
   return (
     <div
-      className="relative w-full overflow-hidden rounded-[2px] bg-zinc-200"
+      className="media-thumb relative w-full overflow-hidden rounded-2xl bg-zinc-200 shadow-sm ring-1 ring-slate-200/60 transition-[transform,box-shadow] duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-[1.006] group-hover:shadow-lg active:translate-y-0 active:scale-[0.997]"
       style={aspectBoxStyle(image)}
     >
       <Image src={src} alt={alt} fill className="object-contain" sizes={sizes} />

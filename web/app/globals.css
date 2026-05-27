@@ -488,16 +488,13 @@
     grid-template-rows: minmax(9rem, 1fr) auto;
     gap: clamp(0.75rem, 1.6vh, 1.25rem);
     width: 100%;
-    /* Prefer stable viewport units to avoid prod/dev mismatch */
-    height: calc(100svh - var(--site-header-height));
     height: calc(100dvh - var(--site-header-height));
     padding-bottom: clamp(0.5rem, 1vh, 0.875rem);
   }
 
   /* Work fold banner should be true full-bleed (100vw) */
   .work-home-fold--fullbleed {
-    /* 100vw includes scrollbar; subtract it for consistent composition */
-    width: calc(100vw - (100vw - 100%));
+    width: 100vw;
     margin-left: calc(50% - 50vw);
     margin-right: calc(50% - 50vw);
   }
@@ -835,8 +832,7 @@
     .work-home-logo__wrapper {
       position: relative;
       display: block;
-      /* Match the “90% zoom” composition at 100% */
-      height: 84%;
+      height: 92%;
       width: 100%;
     }
 

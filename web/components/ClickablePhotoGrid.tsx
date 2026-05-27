@@ -39,7 +39,9 @@ export function ClickablePhotoGrid({
 
   const resolvedGridClass =
     layout === "masonry" ? masonryPreviewClass : (gridClass ?? masonryPreviewClass);
-  const containerClass = className ? `${resolvedGridClass} ${className}` : resolvedGridClass;
+  const containerClass = className
+    ? `clickable-photo-grid ${resolvedGridClass} ${className}`
+    : `clickable-photo-grid ${resolvedGridClass}`;
 
   return (
     <>
@@ -59,7 +61,7 @@ export function ClickablePhotoGrid({
             <button
               type="button"
               onClick={() => openLightbox(i)}
-              className={`w-full text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400 ${
+              className={`group w-full text-left transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.006] active:translate-y-0 active:scale-[0.997] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400 ${
                 isSanityImage(item) ? "cursor-zoom-in" : "cursor-pointer"
               } [&_video]:pointer-events-none`}
               aria-label={label}

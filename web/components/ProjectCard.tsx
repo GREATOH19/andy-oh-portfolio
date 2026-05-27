@@ -184,7 +184,7 @@ export function ProjectCard({
   return (
     <article className="block" aria-label={project.title}>
       <div
-        className="group relative aspect-[4/3] w-full cursor-default overflow-hidden bg-background transition-shadow duration-500 [@media(hover:hover)]:cursor-pointer [@media(hover:hover)]:group-hover:shadow-lg [@media(hover:none)]:cursor-pointer"
+        className="work-thumb group relative aspect-[4/3] w-full cursor-pointer overflow-hidden rounded-2xl bg-background shadow-sm ring-1 ring-slate-200/60 transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:scale-[1.006] hover:shadow-xl focus-within:-translate-y-1 focus-within:scale-[1.006] focus-within:shadow-xl active:translate-y-0 active:scale-[0.997] active:shadow-lg"
         onClick={onImageAreaClick}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
