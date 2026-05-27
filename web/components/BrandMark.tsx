@@ -3,7 +3,12 @@ import Link from "next/link";
 import { cmsBrandTextClass } from "@/lib/cmsFontClass";
 import { urlForImage } from "@/lib/sanity/image";
 import {sanityImageObjectPosition} from "@/lib/sanity/imagePosition";
-import {workHomeBannerImageUrl} from "@/lib/sanity/workHomeBannerImage";
+import {WorkHomeBannerArt} from "@/components/home/WorkHomeBannerArt";
+import {
+  workHomeBannerAlignedLayerUrl,
+  workHomeBannerCroppedDimensions,
+  workHomeBannerImageUrl,
+} from "@/lib/sanity/workHomeBannerImage";
 import type {BannerFocus, SiteBrand} from "@/lib/types/project";
 
 const defaultText = "Andy Oh";
@@ -17,11 +22,20 @@ export function BrandMark({
   brand,
   variant = "header",
   linkable = true,
+  bannerGlow = false,
+  bannerGlowActive = false,
+  bannerGlowWelcomeSharp = false,
 }: {
   brand?: SiteBrand | null;
   variant?: "header" | "footer" | "workHome";
   /** When false, render logo without a link (e.g. Work homepage fold). */
   linkable?: boolean;
+  /** Work fold desktop banner: alpha-outline glow on hover. */
+  bannerGlow?: boolean;
+  /** Set when the banner slot is hovered (from WorkHomeBanner). */
+  bannerGlowActive?: boolean;
+  /** Welcome frost stack — sharp layer color grade + glow. */
+  bannerGlowWelcomeSharp?: boolean;
 }) {
   const text = brand?.text?.trim() || defaultText;
   const alt = brand?.alt?.trim() || text;
@@ -66,9 +80,37 @@ export function BrandMark({
       const focus = (brand.bannerFocus ?? "auto") as BannerFocus;
       const objectPosition = sanityImageObjectPosition(brand.image, focus);
       const src = workHomeBannerImageUrl(brand.image);
-      const dims = brand.image.asset?.metadata?.dimensions;
-      const intrinsicW = dims?.width ?? 1600;
-      const intrinsicH = dims?.height ?? 500;
+      const shadowField = brand.bannerShadowMask?.asset
+        ? brand.bannerShadowMask
+        : brand.shadowImage?.asset
+          ? brand.shadowImage
+          : null;
+      const shadowSrc = shadowField
+        ? workHomeBannerAlignedLayerUrl(shadowField, brand.image)
+        : null;
+      const shadowEnabled =
+        Boolean(shadowSrc) && Boolean(brand.shadowGlowEnabled || brand.bannerHoverEffect);
+      const cropped = workHomeBannerCroppedDimensions(brand.image);
+      const intrinsicW = cropped.width;
+      const intrinsicH = cropped.height;
+      const aspectRatio = intrinsicW / intrinsicH;
+
+      if (bannerGlow) {
+        return wrap(
+          <WorkHomeBannerArt
+            src={src}
+            shadowOverlaySrc={shadowEnabled ? shadowSrc ?? undefined : undefined}
+            shadowGlowBleedSrc={shadowEnabled ? shadowSrc ?? undefined : undefined}
+            alt={alt}
+            width={intrinsicW}
+            height={intrinsicH}
+            aspectRatio={aspectRatio}
+            objectPosition={objectPosition}
+            active={bannerGlowActive}
+            welcomeSharp={bannerGlowWelcomeSharp}
+          />,
+        );
+      }
 
       return wrap(
         <Image
@@ -98,6 +140,11 @@ export function BrandMark({
         priority={variant === "header"}
       />,
     );
+  }
+
+  if (variant === "workHome" && bannerGlow) {
+    const glowClass = bannerGlowActive ? " work-home-banner-text--glow" : "";
+    return wrap(<span className={`${textClassName}${glowClass}`}>{text}</span>);
   }
 
   return wrap(<span className={textClassName}>{text}</span>);

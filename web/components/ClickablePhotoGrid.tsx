@@ -6,16 +6,23 @@ import {SanityAspectMedia} from "@/components/sections/SanityAspectMedia";
 import {isSanityImage, isSanityMedia, isSanityVideo, sanityMediaKey} from "@/lib/sanity/media";
 import type {SanityMediaField} from "@/lib/types/project";
 
+export const masonryPreviewClass =
+  "columns-2 gap-x-2 sm:columns-3 sm:gap-x-3 md:columns-4 md:gap-x-3";
+
+export const masonryPreviewItemClass = "mb-2 break-inside-avoid sm:mb-3";
+
 export function ClickablePhotoGrid({
   images,
   gridClass,
+  layout = "grid",
   thumbMaxWidth = 560,
   sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw",
   quality,
   className,
 }: {
   images: SanityMediaField[];
-  gridClass: string;
+  gridClass?: string;
+  layout?: "grid" | "masonry";
   thumbMaxWidth?: number;
   sizes?: string;
   quality?: number;
@@ -30,9 +37,13 @@ export function ClickablePhotoGrid({
     setActiveIndex(index);
   };
 
+  const resolvedGridClass =
+    layout === "masonry" ? masonryPreviewClass : (gridClass ?? masonryPreviewClass);
+  const containerClass = className ? `${resolvedGridClass} ${className}` : resolvedGridClass;
+
   return (
     <>
-      <div className={className ? `${gridClass} ${className}` : gridClass}>
+      <div className={containerClass}>
         {validMedia.map((item, i) => {
           const alt = item?.alt ?? "";
           const isClickable = isSanityImage(item) || isSanityVideo(item);
@@ -44,30 +55,15 @@ export function ClickablePhotoGrid({
               ? `View ${alt}`
               : `View photo ${i + 1}`;
 
-          if (isClickable) {
-            return (
-              <button
-                key={sanityMediaKey(item, i)}
-                type="button"
-                onClick={() => openLightbox(i)}
-                className={`text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400 ${
-                  isSanityImage(item) ? "cursor-zoom-in" : "cursor-pointer"
-                } [&_video]:pointer-events-none`}
-                aria-label={label}
-              >
-                <SanityAspectMedia
-                  media={item}
-                  alt={alt}
-                  maxWidth={thumbMaxWidth}
-                  quality={quality}
-                  sizes={sizes}
-                />
-              </button>
-            );
-          }
-
-          return (
-            <div key={sanityMediaKey(item, i)} className="text-left">
+          const tile = isClickable ? (
+            <button
+              type="button"
+              onClick={() => openLightbox(i)}
+              className={`w-full text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400 ${
+                isSanityImage(item) ? "cursor-zoom-in" : "cursor-pointer"
+              } [&_video]:pointer-events-none`}
+              aria-label={label}
+            >
               <SanityAspectMedia
                 media={item}
                 alt={alt}
@@ -75,6 +71,30 @@ export function ClickablePhotoGrid({
                 quality={quality}
                 sizes={sizes}
               />
+            </button>
+          ) : (
+            <div className="w-full text-left">
+              <SanityAspectMedia
+                media={item}
+                alt={alt}
+                maxWidth={thumbMaxWidth}
+                quality={quality}
+                sizes={sizes}
+              />
+            </div>
+          );
+
+          if (layout === "masonry") {
+            return (
+              <div key={sanityMediaKey(item, i)} className={masonryPreviewItemClass}>
+                {tile}
+              </div>
+            );
+          }
+
+          return (
+            <div key={sanityMediaKey(item, i)}>
+              {tile}
             </div>
           );
         })}

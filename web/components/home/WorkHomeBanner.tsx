@@ -96,12 +96,30 @@ function WorkHomeDesktopWelcome({
   displayClass: string;
   reduceMotion: boolean | null;
 }) {
+  const [bannerHover, setBannerHover] = useState(false);
+  const glowEnabled = Boolean(brand?.shadowGlowEnabled && brand?.shadowImage?.asset);
+
   return (
-    <div className="work-home-logo__slot work-home-logo__slot--welcome">
+    <div
+      className={`work-home-logo__slot work-home-logo__slot--welcome${bannerHover ? " work-home-logo__slot--glow" : ""}`}
+      onPointerEnter={() => setBannerHover(true)}
+      onPointerLeave={(e) => {
+        const next = e.relatedTarget;
+        if (next instanceof Node && e.currentTarget.contains(next)) return;
+        setBannerHover(false);
+      }}
+    >
       {hasLogo ? (
         <div className="work-home-welcome-backdrop" aria-hidden>
           <div className="work-home-welcome-backdrop__sharp">
-            <BrandMark brand={brand} variant="workHome" linkable={false} />
+            <BrandMark
+              brand={brand}
+              variant="workHome"
+              linkable={false}
+              bannerGlow={glowEnabled}
+              bannerGlowActive={bannerHover}
+              bannerGlowWelcomeSharp
+            />
           </div>
           <div className="work-home-welcome-backdrop__blur">
             <BrandMark brand={brand} variant="workHome" linkable={false} />
@@ -137,8 +155,10 @@ export function WorkHomeBanner({workHomeLogo, headerBrand, welcomeIntro}: WorkHo
   const hasWelcome = heading.length > 0 || body.length > 0;
   const brand = resolveWorkHomeLogo(workHomeLogo, headerBrand);
   const hasLogo = hasSiteBrandContent(brand);
+  const glowEnabled = Boolean(brand?.shadowGlowEnabled && brand?.shadowImage?.asset);
 
   const [showWelcome, setShowWelcome] = useState<boolean | null>(null);
+  const [bannerHover, setBannerHover] = useState(false);
   const reduceMotion = useReducedMotion();
   const displayClass = useTypoClass("display");
 
@@ -180,8 +200,22 @@ export function WorkHomeBanner({workHomeLogo, headerBrand, welcomeIntro}: WorkHo
             reduceMotion={reduceMotion}
           />
         ) : showWelcome === false && hasLogo ? (
-          <div className="work-home-logo__slot">
-            <BrandMark brand={brand} variant="workHome" linkable={false} />
+          <div
+            className={`work-home-logo__slot${bannerHover ? " work-home-logo__slot--glow" : ""}`}
+            onPointerEnter={() => setBannerHover(true)}
+            onPointerLeave={(e) => {
+              const next = e.relatedTarget;
+              if (next instanceof Node && e.currentTarget.contains(next)) return;
+              setBannerHover(false);
+            }}
+          >
+            <BrandMark
+              brand={brand}
+              variant="workHome"
+              linkable={false}
+              bannerGlow={glowEnabled}
+              bannerGlowActive={bannerHover}
+            />
           </div>
         ) : null}
       </div>

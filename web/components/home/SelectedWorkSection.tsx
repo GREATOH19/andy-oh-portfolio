@@ -81,7 +81,7 @@ export function SelectedWorkSection({
 
   return (
     <section id="work" ref={sectionRef} className="scroll-mt-24">
-      <div className="work-home-fold">
+      <div className="work-home-fold work-home-fold--fullbleed">
         <WorkHomeBanner
           workHomeLogo={workHomeLogo}
           headerBrand={headerBrand}

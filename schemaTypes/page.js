@@ -24,7 +24,7 @@ export const page = defineType({
       title: 'More blocks',
       type: 'array',
       description:
-        'Archive, Photography, and Behind the scene blocks (3-item preview on /more, full views on detail pages). Drag to reorder; toggle “Show on site” per block.',
+        'Archive, Photography, and Behind the scene blocks (~2-row masonry preview on /more, full views on detail pages). Drag to reorder; toggle “Show on site” per block.',
       of: [
         {type: 'archiveBlock'},
         {type: 'photographyBlock'},

@@ -28,7 +28,8 @@ export const photographyBlock = defineType({
       title: 'Albums',
       type: 'array',
       of: [{type: 'photoAlbum'}],
-      description: 'Unlimited images. The More page previews 3; the full grid is on /more/photography.',
+      description:
+        'Unlimited images. The More page shows a ~2-row masonry preview; the full grid is on /more/photography.',
     }),
   ],
   preview: {

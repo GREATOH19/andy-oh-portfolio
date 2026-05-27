@@ -53,6 +53,44 @@ export const siteBrandFields = [
       'For the Work homepage banner: use Hotspot (crop tool) to set what stays visible when the image is cropped.',
   }),
   defineField({
+    name: 'shadowGlowEnabled',
+    title: 'Enable banner shadow glow',
+    type: 'boolean',
+    description:
+      'Work homepage banner only. When enabled (and Shadow layer image is set), the app can glow/animate the shadow layer on hover.',
+    initialValue: false,
+    hidden: ({parent}) => parent?.mode !== 'image',
+  }),
+  defineField({
+    name: 'shadowImage',
+    title: 'Shadow layer image (PNG)',
+    type: 'image',
+    options: {hotspot: false},
+    description:
+      'Work homepage banner only. Export ONLY the shadow/outline layer with transparency. Must match the main Logo image canvas size and alignment exactly.',
+    hidden: ({parent}) => parent?.mode !== 'image',
+  }),
+  defineField({
+    name: 'bannerHoverEffect',
+    title: 'Banner hover effect (legacy)',
+    type: 'string',
+    description:
+      'Legacy field already present in some documents. Keep this to avoid “Unknown fields” warnings. Prefer Enable banner shadow glow above.',
+    options: {
+      list: [{title: 'Fluoro shadow (auto)', value: 'fluoro-shadow-auto'}],
+    },
+    hidden: ({parent}) => parent?.mode !== 'image',
+  }),
+  defineField({
+    name: 'bannerShadowMask',
+    title: 'Banner shadow mask (legacy PNG)',
+    type: 'image',
+    options: {hotspot: false},
+    description:
+      'Legacy field already present in some documents. Shadow-only PNG with transparency; must match main Logo image canvas exactly. Prefer Shadow layer image above.',
+    hidden: ({parent}) => parent?.mode !== 'image',
+  }),
+  defineField({
     name: 'bannerFocus',
     title: 'Banner vertical focus',
     description:

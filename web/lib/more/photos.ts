@@ -2,8 +2,6 @@ import type {PhotoAlbum, SanityMediaField} from "@/lib/types/project";
 import {normalizeMediaItem, normalizeMediaList} from "@/lib/sanity/media";
 import {parseYearNumber} from "@/lib/more/year";
 
-export const MORE_PREVIEW_LIMIT = 3;
-
 export function flattenAlbumImages(albums?: PhotoAlbum[] | null): SanityMediaField[] {
   if (!albums?.length) return [];
   const out: SanityMediaField[] = [];

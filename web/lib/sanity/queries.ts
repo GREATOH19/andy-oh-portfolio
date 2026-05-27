@@ -38,6 +38,38 @@ const siteBrandFields = groq`
   fontWeight,
   alt,
   bannerFocus,
+  shadowGlowEnabled,
+  bannerHoverEffect,
+  bannerShadowMask {
+    ...,
+    hotspot,
+    crop,
+    asset->{
+      "_ref": coalesce(_ref, _id),
+      metadata {
+        dimensions {
+          width,
+          height,
+          aspectRatio
+        }
+      }
+    }
+  },
+  shadowImage {
+    ...,
+    hotspot,
+    crop,
+    asset->{
+      "_ref": coalesce(_ref, _id),
+      metadata {
+        dimensions {
+          width,
+          height,
+          aspectRatio
+        }
+      }
+    }
+  },
   image {
     ...,
     hotspot,

@@ -29,7 +29,7 @@ export const behindTheScenesBlock = defineType({
       type: 'array',
       of: [{type: 'cmsMediaItem'}],
       description:
-        'Unlimited. The More page previews 3; the full grid is on /more/behind-the-scenes (drag order).',
+        'Unlimited. The More page shows a ~2-row masonry preview; the full grid is on /more/behind-the-scenes (drag order).',
     }),
   ],
   preview: {

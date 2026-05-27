@@ -492,6 +492,13 @@
     padding-bottom: clamp(0.5rem, 1vh, 0.875rem);
   }
 
+  /* Work fold banner should be true full-bleed (100vw) */
+  .work-home-fold--fullbleed {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+  }
+
   .work-home-fold-chrome {
     width: 100%;
     min-width: 0;
@@ -527,6 +534,11 @@
     min-width: 0;
     align-items: center;
     justify-content: center;
+  }
+
+  .work-home-logo__art {
+    position: relative;
+    display: block;
   }
 
   .work-home-logo__image {
@@ -707,6 +719,15 @@
   }
 
   @media (min-width: 768px) {
+    /* Work banner glow should never clip at horizontal tips */
+    .work-home-fold .work-home-logo__slot {
+      overflow: visible;
+    }
+
+    .work-home-fold .work-home-welcome-backdrop {
+      overflow: visible;
+    }
+
     .work-home-fold-chrome {
       padding-top: 0;
     }
@@ -743,9 +764,8 @@
       width: 100%;
     }
 
-    /* Sharp layer — keeps banner silhouette readable under frost */
-    .work-home-welcome-backdrop__sharp .work-home-logo__image {
-      filter: saturate(1.06) contrast(1.04);
+    /* Sharp layer — grade/glow on img via WorkHomeBannerArt when bannerGlow */
+    .work-home-welcome-backdrop__sharp .work-home-logo__image--base {
       opacity: 0.85;
     }
 
@@ -816,6 +836,53 @@
       width: 100%;
     }
 
+    /* Allow alpha-outline glow to extend outside crop (drop-shadow was clipped here). */
+    .work-home-fold .work-home-logo__slot:has(.work-home-logo__art) {
+      overflow: visible;
+    }
+
+    .work-home-fold .work-home-logo__slot--welcome:has(.work-home-logo__art) {
+      overflow: visible;
+    }
+
+    .work-home-fold .work-home-welcome-backdrop:has(.work-home-logo__art) {
+      overflow: visible;
+    }
+
+    .work-home-logo__art {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .work-home-logo__image--glow-bleed,
+    .work-home-logo__image--base {
+      position: absolute;
+      inset: 0;
+    }
+
+    .work-home-logo__image--glow-bleed {
+      z-index: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.08s cubic-bezier(0.2, 0.9, 0.2, 1);
+    }
+
+    .work-home-logo__image--base {
+      z-index: 1;
+    }
+
+    /* Shadow mask ON TOP of main — inner shading glows on hover (not hidden under base) */
+    .work-home-logo__image--shadow-overlay {
+      z-index: 2;
+      opacity: 0;
+      pointer-events: none;
+      mix-blend-mode: screen;
+      transition: opacity 0.08s cubic-bezier(0.2, 0.9, 0.2, 1);
+    }
+
     .work-home-logo__image {
       position: absolute;
       inset: 0;
@@ -824,6 +891,21 @@
       max-width: none;
       max-height: none;
       object-fit: cover;
+    }
+
+    /* Multi-layer banner: same scale/position for base + shadow (no cover drift) */
+    .work-home-logo__art .work-home-logo__image {
+      object-fit: contain;
+      object-position: var(--work-home-banner-object-position, center 42%);
+    }
+
+    /* Welcome: lift sharp art above frost while glowing */
+    .work-home-logo__slot--welcome:has(.work-home-logo__art--glow) .work-home-welcome-backdrop__sharp {
+      z-index: 4;
+    }
+
+    .work-home-logo__slot--welcome:has(.work-home-logo__art--glow) .work-home-welcome-backdrop__blur {
+      opacity: 0.28;
     }
   }
 
@@ -864,6 +946,133 @@
 
   .project-title {
     @apply font-serif text-2xl md:text-3xl lg:text-4xl leading-tight;
+  }
+}
+
+/* Work banner hover glow — opacity pulse only (static filter; cheap compositing) */
+@keyframes work-home-banner-opacity-heartbeat {
+  0%,
+  100% {
+    opacity: 0.52;
+  }
+
+  14% {
+    opacity: 1;
+  }
+
+  26% {
+    opacity: 0.76;
+  }
+
+  55% {
+    opacity: 0.64;
+  }
+}
+
+@keyframes work-home-banner-opacity-heartbeat-subtle {
+  0%,
+  100% {
+    opacity: 0.9;
+  }
+
+  14% {
+    opacity: 1;
+  }
+
+  26% {
+    opacity: 0.94;
+  }
+
+  55% {
+    opacity: 0.92;
+  }
+}
+
+@media (min-width: 768px) {
+  .work-home-fold .work-home-logo__art--glow .work-home-logo__image--base {
+    opacity: 1;
+    filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.9))
+      drop-shadow(0 0 8px rgba(235, 253, 255, 0.7))
+      drop-shadow(0 0 20px rgba(185, 245, 255, 0.45));
+    animation: work-home-banner-opacity-heartbeat-subtle 1.15s cubic-bezier(0.2, 0.9, 0.2, 1)
+      infinite;
+  }
+
+  .work-home-fold
+    .work-home-logo__art--welcome-sharp.work-home-logo__art--glow
+    .work-home-logo__image--base {
+    filter: saturate(1.06) contrast(1.04) drop-shadow(0 0 1px rgba(255, 255, 255, 0.9))
+      drop-shadow(0 0 8px rgba(235, 253, 255, 0.7))
+      drop-shadow(0 0 20px rgba(185, 245, 255, 0.45));
+  }
+
+  .work-home-fold .work-home-logo__art--glow .work-home-logo__image--glow-bleed {
+    filter: blur(7px) brightness(1.3) saturate(1.1)
+      drop-shadow(0 0 12px rgba(255, 255, 255, 0.55))
+      drop-shadow(0 0 26px rgba(220, 252, 255, 0.4));
+    animation: work-home-banner-opacity-heartbeat 1.15s cubic-bezier(0.2, 0.9, 0.2, 1) infinite;
+  }
+
+  .work-home-fold
+    .work-home-logo__art--glow.work-home-logo__art--has-shadow-overlay
+    .work-home-logo__image--shadow-overlay {
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.95))
+      drop-shadow(0 0 10px rgba(210, 255, 255, 0.85))
+      drop-shadow(0 0 22px rgba(120, 240, 255, 0.65));
+    animation: work-home-banner-opacity-heartbeat 1.15s cubic-bezier(0.2, 0.9, 0.2, 1) infinite;
+  }
+
+  /* Welcome overlay copy — opacity pulse only */
+  .work-home-fold .work-home-logo__slot--glow .work-home-welcome--overlay .work-home-logo__text,
+  .work-home-fold .work-home-logo__slot--glow .work-home-welcome--overlay .work-home-welcome__body,
+  .work-home-fold .work-home-logo__slot--glow .work-home-banner-text--glow {
+    animation: work-home-banner-opacity-heartbeat-subtle 1.15s cubic-bezier(0.2, 0.9, 0.2, 1)
+      infinite;
+    color: rgba(240, 255, 255, 0.98) !important;
+    -webkit-text-stroke: 0.65px rgba(120, 240, 255, 0.7);
+    -webkit-text-fill-color: rgba(240, 255, 255, 0.98) !important;
+    text-shadow:
+      0 0 1px rgba(255, 255, 255, 0.95),
+      0 0 6px rgba(230, 252, 255, 0.65),
+      0 0 16px rgba(180, 245, 255, 0.45);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .work-home-fold .work-home-logo__art--glow .work-home-logo__image--glow-bleed {
+      animation: none;
+      opacity: 0.78;
+      filter: blur(7px) brightness(1.3) saturate(1.1)
+        drop-shadow(0 0 12px rgba(230, 252, 255, 0.5));
+    }
+
+    .work-home-fold .work-home-logo__art--glow .work-home-logo__image--base {
+      animation: none;
+      opacity: 1;
+    }
+
+    .work-home-fold
+      .work-home-logo__art--glow.work-home-logo__art--has-shadow-overlay
+      .work-home-logo__image--shadow-overlay {
+      animation: none;
+      opacity: 0.82;
+      filter: drop-shadow(0 0 2px rgba(255, 255, 255, 1))
+        drop-shadow(0 0 10px rgba(200, 255, 255, 0.85))
+        drop-shadow(0 0 20px rgba(120, 240, 255, 0.7));
+    }
+
+    .work-home-fold .work-home-logo__slot--glow .work-home-welcome--overlay .work-home-logo__text,
+    .work-home-fold .work-home-logo__slot--glow .work-home-welcome--overlay .work-home-welcome__body,
+    .work-home-fold .work-home-logo__slot--glow .work-home-banner-text--glow {
+      animation: none;
+      opacity: 1;
+      color: rgba(240, 255, 255, 0.98) !important;
+      -webkit-text-stroke: 0.65px rgba(120, 240, 255, 0.7);
+      -webkit-text-fill-color: rgba(240, 255, 255, 0.98) !important;
+      text-shadow:
+        0 0 1px rgba(255, 255, 255, 0.95),
+        0 0 6px rgba(230, 252, 255, 0.65),
+        0 0 16px rgba(180, 245, 255, 0.45);
+    }
   }
 }
 

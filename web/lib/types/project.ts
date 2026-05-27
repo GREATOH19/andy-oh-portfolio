@@ -320,6 +320,14 @@ export type SiteBrand = {
   fontWeight?: SiteFontWeight | null;
   alt?: string | null;
   image?: SanityImageField;
+  /** Work homepage banner: optional shadow/outline layer (PNG) to glow on hover. */
+  shadowImage?: SanityImageField;
+  /** Work homepage banner: enable shadow glow layer (requires shadowImage). */
+  shadowGlowEnabled?: boolean | null;
+  /** Legacy: hover effect name (e.g. "fluoro-shadow-auto"). */
+  bannerHoverEffect?: string | null;
+  /** Legacy: shadow-only mask image (PNG) used for glow layer. */
+  bannerShadowMask?: SanityImageField;
   /** Work homepage banner crop anchor (ignored for header logo). */
   bannerFocus?: BannerFocus | null;
 };

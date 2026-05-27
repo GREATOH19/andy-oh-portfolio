@@ -7,7 +7,8 @@ import type {
   ProjectListItem,
 } from "@/lib/types/project";
 import {sortProjectsByYearDesc} from "@/lib/more/year";
-import {flattenAlbumImages, filterValidImages, MORE_PREVIEW_LIMIT} from "@/lib/more/photos";
+import {flattenAlbumImages, filterValidImages} from "@/lib/more/photos";
+import {pickMorePreview} from "@/lib/more/preview";
 
 export function getArchiveBlock(page: MorePageDocument | null): ArchiveBlock | null {
   const block = page?.blocks?.find(
@@ -49,17 +50,19 @@ export function getAllArchiveProjectsAcrossBlocks(blocks?: MoreBlock[] | null): 
 }
 
 export function previewArchiveProjects(page: MorePageDocument | null): ProjectListItem[] {
-  return getArchiveProjects(page).slice(0, MORE_PREVIEW_LIMIT);
+  const block = getArchiveBlock(page);
+  if (!block) return [];
+  return pickMorePreview(getArchiveProjects(page), block._key);
 }
 
 export function previewPhotographyImages(page: MorePageDocument | null) {
   const block = getPhotographyBlock(page);
   if (!block?.enabled) return [];
-  return flattenAlbumImages(block.albums).slice(0, MORE_PREVIEW_LIMIT);
+  return pickMorePreview(flattenAlbumImages(block.albums), block._key);
 }
 
 export function previewBehindTheScenesImages(page: MorePageDocument | null) {
   const block = getBehindTheScenesBlock(page);
   if (!block?.enabled) return [];
-  return filterValidImages(block.images).slice(0, MORE_PREVIEW_LIMIT);
+  return pickMorePreview(filterValidImages(block.images), block._key);
 }

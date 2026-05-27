@@ -20,19 +20,25 @@ export function PhotoThumbnailGrid({
   images,
   columns = 3,
   fixedColumns = false,
+  layout = "grid",
 }: {
   images: SanityMediaField[];
   columns?: 1 | 2 | 3;
   fixedColumns?: boolean;
+  layout?: "grid" | "masonry";
 }) {
-  const sizes = fixedColumns
-    ? "(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 20vw"
-    : "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw";
+  const sizes =
+    layout === "masonry"
+      ? "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+      : fixedColumns
+        ? "(max-width: 640px) 33vw, (max-width: 1024px) 25vw, 20vw"
+        : "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw";
 
   return (
     <ClickablePhotoGrid
       images={images}
-      gridClass={gridClass(columns, fixedColumns)}
+      layout={layout}
+      gridClass={layout === "grid" ? gridClass(columns, fixedColumns) : undefined}
       sizes={sizes}
     />
   );
