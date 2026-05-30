@@ -29,6 +29,7 @@ import {projectChapter} from './project/projectChapter'
 import {projectGallery} from './project/projectGallery'
 import {projectMedia} from './project/projectMedia'
 import {projectQuote} from './project/projectQuote'
+import {projectZigzagRow} from './project/projectZigzagRow'
 
 export const schemaTypes = [
   about,
@@ -48,6 +49,7 @@ export const schemaTypes = [
   projectMedia,
   projectGallery,
   projectQuote,
+  projectZigzagRow,
   contactCtaSection,
   gallerySection,
   heroSection,

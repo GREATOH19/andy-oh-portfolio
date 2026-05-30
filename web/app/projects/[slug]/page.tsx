@@ -1,5 +1,6 @@
 import {ProjectHeader} from "@/components/ProjectHeader";
 import {ProjectHero} from "@/components/ProjectHero";
+import {ProjectToc} from "@/components/project/ProjectToc";
 import {ProjectStory} from "@/components/project/ProjectStory";
 import {client} from "@/lib/sanity/client";
 import {isSanityImage, normalizeMediaItem} from "@/lib/sanity/media";
@@ -56,10 +57,25 @@ export default async function ProjectPage({params}: Props) {
         intrinsicHeight={project.projectHeroDimensions?.height}
       />
 
-      <article className="container-wide flex-1 pb-20 md:pb-24">
+      <article className="container-project flex-1 pb-20 md:pb-24">
         <ProjectHeader project={project} titleInHero={Boolean(heroMedia)} />
 
-        {story.length > 0 && <ProjectStory blocks={story} />}
+        {story.length > 0 ? (
+          <div className="project-story-mobile-bleed">
+            <div className="md:hidden mt-10">
+              <ProjectToc blocks={story} variant="mobile" />
+            </div>
+
+            <div className="mt-[6.75rem] grid gap-12 md:grid-cols-[minmax(0,1fr)_16rem] md:gap-3 lg:grid-cols-[minmax(0,1fr)_14rem] lg:gap-3">
+              <div className="min-w-0">
+                <ProjectStory blocks={story} />
+              </div>
+              <aside className="hidden md:block justify-self-end">
+                <ProjectToc blocks={story} variant="desktop" />
+              </aside>
+            </div>
+          </div>
+        ) : null}
       </article>
     </>
   );

@@ -1,4 +1,5 @@
 import {defineField, defineType} from 'sanity'
+import {CMS_FONT_OPTIONS} from '../fontStyle'
 
 export const projectQuote = defineType({
   name: 'projectQuote',
@@ -8,8 +9,39 @@ export const projectQuote = defineType({
     defineField({
       name: 'quote',
       title: 'Quote',
-      type: 'text',
-      rows: 3,
+      type: 'array',
+      of: [
+        {
+          type: 'block',
+          styles: [
+            {title: 'Quote — Default', value: 'normal'},
+            {title: 'Quote — Small', value: 'sizeSm'},
+            {title: 'Quote — Large', value: 'sizeLg'},
+            {title: 'Quote — XL', value: 'sizeXl'},
+          ],
+          marks: {
+            decorators: [
+              {title: 'Bold', value: 'strong'},
+              {title: 'Italic', value: 'em'},
+            ],
+            annotations: [
+              {
+                name: 'font',
+                title: 'Font',
+                type: 'object',
+                fields: [
+                  defineField({
+                    name: 'font',
+                    title: 'Font',
+                    type: 'string',
+                    options: {list: CMS_FONT_OPTIONS, layout: 'dropdown'},
+                  }),
+                ],
+              },
+            ],
+          },
+        },
+      ],
     }),
     defineField({
       name: 'attribution',
@@ -21,8 +53,8 @@ export const projectQuote = defineType({
   preview: {
     select: {quote: 'quote', attribution: 'attribution'},
     prepare: ({quote, attribution}) => ({
-      title: quote
-        ? String(quote).slice(0, 48) + (String(quote).length > 48 ? '…' : '')
+      title: Array.isArray(quote) && quote.length
+        ? 'Pull quote'
         : 'Pull quote',
       subtitle: attribution || 'Quote',
     }),

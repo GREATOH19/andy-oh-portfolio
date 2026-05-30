@@ -1,4 +1,5 @@
 import {defineField, defineType} from 'sanity'
+import {CMS_FONT_OPTIONS} from '../fontStyle'
 
 
 
@@ -18,9 +19,39 @@ export const quoteSection = defineType({
 
       title: 'Quote',
 
-      type: 'text',
-
-      rows: 4,
+      type: 'array',
+      of: [
+        {
+          type: 'block',
+          styles: [
+            {title: 'Quote — Default', value: 'normal'},
+            {title: 'Quote — Small', value: 'sizeSm'},
+            {title: 'Quote — Large', value: 'sizeLg'},
+            {title: 'Quote — XL', value: 'sizeXl'},
+          ],
+          marks: {
+            decorators: [
+              {title: 'Bold', value: 'strong'},
+              {title: 'Italic', value: 'em'},
+            ],
+            annotations: [
+              {
+                name: 'font',
+                title: 'Font',
+                type: 'object',
+                fields: [
+                  defineField({
+                    name: 'font',
+                    title: 'Font',
+                    type: 'string',
+                    options: {list: CMS_FONT_OPTIONS, layout: 'dropdown'},
+                  }),
+                ],
+              },
+            ],
+          },
+        },
+      ],
 
       validation: (Rule) => Rule.required(),
 

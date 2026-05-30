@@ -144,6 +144,7 @@ export const project = defineType({
         {type: 'projectMedia'},
         {type: 'projectGallery'},
         {type: 'projectQuote'},
+        {type: 'projectZigzagRow'},
       ],
     }),
   ],

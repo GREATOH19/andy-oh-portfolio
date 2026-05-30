@@ -111,18 +111,24 @@ export type ProjectAward = {
 
 export type ProjectChapterBlock = {
   _type: "projectChapter";
+  _key?: string;
   title?: string | null;
+  tocTitle?: string | null;
+  titleFont?: string | null;
+  titleSize?: "sm" | "md" | "lg" | "xl" | null;
   body?: PortableTextBlock[] | null;
 };
 
 export type ProjectMediaBlock = {
   _type: "projectMedia";
+  _key?: string;
   media?: CmsMediaItemRaw;
   caption?: string | null;
 };
 
 export type ProjectGalleryBlock = {
   _type: "projectGallery";
+  _key?: string;
   images?: CmsMediaInput[] | null;
   caption?: string | null;
   columns?: number | null;
@@ -130,15 +136,26 @@ export type ProjectGalleryBlock = {
 
 export type ProjectQuoteBlock = {
   _type: "projectQuote";
-  quote?: string | null;
+  _key?: string;
+  quote?: PortableTextBlock[] | null;
   attribution?: string | null;
+};
+
+export type ProjectZigzagRowBlock = {
+  _type: "projectZigzagRow";
+  _key?: string;
+  layout?: "auto" | "textLeft" | "textRight" | null;
+  body?: PortableTextBlock[] | null;
+  media?: CmsMediaItemRaw;
+  caption?: string | null;
 };
 
 export type ProjectStoryBlock =
   | ProjectChapterBlock
   | ProjectMediaBlock
   | ProjectGalleryBlock
-  | ProjectQuoteBlock;
+  | ProjectQuoteBlock
+  | ProjectZigzagRowBlock;
 
 export type ProjectDetail = ProjectListItem & {
   /** Width/height of the asset used for the detail hero (for compact layout). */
@@ -180,7 +197,7 @@ export type TwoColumnSection = {
 
 export type QuoteSection = {
   _type: "quoteSection";
-  quote?: string | null;
+  quote?: PortableTextBlock[] | null;
   attribution?: string | null;
 };
 

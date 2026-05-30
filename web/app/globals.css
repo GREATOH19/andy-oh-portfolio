@@ -49,6 +49,8 @@
   --foreground: #111111;
   /* SiteHeader uses this for h-*; intro mask uses the same for top offset */
   --site-header-height: 4rem;
+  /* Mobile-only: sticky TOC bar under SiteHeader */
+  --project-toc-height: 0rem;
   /* Uniform gutters — reference ~30px row/column (2×2 grid) */
   --work-grid-gap: 1.875rem;
   /* Project card liquid glass — muted frost + whisper cyan */
@@ -58,6 +60,12 @@
   --glass-brand-cyan: rgba(86, 205, 255, 0.08);
   --glass-brand-sky: rgba(112, 215, 255, 0.065);
   --glass-brand-warm: rgba(255, 199, 44, 0.05);
+}
+
+@media (max-width: 47.99rem) {
+  :root {
+    --project-toc-height: 2.75rem;
+  }
 }
 
 @media (max-width: 640px) {
@@ -415,8 +423,30 @@
     padding-inline: 2rem;
   }
 
+  /* Project detail pages: wider than container-wide */
+  .container-project {
+    width: 100%;
+    max-width: 1680px;
+    margin-inline: auto;
+    padding-inline: 2rem;
+  }
+
+  /* Project story — mobile full-bleed with minimal side gutter */
+  @media (max-width: 47.99rem) {
+    .project-story-mobile-bleed {
+      width: 100vw;
+      max-width: 100vw;
+      margin-left: calc(50% - 50vw);
+      padding-inline: 10px;
+    }
+  }
+
   @media (min-width: 48rem) {
     .container-wide {
+      padding-inline: 4rem;
+    }
+
+    .container-project {
       padding-inline: 4rem;
     }
   }
@@ -424,6 +454,11 @@
   @media (min-width: 64rem) {
     .container-wide {
       padding-inline: 6rem;
+    }
+
+    .container-project {
+      /* 60px outer padding on desktop */
+      padding-inline: 3.75rem;
     }
   }
 

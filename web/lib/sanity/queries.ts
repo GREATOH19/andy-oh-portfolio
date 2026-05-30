@@ -102,8 +102,13 @@ const projectListItemFields = groq`
 `;
 
 const projectStoryFields = groq`
+  _key,
   _type,
   title,
+  tocTitle,
+  titleFont,
+  titleSize,
+  layout,
   body,
   quote,
   attribution,
