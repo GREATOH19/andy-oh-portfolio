@@ -58,15 +58,18 @@ function tocFromStory(blocks: ProjectStoryBlock[]): TocItem[] {
     const chapterId = chapterAnchorId(b, i);
     const rawTitle = b.title?.trim() || "";
     const rawToc = b.tocTitle?.trim() || "";
-    const chapterLabel = (rawToc || rawTitle || `Chapter ${chapterIndex}`).trim();
-    const chapterTooltip = rawToc && rawTitle && rawToc !== rawTitle ? rawTitle : undefined;
-    items.push({
-      id: chapterId,
-      label: chapterLabel,
-      tooltip: chapterTooltip,
-      level: 1,
-      number: chapterNum,
-    });
+
+    if (rawToc || rawTitle) {
+      const chapterLabel = (rawToc || rawTitle).trim();
+      const chapterTooltip = rawToc && rawTitle && rawToc !== rawTitle ? rawTitle : undefined;
+      items.push({
+        id: chapterId,
+        label: chapterLabel,
+        tooltip: chapterTooltip,
+        level: 1,
+        number: chapterNum,
+      });
+    }
 
     const body = b.body ?? [];
     for (const pt of body) {
@@ -130,13 +133,7 @@ function scrollToId(id: string) {
   }
 }
 
-export function ProjectToc({
-  blocks,
-  variant,
-}: {
-  blocks: ProjectStoryBlock[];
-  variant: "mobile" | "desktop";
-}) {
+export function ProjectToc({blocks}: {blocks: ProjectStoryBlock[]}) {
   const items = useMemo(() => tocFromStory(blocks), [blocks]);
   const [activeId, setActiveId] = useState<string | null>(items[0]?.id ?? null);
   const mobileSentinelRef = useRef<HTMLDivElement>(null);
@@ -176,7 +173,7 @@ export function ProjectToc({
   }, [items]);
 
   useEffect(() => {
-    if (variant !== "mobile" || !items.length) return;
+    if (!items.length) return;
 
     const sentinel = mobileSentinelRef.current;
     if (!sentinel) return;
@@ -193,17 +190,16 @@ export function ProjectToc({
       window.removeEventListener("scroll", updatePinned);
       window.removeEventListener("resize", updatePinned);
     };
-  }, [variant, items.length]);
+  }, [items.length]);
 
   if (items.length <= 1) return null;
 
-  if (variant === "mobile") {
-    return (
+  return (
       <div style={{["--project-toc-height" as never]: "2.75rem"}}>
         <div ref={mobileSentinelRef} className="pointer-events-none h-0" aria-hidden />
         <div
           className={[
-            "z-[49] border-b border-zinc-200/60 bg-[rgba(234,252,255,0.72)] backdrop-blur-md",
+            "z-[49] w-full border-b border-zinc-200/60 bg-[rgba(234,252,255,0.72)] backdrop-blur-md box-border",
             mobilePinned
               ? "fixed inset-x-0 top-[var(--site-header-height)]"
               : "relative",
@@ -211,7 +207,7 @@ export function ProjectToc({
         >
           <nav
             aria-label="On this page"
-            className="flex gap-3 overflow-x-auto px-[10px] py-2"
+            className="flex gap-3 overflow-x-auto px-[var(--project-bleed-gutter,2.5rem)] py-2 md:justify-center md:overflow-x-visible md:flex-wrap"
           >
             {items
               .filter((i) => i.level === 1)
@@ -241,57 +237,6 @@ export function ProjectToc({
           <div className="h-[var(--project-toc-height)] shrink-0" aria-hidden />
         ) : null}
       </div>
-    );
-  }
-
-  return (
-    <div className="sticky top-[calc(var(--site-header-height)+3rem)]">
-      <nav aria-label="On this page" className="text-sm">
-        <div className="mb-4 text-[11px] uppercase tracking-[0.22em] text-zinc-400">Contents</div>
-        <div className="relative pl-4">
-          <div aria-hidden className="absolute left-1 top-1 bottom-1 w-px bg-zinc-300/60" />
-          <ul className="space-y-2">
-            {items.map((item) => {
-              const isActive = activeId === item.id;
-              const indent = item.level === 1 ? "" : item.level === 2 ? "pl-3" : "pl-6";
-              const dot =
-                item.level === 1 ? "h-2 w-2" : item.level === 2 ? "h-1.5 w-1.5" : "h-1 w-1";
-              return (
-                <li key={item.id} className={`relative ${indent}`}>
-                  <button
-                    type="button"
-                    onClick={() => scrollToId(item.id)}
-                    className={[
-                      "group flex w-full items-start gap-2 text-left",
-                      isActive ? "text-zinc-950" : "text-zinc-600 hover:text-zinc-900",
-                    ].join(" ")}
-                    title={item.tooltip}
-                  >
-                    <span
-                      className={[
-                        "mt-1.5 rounded-full bg-zinc-400/70 transition-colors",
-                        dot,
-                        isActive ? "bg-zinc-900" : "group-hover:bg-zinc-700",
-                      ].join(" ")}
-                      aria-hidden
-                    />
-                    <span className="min-w-[2.6rem] tabular-nums text-zinc-500">
-                      {item.number}
-                    </span>
-                    <span className="ml-auto text-right leading-snug">{item.label}</span>
-                  </button>
-                  {item.tooltip ? (
-                    <div className="pointer-events-none absolute left-6 top-full z-10 mt-2 hidden w-[min(22rem,70vw)] rounded-md border border-zinc-200/70 bg-white/80 p-2 text-[12px] leading-snug text-zinc-600 shadow-sm backdrop-blur-md group-hover:block">
-                      {item.tooltip}
-                    </div>
-                  ) : null}
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      </nav>
-    </div>
   );
 }
 

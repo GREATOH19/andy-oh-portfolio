@@ -9,12 +9,14 @@ export function SanityAspectMedia({
   maxWidth,
   quality,
   sizes,
+  unoptimized,
 }: {
   media: SanityMediaField;
   alt: string;
   maxWidth: number;
   quality?: number;
   sizes: string;
+  unoptimized?: boolean;
 }) {
   if (isSanityImage(media)) {
     return (
@@ -24,6 +26,7 @@ export function SanityAspectMedia({
         maxWidth={maxWidth}
         quality={quality}
         sizes={sizes}
+        unoptimized={unoptimized}
       />
     );
   }

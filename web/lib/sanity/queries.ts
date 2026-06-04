@@ -108,12 +108,28 @@ const projectStoryFields = groq`
   tocTitle,
   titleFont,
   titleSize,
+  textAlign,
+  mobileBlockOrder,
+  mobileStackOrder,
+  mediaWidth,
+  mediaAlign,
+  mobileCarousel,
+  size,
+  style,
+  ratio,
+  left,
+  right,
   layout,
+  bodyFont,
+  bodyFontSize,
   body,
   quote,
   attribution,
   caption,
   columns,
+  items[] {
+    ${cmsMediaItemFields}
+  },
   media {
     ${cmsMediaItemFields}
   },
@@ -165,6 +181,13 @@ export const projectBySlugQuery = groq`
       href
     },
     articleUrl,
+    attachments[] {
+      title,
+      description,
+      "url": file.asset->url,
+      "filename": file.asset->originalFilename,
+      "size": file.asset->size
+    },
     coverImage,
     heroImage {
       ${cmsMediaItemFields}

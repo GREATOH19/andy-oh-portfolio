@@ -9,9 +9,15 @@ if (!projectId || !dataset) {
   );
 }
 
+const studioUrl =
+  process.env.NEXT_PUBLIC_SANITY_STUDIO_URL ?? "http://localhost:3333";
+
 export const client = createClient({
   projectId,
   dataset,
   apiVersion: "2024-01-01",
   useCdn: false,
+  stega: {
+    studioUrl,
+  },
 });

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import {draftMode} from "next/headers";
 import {
   DM_Sans,
   Geist,
@@ -15,6 +16,7 @@ import { DocumentOverflowReset } from "@/components/DocumentOverflowReset";
 import { DebugBodyStyleReporter } from "@/components/DebugBodyStyleReporter";
 import { ScrollGradient } from "@/components/ScrollGradient";
 import { SiteHeader } from "@/components/SiteHeader";
+import { VisualEditingBridge } from "@/components/VisualEditingBridge";
 import { TypographyProvider } from "@/components/TypographyProvider";
 import { client } from "@/lib/sanity/client";
 import { fetchMorePage } from "@/lib/more/fetchMorePage";
@@ -87,6 +89,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const isDraftMode = (await draftMode()).isEnabled;
+
   const [settings, contactDoc, morePage] = await Promise.all([
     client.fetch<SiteSettingsDocument | null>(siteSettingsQuery),
     client.fetch<ContactDocument | null>(contactQuery),
@@ -126,6 +130,7 @@ export default async function RootLayout({
               />
             </ConditionalFooter>
           </main>
+          {isDraftMode ? <VisualEditingBridge /> : null}
         </TypographyProvider>
       </body>
     </html>

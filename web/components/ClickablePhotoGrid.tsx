@@ -18,6 +18,7 @@ export function ClickablePhotoGrid({
   thumbMaxWidth = 560,
   sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw",
   quality,
+  unoptimized,
   className,
 }: {
   images: SanityMediaField[];
@@ -26,6 +27,7 @@ export function ClickablePhotoGrid({
   thumbMaxWidth?: number;
   sizes?: string;
   quality?: number;
+  unoptimized?: boolean;
   className?: string;
 }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -72,6 +74,7 @@ export function ClickablePhotoGrid({
                 maxWidth={thumbMaxWidth}
                 quality={quality}
                 sizes={sizes}
+                unoptimized={unoptimized}
               />
             </button>
           ) : (
@@ -82,6 +85,7 @@ export function ClickablePhotoGrid({
                 maxWidth={thumbMaxWidth}
                 quality={quality}
                 sizes={sizes}
+                unoptimized={unoptimized}
               />
             </div>
           );
@@ -119,4 +123,12 @@ export function projectGalleryGridClass(columns: number): string {
   if (columns === 2) return "grid grid-cols-2 gap-2 sm:gap-3";
   if (columns === 3) return "grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3";
   return "grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4";
+}
+
+/** Story gallery — gap from --story-media-items-gap (no Tailwind gap utilities). */
+export function projectStoryGalleryGridClass(columns: number): string {
+  if (columns === 1) return "grid grid-cols-1";
+  if (columns === 2) return "grid grid-cols-2";
+  if (columns === 3) return "grid grid-cols-2 sm:grid-cols-3";
+  return "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4";
 }

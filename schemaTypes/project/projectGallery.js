@@ -1,4 +1,5 @@
 import {defineField, defineType} from 'sanity'
+import {projectStoryLayoutFields} from './projectStoryLayoutFields'
 
 export const projectGallery = defineType({
   name: 'projectGallery',
@@ -24,6 +25,7 @@ export const projectGallery = defineType({
       validation: (Rule) => Rule.min(1).max(3),
       description: 'Desktop column count (1–3).',
     }),
+    ...projectStoryLayoutFields,
   ],
   preview: {
     select: {images: 'images', caption: 'caption'},

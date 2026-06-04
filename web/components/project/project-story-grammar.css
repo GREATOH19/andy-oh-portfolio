@@ -1,0 +1,18 @@
+/**
+ * Chapter unit ↔ chapter unit gap (head + between-chapters blocks).
+ * Mobile 1.6rem | Web (≥48rem) 2.3rem — via --story-chapter-gap on .project-story
+ */
+html body .project-story > .project-story-chapter-unit + .project-story-chapter-unit,
+html body .project-story > .project-story-chapter-unit[data-story-chapter-gap],
+html body .project-story > .project-story-chapter-unit.project-story-chapter-gap-active {
+  margin-top: var(--story-chapter-gap, 1.6rem) !important;
+  padding-top: 0 !important;
+  box-sizing: border-box;
+}
+
+html body .project-story > .project-story-chapter-unit[data-story-chapter-gap] > *:first-child,
+html body .project-story > .project-story-chapter-unit.project-story-chapter-gap-active > *:first-child {
+  margin-top: 0 !important;
+}
+
+/* Story body font sizes: globals.css (.project-story-prose, .story-body-text) */

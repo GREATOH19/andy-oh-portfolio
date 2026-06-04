@@ -96,19 +96,10 @@ function WorkHomeDesktopWelcome({
   displayClass: string;
   reduceMotion: boolean | null;
 }) {
-  const [bannerHover, setBannerHover] = useState(false);
   const glowEnabled = Boolean(brand?.shadowGlowEnabled && brand?.shadowImage?.asset);
 
   return (
-    <div
-      className={`work-home-logo__slot work-home-logo__slot--welcome${bannerHover ? " work-home-logo__slot--glow" : ""}`}
-      onPointerEnter={() => setBannerHover(true)}
-      onPointerLeave={(e) => {
-        const next = e.relatedTarget;
-        if (next instanceof Node && e.currentTarget.contains(next)) return;
-        setBannerHover(false);
-      }}
-    >
+    <div className="work-home-logo__slot work-home-logo__slot--welcome">
       {hasLogo ? (
         <div className="work-home-welcome-backdrop" aria-hidden>
           <div className="work-home-welcome-backdrop__sharp">
@@ -117,7 +108,7 @@ function WorkHomeDesktopWelcome({
               variant="workHome"
               linkable={false}
               bannerGlow={glowEnabled}
-              bannerGlowActive={bannerHover}
+              bannerGlowActive={false}
               bannerGlowWelcomeSharp
             />
           </div>

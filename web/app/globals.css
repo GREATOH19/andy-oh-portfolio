@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../components/project/project-story-grammar.css";
 
 /* CMS picks fonts via cmsFontClass.ts — class names must exist in full for Tailwind to emit utilities */
 @source "../lib/cmsFontClass.ts";
@@ -49,8 +50,8 @@
   --foreground: #111111;
   /* SiteHeader uses this for h-*; intro mask uses the same for top offset */
   --site-header-height: 4rem;
-  /* Mobile-only: sticky TOC bar under SiteHeader */
-  --project-toc-height: 0rem;
+  /* Sticky chapter TOC bar under SiteHeader */
+  --project-toc-height: 2.75rem;
   /* Uniform gutters — reference ~30px row/column (2×2 grid) */
   --work-grid-gap: 1.875rem;
   /* Project card liquid glass — muted frost + whisper cyan */
@@ -60,12 +61,6 @@
   --glass-brand-cyan: rgba(86, 205, 255, 0.08);
   --glass-brand-sky: rgba(112, 215, 255, 0.065);
   --glass-brand-warm: rgba(255, 199, 44, 0.05);
-}
-
-@media (max-width: 47.99rem) {
-  :root {
-    --project-toc-height: 2.75rem;
-  }
 }
 
 @media (max-width: 640px) {
@@ -168,6 +163,54 @@
   .project-card-overlay-title {
     font-size: 2.875rem;
   }
+}
+
+/*
+ * STORY LAYOUT GRAMMAR (non-negotiable)
+ * -----------------------------------
+ * Story spacing: chapter 1.6rem (mobile) / 2.3rem (web ≥48rem); within-chapter 1.75rem;
+ * between-chapters / media / zigzag: 0.4rem (mobile); web between-blocks = within-chapter (1.75rem)
+ * Chapter unit gap: project-story-grammar.css (data-story-chapter-gap on .project-story-chapter-unit)
+ * Between-chapter blocks: --story-between-chapters-gap on .project-story-between-chapters
+ * Chapter title/body: --story-within-chapter-gap | prose blocks: --story-prose-gap (1rem mobile)
+ */
+.project-story {
+  /* Blocks after a chapter marker until the next projectChapter */
+  --story-between-chapters-gap: 0.4rem;
+  --story-within-chapter-gap: 1.75rem;
+  --story-prose-gap: 1rem;
+  --story-chapter-gap: 1.6rem;
+  --story-media-items-gap: 0.4rem;
+  --story-zigzag-gap: 0.4rem;
+}
+
+@media (min-width: 48rem) {
+  .project-story {
+    --story-chapter-gap: 2.3rem;
+    --story-between-chapters-gap: var(--story-within-chapter-gap);
+    --story-prose-gap: var(--story-within-chapter-gap);
+    --story-zigzag-gap: 0.75rem;
+  }
+}
+
+@media (max-width: 47.999rem) {
+  .project-story {
+    --story-zigzag-block-gap: 1rem;
+    --story-chapter-body-media-gap: 1rem;
+  }
+}
+
+.project-story-chapter-title {
+  margin-bottom: var(--story-within-chapter-gap);
+}
+
+/* Pre-first-chapter solo blocks only */
+.story-spacing-between-chapters {
+  margin-top: var(--story-between-chapters-gap, 0.4rem);
+}
+
+.story-spacing-zigzag {
+  gap: var(--story-zigzag-gap, 0.4rem); /* zigzag internal — not between-chapter components */
 }
 
 /* Work homepage thumbnails — mobile matches pre-launch; larger from sm+ */
@@ -425,19 +468,314 @@
 
   /* Project detail pages: wider than container-wide */
   .container-project {
+    --project-container-gutter: 2.5rem;
     width: 100%;
     max-width: 1680px;
     margin-inline: auto;
-    padding-inline: 2rem;
+    padding-inline: var(--project-container-gutter);
   }
 
-  /* Project story — mobile full-bleed with minimal side gutter */
-  @media (max-width: 47.99rem) {
+  .project-story {
+    display: flex;
+    flex-direction: column;
+    --story-between-chapters-gap: 0.4rem;
+    --story-within-chapter-gap: 1.75rem;
+    --story-prose-gap: 1rem;
+    --story-chapter-gap: 1.6rem;
+    --story-media-items-gap: 0.4rem;
+    --story-zigzag-gap: 0.4rem;
+  }
+
+  @media (min-width: 48rem) {
+    .project-story {
+      --story-chapter-gap: 2.3rem;
+      --story-between-chapters-gap: var(--story-within-chapter-gap);
+      --story-prose-gap: var(--story-within-chapter-gap);
+      --story-zigzag-gap: 0.75rem;
+    }
+  }
+
+  .project-story-between-chapters {
+    display: flex;
+    flex-direction: column;
+    gap: var(--story-between-chapters-gap);
+  }
+
+  /* Chapter body → blocks below (padding only; not chapter↔chapter gap) */
+  .project-story-chapter-head + .project-story-between-chapters {
+    margin-top: 0;
+    padding-top: var(--story-between-chapters-gap);
+  }
+
+  .project-story-between-chapters > * {
+    margin-top: 0 !important;
+  }
+
+  .project-story-between-chapters > *:last-child {
+    margin-bottom: 0 !important;
+  }
+
+  .project-story-chapter-head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--story-within-chapter-gap);
+  }
+
+  .project-story-chapter-head:has(> :nth-child(2)) .project-story-chapter-title {
+    margin-bottom: 0;
+  }
+
+  .project-story-prose-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--story-prose-gap, 1rem);
+  }
+
+  .project-story-prose-stack > :first-child {
+    margin-top: 0;
+  }
+
+  .project-story-prose-stack p {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    line-height: 1.7;
+  }
+
+  .project-story-prose-stack ul,
+  .project-story-prose-stack ol {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .project-story-prose-stack h2,
+  .project-story-prose-stack h3 {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .project-story-prose-stack figure {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .project-story-between-chapters figure figcaption,
+  .project-story-between-chapters blockquote + p {
+    margin-top: var(--story-between-chapters-gap) !important;
+  }
+
+  .project-story-chapter-head figure figcaption,
+  .project-story-chapter-head blockquote + p {
+    margin-top: var(--story-within-chapter-gap) !important;
+  }
+
+  /* Project story — readable line length on small screens; full width in bleed layout */
+  .project-story-prose {
+    width: 100%;
+    max-width: 65ch;
+    --story-body-font-size: 1.02rem;
+  }
+
+  @media (min-width: 48rem) {
+    .project-story-prose {
+      --story-body-font-size: 17px;
+    }
+  }
+
+  .story-body-text {
+    font-size: var(--story-body-font-size);
+  }
+
+  /* List items render an inner <p>; inherit block/body font + size from <li> */
+  .project-story-prose-stack :is(ul, ol).story-body-list {
+    font-family: inherit;
+    font-size: inherit;
+  }
+
+  .project-story-prose-stack li.story-body-text > p {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    font-size: inherit;
+    font-family: inherit;
+    line-height: inherit;
+    color: inherit;
+  }
+
+  .project-story-prose > :first-child {
+    margin-top: 0;
+  }
+
+  .project-story-mobile-bleed .project-story-prose {
+    max-width: none;
+  }
+
+  /* Project detail — vertical gap between overview and story */
+  .project-story-band-gap {
+    margin-top: 5rem;
+  }
+
+  @media (max-width: 47.999rem) {
+    .project-story-band-gap {
+      margin-top: 8rem;
+    }
+  }
+
+  /* Mobile: zigzag stack + chapter body ↔ media rhythm */
+  @media (max-width: 47.999rem) {
+    .project-story {
+      --story-zigzag-block-gap: 1rem;
+      --story-chapter-body-media-gap: 1rem;
+    }
+
+    .project-story-chapter-head:has(.project-story-prose)
+      + .project-story-between-chapters {
+      padding-top: var(--story-chapter-body-media-gap);
+    }
+
+    .project-story-chapter-unit--mobile-block-reorder {
+      display: flex;
+      flex-direction: column;
+      row-gap: var(--story-chapter-body-media-gap, 1rem);
+    }
+
+    .project-story-chapter-unit--mobile-block-reorder .project-story-chapter-head,
+    .project-story-chapter-unit--mobile-block-reorder .project-story-between-chapters {
+      display: contents;
+    }
+
+    .project-story-chapter-unit--mobile-block-reorder
+      .project-story-chapter-head
+      + .project-story-between-chapters {
+      padding-top: 0;
+    }
+
+    /* Text block (not zigzag) → next block: 1rem total (flex gap + margin) */
+    .project-story-between-chapters
+      > *:has(.project-story-prose):not(.story-spacing-zigzag)
+      + * {
+      margin-top: calc(
+        var(--story-chapter-body-media-gap, 1rem) -
+          var(--story-between-chapters-gap, 0.4rem)
+      ) !important;
+    }
+
+    /* Zigzag block ↔ zigzag block: 1rem total */
+    .project-story-between-chapters > .story-spacing-zigzag + .story-spacing-zigzag,
+    .project-story > .story-spacing-zigzag + .story-spacing-zigzag {
+      margin-top: calc(
+        var(--story-zigzag-block-gap, 1rem) - var(--story-between-chapters-gap, 0.4rem)
+      ) !important;
+    }
+
+    .project-story-between-chapters--media-first > *,
+    .project-story-between-chapters--text-first > * {
+      margin-top: 0 !important;
+    }
+
+    .project-story-between-chapters--media-first
+      > *:has(.project-story-prose):not(.story-spacing-zigzag)
+      + *,
+    .project-story-between-chapters--text-first
+      > *:has(.project-story-prose):not(.story-spacing-zigzag)
+      + * {
+      margin-top: calc(
+        var(--story-chapter-body-media-gap, 1rem) -
+          var(--story-between-chapters-gap, 0.4rem)
+      ) !important;
+    }
+
+    .project-story-between-chapters--media-first > .story-spacing-zigzag + .story-spacing-zigzag,
+    .project-story-between-chapters--text-first > .story-spacing-zigzag + .story-spacing-zigzag {
+      margin-top: calc(
+        var(--story-zigzag-block-gap, 1rem) - var(--story-between-chapters-gap, 0.4rem)
+      ) !important;
+    }
+  }
+
+  /* Project overview — narrower than full-bleed story */
+  .project-overview-narrow {
+    width: 100%;
+    max-width: 68rem;
+    margin-inline: auto;
+  }
+
+  /* Project TOC — edge-to-edge band */
+  .project-toc-full-bleed {
+    --project-bleed-gutter: 2.5rem;
+    width: auto;
+    max-width: none;
+    margin-inline: calc(-1 * var(--project-container-gutter, 2.5rem));
+    box-sizing: border-box;
+  }
+
+  /* Project story — full-width band inside project container */
+  .project-story-mobile-bleed {
+    --project-story-gutter: 2.5rem;
+    width: auto;
+    max-width: none;
+    margin-inline: calc(-1 * var(--project-container-gutter, 2.5rem));
+    padding-inline: var(--project-story-gutter);
+    box-sizing: border-box;
+  }
+
+  .project-story-mobile-bleed .project-story {
+    width: 100%;
+    max-width: none;
+  }
+
+  /* Story block: break out of story gutter (edge-to-edge media, desktop) */
+  .project-story-layout-bleed {
+    width: auto;
+    max-width: none;
+    margin-inline: calc(-1 * var(--project-story-gutter, 2.5rem));
+    padding-inline: var(--project-story-gutter, 2.5rem);
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 47.999rem) {
     .project-story-mobile-bleed {
-      width: 100vw;
-      max-width: 100vw;
-      margin-left: calc(50% - 50vw);
-      padding-inline: 10px;
+      --project-story-gutter: 1rem;
+      padding-inline: 0;
+    }
+
+    /* Text blocks keep side gutter; full-width media blocks stay edge-to-edge */
+    .project-story-mobile-bleed .project-story > *:not(.project-story-block--mobile-edge) {
+      padding-inline: var(--project-story-gutter);
+      box-sizing: border-box;
+    }
+
+    .project-story-mobile-bleed .project-story-between-chapters > *:not(.project-story-block--mobile-edge),
+    .project-story-mobile-bleed .project-story-chapter-head > *:not(.project-story-block--mobile-edge) {
+      padding-inline: var(--project-story-gutter);
+      box-sizing: border-box;
+    }
+
+    .project-story-block--mobile-edge {
+      width: 100%;
+      max-width: none;
+      margin-inline: 0;
+      padding-inline: 0;
+    }
+
+    .project-story-layout-bleed {
+      width: 100%;
+      max-width: none;
+      margin-inline: 0;
+      padding-inline: 0;
+    }
+
+    .project-story-between-chapters--media-first,
+    .project-story-between-chapters--text-first {
+      align-items: stretch;
+    }
+
+    .project-story-block--mobile-edge .media-thumb,
+    .project-story-layout-bleed .media-thumb {
+      @apply rounded-none shadow-none ring-0;
+    }
+
+    .project-story-block--mobile-edge figcaption {
+      padding-inline: var(--project-story-gutter);
+      box-sizing: border-box;
     }
   }
 
@@ -447,7 +785,16 @@
     }
 
     .container-project {
-      padding-inline: 4rem;
+      padding-inline: 4.5rem;
+      --project-container-gutter: 4.5rem;
+    }
+
+    .project-story-mobile-bleed {
+      --project-story-gutter: 4.5rem;
+    }
+
+    .project-toc-full-bleed {
+      --project-bleed-gutter: 4.5rem;
     }
   }
 
@@ -457,8 +804,16 @@
     }
 
     .container-project {
-      /* 60px outer padding on desktop */
-      padding-inline: 3.75rem;
+      padding-inline: 4.5rem;
+      --project-container-gutter: 4.5rem;
+    }
+
+    .project-story-mobile-bleed {
+      --project-story-gutter: 4.5rem;
+    }
+
+    .project-toc-full-bleed {
+      --project-bleed-gutter: 4.5rem;
     }
   }
 
@@ -1111,3 +1466,133 @@
   }
 }
 
+/* Story grammar — chapter unit ↔ chapter unit (after all @layer) */
+html body .project-story > .project-story-chapter-unit + .project-story-chapter-unit,
+html body .project-story > .project-story-chapter-unit[data-story-chapter-gap],
+html body .project-story > .project-story-chapter-unit.project-story-chapter-gap-active {
+  margin-top: var(--story-chapter-gap, 1.6rem) !important;
+  padding-top: 0 !important;
+}
+
+html body .project-story .project-story-between-chapters {
+  gap: var(--story-between-chapters-gap, 0.4rem) !important;
+  margin-top: 0 !important;
+}
+
+@media (min-width: 48rem) {
+  html body .project-story .project-story-chapter-head + .project-story-between-chapters {
+    margin-top: 0 !important;
+    padding-top: var(--story-between-chapters-gap, 1.75rem) !important;
+  }
+}
+
+@media (max-width: 47.999rem) {
+  html body .project-story .project-story-chapter-head + .project-story-between-chapters {
+    margin-top: 0 !important;
+    padding-top: var(--story-between-chapters-gap, 0.4rem) !important;
+  }
+
+  html body .project-story .project-story-chapter-head:has(.project-story-prose)
+    + .project-story-between-chapters {
+    padding-top: var(--story-chapter-body-media-gap, 1rem) !important;
+  }
+
+  html body
+    .project-story
+    .project-story-between-chapters
+    > *:has(.project-story-prose):not(.story-spacing-zigzag)
+    + * {
+    margin-top: calc(
+      var(--story-chapter-body-media-gap, 1rem) -
+        var(--story-between-chapters-gap, 0.4rem)
+    ) !important;
+  }
+
+  html body .project-story .project-story-between-chapters > .story-spacing-zigzag + .story-spacing-zigzag,
+  html body .project-story > .story-spacing-zigzag + .story-spacing-zigzag {
+    margin-top: calc(
+      var(--story-zigzag-block-gap, 1rem) - var(--story-between-chapters-gap, 0.4rem)
+    ) !important;
+  }
+
+  html body .project-story .project-story-chapter-unit--mobile-block-reorder {
+    display: flex !important;
+    flex-direction: column !important;
+    row-gap: var(--story-chapter-body-media-gap, 1rem) !important;
+  }
+
+  html body
+    .project-story
+    .project-story-chapter-unit--mobile-block-reorder
+    .project-story-chapter-head,
+  html body
+    .project-story
+    .project-story-chapter-unit--mobile-block-reorder
+    .project-story-between-chapters {
+    display: contents !important;
+  }
+}
+
+html body .project-story .project-story-media-grid {
+  gap: var(--story-media-items-gap, 0.4rem) !important;
+}
+
+html body .project-story .story-spacing-zigzag {
+  gap: var(--story-zigzag-gap, 0.4rem) !important;
+}
+
+@media (min-width: 48rem) {
+  html body .project-story .story-spacing-zigzag {
+    gap: var(--story-zigzag-gap, 0.75rem) !important;
+  }
+}
+
+@media (max-width: 47.999rem) {
+  html body
+    .project-story
+    .project-story-chapter-unit--mobile-block-reorder
+    .project-story-chapter-head
+    + .project-story-between-chapters {
+    padding-top: 0 !important;
+  }
+}
+
+html body .project-story .project-story-prose-stack {
+  gap: var(--story-prose-gap, 1rem) !important;
+}
+
+html body .project-story .project-story-chapter-title {
+  margin-bottom: var(--story-within-chapter-gap, 1.75rem);
+}
+
+/* Story body — one size on mobile; desktop default 17px (see .project-story-prose above) */
+@media (max-width: 47.999rem) {
+  html body .project-story .project-story-prose {
+    --story-body-font-size: 1.02rem !important;
+  }
+
+  html body .project-story .project-story-prose-stack :is(p, li) {
+    font-size: 1.02rem !important;
+  }
+
+  html body .project-story .project-story-prose-stack :is(p, li) * {
+    font-size: inherit !important;
+  }
+}
+
+@media (min-width: 48rem) {
+  html body .project-story .story-spacing-zigzag .project-story-prose {
+    --story-body-font-size: 17px;
+  }
+
+  html body .project-story .project-story-prose-stack :is(p.story-body-text, li.story-body-text),
+  html body .project-story .story-spacing-zigzag .project-story-prose-stack :is(p, li) {
+    font-size: var(--story-body-font-size, 17px);
+  }
+
+  html body .project-story .project-story-prose-stack li.story-body-text > p,
+  html body .project-story .story-spacing-zigzag .project-story-prose-stack li > p {
+    font-size: inherit;
+    font-family: inherit;
+  }
+}

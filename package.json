@@ -11,10 +11,10 @@
   },
   "dependencies": {
     "@sanity/orderable-document-list": "^1.5.1",
-    "@sanity/vision": "^5.24.0",
+    "@sanity/vision": "^5.28.0",
     "react": "^19.2.2",
     "react-dom": "^19.2.2",
-    "sanity": "^5.24.0",
+    "sanity": "^5.28.0",
     "styled-components": "^6.1.15"
   }
 }

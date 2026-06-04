@@ -130,6 +130,15 @@ export const project = defineType({
       group: 'intro',
       description: 'Optional — Medium or case study URL.',
     }),
+    defineField({
+      name: 'attachments',
+      title: 'Downloads (PDF)',
+      type: 'array',
+      group: 'intro',
+      description:
+        'Optional PDFs shown below the overview and above the story — e.g. process deck, spec sheet.',
+      of: [{type: 'projectAttachment'}],
+    }),
 
     // —— Story (scroll) ——
     defineField({
@@ -138,13 +147,15 @@ export const project = defineType({
       type: 'array',
       group: 'story',
       description:
-        'Build the case study top to bottom: chapters for text, full-width media for hero moments, grids for process shots, pull quotes for emphasis.',
+        'Build top to bottom: chapters, text boxes, media, grids, zigzag, two columns, and quotes. Use Width/Alignment on media blocks.',
       of: [
         {type: 'projectChapter'},
+        {type: 'projectTextBox'},
         {type: 'projectMedia'},
         {type: 'projectGallery'},
         {type: 'projectQuote'},
         {type: 'projectZigzagRow'},
+        {type: 'projectColumns'},
       ],
     }),
   ],

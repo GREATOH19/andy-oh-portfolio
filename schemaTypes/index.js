@@ -23,6 +23,7 @@ import {photographyBlock} from './sections/photographyBlock'
 import {behindTheScenesBlock} from './sections/behindTheScenesBlock'
 
 import {detailLine} from './project/detailLine'
+import {projectAttachment} from './project/projectAttachment'
 import {partner} from './project/partner'
 import {projectAward} from './project/projectAward'
 import {projectChapter} from './project/projectChapter'
@@ -30,6 +31,9 @@ import {projectGallery} from './project/projectGallery'
 import {projectMedia} from './project/projectMedia'
 import {projectQuote} from './project/projectQuote'
 import {projectZigzagRow} from './project/projectZigzagRow'
+import {projectTextBox} from './project/projectTextBox'
+import {projectInlineMedia} from './project/projectInlineMedia'
+import {projectColumns} from './project/projectColumns'
 
 export const schemaTypes = [
   about,
@@ -43,6 +47,7 @@ export const schemaTypes = [
   photoAlbum,
   siteBrand,
   detailLine,
+  projectAttachment,
   partner,
   projectAward,
   projectChapter,
@@ -50,6 +55,9 @@ export const schemaTypes = [
   projectGallery,
   projectQuote,
   projectZigzagRow,
+  projectTextBox,
+  projectInlineMedia,
+  projectColumns,
   contactCtaSection,
   gallerySection,
   heroSection,

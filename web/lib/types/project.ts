@@ -109,6 +109,25 @@ export type ProjectAward = {
   href?: string | null;
 };
 
+export type ProjectAttachment = {
+  title?: string | null;
+  description?: string | null;
+  url?: string | null;
+  filename?: string | null;
+  size?: number | null;
+};
+
+export type ProjectChapterTextAlign = "left" | "center" | "right";
+
+export type ProjectMobileStackOrder = "default" | "mediaFirst" | "textFirst";
+export type ProjectChapterMobileBlockOrder = ProjectMobileStackOrder;
+export type ProjectZigzagMobileStackOrder = ProjectMobileStackOrder;
+
+export type ProjectBodyTypographyFields = {
+  bodyFont?: string | null;
+  bodyFontSize?: number | null;
+};
+
 export type ProjectChapterBlock = {
   _type: "projectChapter";
   _key?: string;
@@ -116,15 +135,36 @@ export type ProjectChapterBlock = {
   tocTitle?: string | null;
   titleFont?: string | null;
   titleSize?: "sm" | "md" | "lg" | "xl" | null;
+  textAlign?: ProjectChapterTextAlign | null;
   body?: PortableTextBlock[] | null;
+  mobileBlockOrder?: ProjectChapterMobileBlockOrder | null;
+} & ProjectBodyTypographyFields;
+
+export type ProjectStoryMediaWidth = "narrow" | "medium" | "full" | "bleed";
+export type ProjectStoryMediaAlign = "left" | "center" | "right";
+export type ProjectStoryMobileCarousel = "carousel" | "stack";
+
+export type ProjectStoryLayoutFields = {
+  mediaWidth?: ProjectStoryMediaWidth | null;
+  mediaAlign?: ProjectStoryMediaAlign | null;
+  /** When 2+ items: carousel (default) or stacked list on mobile */
+  mobileCarousel?: ProjectStoryMobileCarousel | null;
 };
+
+export type ProjectInlineMediaBlock = {
+  _type: "projectInlineMedia";
+  _key?: string;
+  media?: CmsMediaItemRaw;
+  caption?: string | null;
+} & ProjectStoryLayoutFields;
 
 export type ProjectMediaBlock = {
   _type: "projectMedia";
   _key?: string;
+  items?: CmsMediaInput[] | null;
   media?: CmsMediaItemRaw;
   caption?: string | null;
-};
+} & ProjectStoryLayoutFields;
 
 export type ProjectGalleryBlock = {
   _type: "projectGallery";
@@ -132,6 +172,14 @@ export type ProjectGalleryBlock = {
   images?: CmsMediaInput[] | null;
   caption?: string | null;
   columns?: number | null;
+} & ProjectStoryLayoutFields;
+
+export type ProjectColumnsBlock = {
+  _type: "projectColumns";
+  _key?: string;
+  ratio?: "50-50" | "40-60" | "60-40" | null;
+  left?: PortableTextBlock[] | null;
+  right?: PortableTextBlock[] | null;
 };
 
 export type ProjectQuoteBlock = {
@@ -141,21 +189,34 @@ export type ProjectQuoteBlock = {
   attribution?: string | null;
 };
 
+export type ProjectTextBoxBlock = {
+  _type: "projectTextBox";
+  _key?: string;
+  label?: string | null;
+  textAlign?: ProjectChapterTextAlign | null;
+  body?: PortableTextBlock[] | null;
+} & ProjectBodyTypographyFields;
+
 export type ProjectZigzagRowBlock = {
   _type: "projectZigzagRow";
   _key?: string;
   layout?: "auto" | "textLeft" | "textRight" | null;
+  mobileStackOrder?: ProjectZigzagMobileStackOrder | null;
   body?: PortableTextBlock[] | null;
+  /** Current schema: array of media. Legacy rows may still have a single `media` object. */
+  images?: CmsMediaInput[] | null;
   media?: CmsMediaItemRaw;
   caption?: string | null;
-};
+} & ProjectBodyTypographyFields;
 
 export type ProjectStoryBlock =
   | ProjectChapterBlock
+  | ProjectTextBoxBlock
   | ProjectMediaBlock
   | ProjectGalleryBlock
   | ProjectQuoteBlock
-  | ProjectZigzagRowBlock;
+  | ProjectZigzagRowBlock
+  | ProjectColumnsBlock;
 
 export type ProjectDetail = ProjectListItem & {
   /** Width/height of the asset used for the detail hero (for compact layout). */
@@ -166,6 +227,7 @@ export type ProjectDetail = ProjectListItem & {
   partners?: ProjectPartner[] | null;
   awards?: ProjectAward[] | null;
   articleUrl?: string | null;
+  attachments?: ProjectAttachment[] | null;
   story?: ProjectStoryBlock[] | null;
 };
 

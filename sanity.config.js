@@ -4,6 +4,10 @@ import {visionTool} from '@sanity/vision'
 import {deskStructure} from './deskStructure'
 import {schemaTypes} from './schemaTypes'
 import {projectPlacement} from './sanity/plugins/projectPlacement'
+import {presentation} from './sanity/presentation'
+
+// Opt-in: needs web on :3000 + SANITY_API_READ_TOKEN in web/.env.local
+const usePresentation = process.env.SANITY_STUDIO_ENABLE_PRESENTATION === 'true'
 
 export default defineConfig({
   name: 'default',
@@ -12,7 +16,12 @@ export default defineConfig({
   projectId: 'sttir3vc',
   dataset: 'production',
 
-  plugins: [structureTool({structure: deskStructure}), visionTool(), projectPlacement()],
+  plugins: [
+    structureTool({structure: deskStructure}),
+    ...(usePresentation ? [presentation] : []),
+    visionTool(),
+    projectPlacement(),
+  ],
 
   schema: {
     types: schemaTypes,
