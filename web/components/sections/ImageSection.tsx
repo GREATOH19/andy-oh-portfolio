@@ -44,7 +44,6 @@ export function ImageSection({
       thumbMaxWidth={sizing.displayPx}
       sizes={sizing.sizes}
       quality={sizing.quality}
-      unoptimized={sizing.unoptimized}
     />
   );
 
@@ -58,7 +57,6 @@ export function ImageSection({
             thumbMaxWidth={sizing.displayPx}
             sizes={sizing.sizes}
             quality={sizing.quality}
-            unoptimized={sizing.unoptimized}
           />
         </div>
         <div className="hidden md:block">

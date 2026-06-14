@@ -2,9 +2,12 @@
 
 import Image from "next/image";
 import {SiMedium} from "react-icons/si";
+import {PortableBody} from "@/components/PortableBody";
 import {useTypoClass} from "@/components/TypographyProvider";
-import {urlForImage} from "@/lib/sanity/image";
 import {PROJECT_HERO_COMPACT} from "@/components/ProjectHero";
+import {urlForImage} from "@/lib/sanity/image";
+import {projectDetailsForDisplay} from "@/lib/project/detailOrder";
+import {leadHasContent, normalizeLeadBlocks} from "@/lib/portableText/leadContent";
 import type {ProjectDetail} from "@/lib/types/project";
 
 /**
@@ -27,9 +30,8 @@ export function ProjectHeader({
   const bodyClass = useTypoClass("body");
   const metaClass = useTypoClass("meta");
 
-  const paragraphs = splitParagraphs(project.lead);
-  const details =
-    project.details?.filter((d) => d?.value?.trim() || d?.label?.trim()) ?? [];
+  const leadBlocks = normalizeLeadBlocks(project.lead);
+  const details = projectDetailsForDisplay(project.details);
   const highlights = project.highlights?.filter(Boolean) ?? [];
   const partners = project.partners?.filter((p) => p?.name) ?? [];
   const awards =
@@ -44,10 +46,9 @@ export function ProjectHeader({
     partners.length > 0 ||
     awards.length > 0 ||
     Boolean(project.articleUrl) ||
-    yearLine ||
-    project.role;
+    yearLine;
 
-  const hasLead = paragraphs.length > 0;
+  const hasLead = leadHasContent(project.lead);
   /** No lead copy — spread intro meta across the overview band on md+. */
   const sidebarFillsWidth = hasSidebar && !hasLead;
   /** Lead-less desktop: left-column blocks stick start; right-column blocks stay end-aligned. */
@@ -57,10 +58,26 @@ export function ProjectHeader({
     : "";
   const metaStickFullLeft = sidebarFillsWidth ? "md:basis-full md:text-left" : "";
 
-  const hasDetailsBlock =
-    details.length > 0 || Boolean(yearLine) || Boolean(project.role);
+  const hasDetailsBlock = details.length > 0 || Boolean(yearLine);
   const hasRightMetaCluster =
     hasDetailsBlock || highlights.length > 0 || Boolean(project.articleUrl);
+
+  const detailsBlock = hasDetailsBlock ? (
+    <div className="space-y-1.5">
+      {details.map((item, i) => (
+        <p key={i}>
+          {item.label && item.value?.trim() ? (
+            <>
+              <span className="text-zinc-500">{item.label}:</span> {item.value}
+            </>
+          ) : (
+            item.value?.trim() || item.label
+          )}
+        </p>
+      ))}
+      {yearLine ? <p>{yearLine}</p> : null}
+    </div>
+  ) : null;
 
   const titleBlockClass = titleInHero ? `hidden ${PROJECT_HERO_COMPACT}` : "block";
 
@@ -108,15 +125,11 @@ export function ProjectHeader({
                 : "mt-10"
             }
           >
-            {hasLead && (
-              <div className="space-y-5 max-md:order-2 md:col-start-1">
-                {paragraphs.map((p, i) => (
-                  <p key={i} className={`text-[15px] leading-[1.7] text-zinc-700 ${bodyClass}`}>
-                    {p}
-                  </p>
-                ))}
+            {hasLead && leadBlocks ? (
+              <div className="project-overview-prose max-md:order-2 md:col-start-1">
+                <PortableBody value={leadBlocks} className={bodyClass} spacing="story" />
               </div>
-            )}
+            ) : null}
 
             {hasSidebar && (
               <aside
@@ -201,26 +214,7 @@ export function ProjectHeader({
                 {hasRightMetaCluster &&
                   (sidebarFillsWidth ? (
                     <div className={`flex flex-col gap-6 ${metaStickRightCluster}`}>
-                      {hasDetailsBlock ? (
-                        <div className="space-y-1.5">
-                          {details.length > 0
-                            ? details.map((item, i) => (
-                                <p key={i}>
-                                  {item.label && item.value?.trim() ? (
-                                    <>
-                                      <span className="text-zinc-500">{item.label}:</span>{" "}
-                                      {item.value}
-                                    </>
-                                  ) : (
-                                    item.value?.trim() || item.label
-                                  )}
-                                </p>
-                              ))
-                            : [yearLine, project.role]
-                                .filter(Boolean)
-                                .map((line, i) => <p key={i}>{line}</p>)}
-                        </div>
-                      ) : null}
+                      {detailsBlock}
 
                       {highlights.length > 0 && (
                         <div>
@@ -250,26 +244,7 @@ export function ProjectHeader({
                     </div>
                   ) : (
                     <>
-                      {hasDetailsBlock ? (
-                        <div className="space-y-1.5">
-                          {details.length > 0
-                            ? details.map((item, i) => (
-                                <p key={i}>
-                                  {item.label && item.value?.trim() ? (
-                                    <>
-                                      <span className="text-zinc-500">{item.label}:</span>{" "}
-                                      {item.value}
-                                    </>
-                                  ) : (
-                                    item.value?.trim() || item.label
-                                  )}
-                                </p>
-                              ))
-                            : [yearLine, project.role]
-                                .filter(Boolean)
-                                .map((line, i) => <p key={i}>{line}</p>)}
-                        </div>
-                      ) : null}
+                      {detailsBlock}
 
                       {highlights.length > 0 && (
                         <div className="mt-6">
@@ -363,10 +338,3 @@ function formatYear(year?: string | number | null): string | null {
   return text || null;
 }
 
-function splitParagraphs(value?: string | null): string[] {
-  if (!value) return [];
-  return value
-    .split(/\n\s*\n+/)
-    .map((p) => p.trim())
-    .filter(Boolean);
-}

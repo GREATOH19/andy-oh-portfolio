@@ -2,7 +2,7 @@
 
 import {useCallback, useEffect, useRef, useState, type TouchList as ReactTouchList} from "react";
 import {createPortal} from "react-dom";
-import {sanityImageAssetId, urlForImage} from "@/lib/sanity/image";
+import {buildSanityImageSrc, sanityImageAssetId} from "@/lib/sanity/image";
 import type {SanityImageField} from "@/lib/types/project";
 
 const MIN_SCALE = 1;
@@ -230,7 +230,7 @@ export function PhotoLightbox({
 
   if (!assetId || !image) return null;
 
-  const src = urlForImage(image).width(4096).quality(95).url();
+  const src = buildSanityImageSrc(image, {displayWidth: 2560, quality: 95}) ?? "";
   const alt = image.alt ?? "";
   const isZoomed = scale > 1;
 

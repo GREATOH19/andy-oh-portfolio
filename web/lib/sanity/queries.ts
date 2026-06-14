@@ -4,6 +4,16 @@ const cmsMediaItemFields = groq`
   ...,
   mediaType,
   loop,
+  loopDissolve,
+  loopPreview {
+    asset->{
+      _ref,
+      _id,
+      url,
+      mimeType,
+      originalFilename
+    }
+  },
   alt,
   image {
     ...,
@@ -23,6 +33,8 @@ const cmsMediaItemFields = groq`
       originalFilename
     }
   },
+  youtubeUrl,
+  videoAspect,
   asset->{
     "_ref": coalesce(_ref, _id),
     metadata {
@@ -93,7 +105,6 @@ const projectListItemFields = groq`
   "slug": slug.current,
   subtitle,
   year,
-  role,
   coverImage,
   cardOverlayScrim,
   heroImage {
@@ -120,13 +131,24 @@ const projectStoryFields = groq`
   left,
   right,
   layout,
+  centerTextWithMedia,
   bodyFont,
   bodyFontSize,
   body,
   quote,
   attribution,
   caption,
+  url,
+  videoAspect,
+  loop,
+  autoplay,
+  handle,
+  maxPosts,
   columns,
+  gridAspectRatio,
+  cropFocus,
+  bodyGridAspectRatio,
+  bodyCropFocus,
   items[] {
     ${cmsMediaItemFields}
   },
@@ -135,6 +157,45 @@ const projectStoryFields = groq`
   },
   images[] {
     ${cmsMediaItemFields}
+  },
+  bodyImages[] {
+    ${cmsMediaItemFields}
+  },
+  bodyImageColumns,
+  steps[] {
+    _key,
+    caption,
+    media {
+      ${cmsMediaItemFields}
+    }
+  },
+  items[] {
+    _key,
+    tileSize,
+    media {
+      ${cmsMediaItemFields}
+    }
+  },
+  audio {
+    asset->{
+      _ref,
+      _id,
+      url,
+      mimeType,
+      originalFilename
+    }
+  },
+  cover {
+    ...,
+    alt,
+    hotspot,
+    crop,
+    asset->{
+      "_ref": coalesce(_ref, _id),
+      metadata {
+        dimensions
+      }
+    }
   }
 `;
 
@@ -163,7 +224,6 @@ export const projectBySlugQuery = groq`
     subtitle,
     cardOverlayScrim,
     year,
-    role,
     lead,
     details[] {
       label,
@@ -308,6 +368,8 @@ export const morePageQuery = groq`
       attribution,
       caption,
       columns,
+      gridAspectRatio,
+      cropFocus,
       left,
       right,
       "image": image{
@@ -362,6 +424,8 @@ export const pageBySlugQuery = groq`
       attribution,
       caption,
       columns,
+      gridAspectRatio,
+      cropFocus,
       left,
       right,
       "image": image{

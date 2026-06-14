@@ -3,11 +3,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "sanity dev",
+    "dev": "sanity dev --host=0.0.0.0",
     "build": "sanity build",
     "deploy": "sanity deploy",
     "migrate:media": "sanity exec ./scripts/migrate-legacy-cms-media.mjs --with-user-token",
-    "migrate:project-cms": "sanity exec ./scripts/migrate-project-cms.mjs --with-user-token"
+    "migrate:project-cms": "sanity exec ./scripts/migrate-project-cms.mjs --with-user-token",
+    "migrate:lead-pt": "sanity exec ./scripts/migrate-lead-portable-text.mjs --with-user-token"
   },
   "dependencies": {
     "@sanity/orderable-document-list": "^1.5.1",
@@ -15,6 +16,7 @@
     "react": "^19.2.2",
     "react-dom": "^19.2.2",
     "sanity": "^5.28.0",
+    "sanity-plugin-media": "^4.3.1",
     "styled-components": "^6.1.15"
   }
 }

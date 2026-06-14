@@ -77,6 +77,11 @@ export function cmsMagazineOrFont(font?: string | null): string {
   return cmsFontClass(font) || "font-serif";
 }
 
+/** Story chapter headings — default Space Grotesk; override via CMS dropdown. */
+export function cmsChapterTitleFont(font?: string | null): string {
+  return cmsFontClass(font) || CMS_FONT_CLASSES.spaceGrotesk;
+}
+
 function typoRoleFontClass(role: TypographyRole, typography?: SiteTypography | null): string {
   const font = typography?.[role];
   switch (role) {

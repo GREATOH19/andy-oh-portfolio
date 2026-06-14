@@ -1,9 +1,19 @@
 "use client";
 
-import {useState} from "react";
+import type {CSSProperties} from "react";
+import {useCallback, useMemo, useState} from "react";
 import {MediaLightbox} from "@/components/MediaLightbox";
 import {SanityAspectMedia} from "@/components/sections/SanityAspectMedia";
-import {isSanityImage, isSanityMedia, isSanityVideo, sanityMediaKey} from "@/lib/sanity/media";
+import {
+  isSanityImage,
+  isSanityLightboxMedia,
+  isSanityMedia,
+  isSanityVideo,
+  sanityMediaKey,
+} from "@/lib/sanity/media";
+import {clampGridTileAspect, type GridAspectRatio, type GridCropFocus} from "@/lib/gridAspectRatio";
+import {rowAspectsForItems, type MediaAspect} from "@/lib/gridRowAspect";
+import {useGalleryBreakpointColumns} from "@/lib/projectStory/useGalleryBreakpointColumns";
 import type {SanityMediaField} from "@/lib/types/project";
 
 export const masonryPreviewClass =
@@ -18,8 +28,11 @@ export function ClickablePhotoGrid({
   thumbMaxWidth = 560,
   sizes = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw",
   quality,
-  unoptimized,
   className,
+  gridStyle,
+  gridAspectRatio = "auto",
+  cropFocus = "auto",
+  columns,
 }: {
   images: SanityMediaField[];
   gridClass?: string;
@@ -27,16 +40,41 @@ export function ClickablePhotoGrid({
   thumbMaxWidth?: number;
   sizes?: string;
   quality?: number;
-  unoptimized?: boolean;
   className?: string;
+  gridStyle?: CSSProperties;
+  gridAspectRatio?: GridAspectRatio | null;
+  cropFocus?: GridCropFocus | null;
+  columns?: number | null;
 }) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [videoAspects, setVideoAspects] = useState<Record<string, MediaAspect>>({});
   const validMedia = images.filter(isSanityMedia) as NonNullable<SanityMediaField>[];
+  const lightboxItems = validMedia.filter(isSanityLightboxMedia);
+  const visibleColumns = useGalleryBreakpointColumns(columns ?? 1);
+  const rowAspects = useMemo(
+    () =>
+      layout === "grid"
+        ? rowAspectsForItems(validMedia, visibleColumns, videoAspects, sanityMediaKey)
+        : validMedia.map(() => undefined),
+    [layout, validMedia, visibleColumns, videoAspects],
+  );
+
+  const onVideoLayout = useCallback((key: string, aspect: MediaAspect) => {
+    const clamped = clampGridTileAspect(aspect.width, aspect.height);
+    setVideoAspects((prev) => {
+      const current = prev[key];
+      if (current?.width === clamped.width && current?.height === clamped.height) return prev;
+      return {...prev, [key]: clamped};
+    });
+  }, []);
 
   if (validMedia.length === 0) return null;
 
   const openLightbox = (index: number) => {
-    setActiveIndex(index);
+    const item = validMedia[index];
+    if (!isSanityLightboxMedia(item)) return;
+    const lbIndex = lightboxItems.indexOf(item);
+    if (lbIndex >= 0) setActiveIndex(lbIndex);
   };
 
   const resolvedGridClass =
@@ -47,10 +85,10 @@ export function ClickablePhotoGrid({
 
   return (
     <>
-      <div className={containerClass}>
+      <div className={containerClass} style={gridStyle}>
         {validMedia.map((item, i) => {
           const alt = item?.alt ?? "";
-          const isClickable = isSanityImage(item) || isSanityVideo(item);
+          const isClickable = isSanityLightboxMedia(item);
           const label = isSanityVideo(item)
             ? alt
               ? `Play ${alt}`
@@ -59,35 +97,58 @@ export function ClickablePhotoGrid({
               ? `View ${alt}`
               : `View photo ${i + 1}`;
 
+          const tileClass = `group w-full text-left transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.006] active:translate-y-0 active:scale-[0.997] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400 ${
+            isSanityImage(item) ? "cursor-zoom-in" : "cursor-pointer"
+          } [&_video]:pointer-events-none`;
+          const itemKey = sanityMediaKey(item, i);
+          const media = (
+            <SanityAspectMedia
+              media={item}
+              alt={alt}
+              maxWidth={thumbMaxWidth}
+              quality={quality}
+              sizes={sizes}
+              gridAspectRatio={layout === "masonry" ? "auto" : gridAspectRatio}
+              cropFocus={layout === "masonry" ? "auto" : cropFocus}
+              inGrid={layout === "grid"}
+              gridRowAspect={rowAspects[i]}
+              onVideoLayout={
+                isSanityVideo(item)
+                  ? (aspect) => onVideoLayout(itemKey, aspect)
+                  : undefined
+              }
+            />
+          );
+
           const tile = isClickable ? (
-            <button
-              type="button"
-              onClick={() => openLightbox(i)}
-              className={`group w-full text-left transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.006] active:translate-y-0 active:scale-[0.997] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400 ${
-                isSanityImage(item) ? "cursor-zoom-in" : "cursor-pointer"
-              } [&_video]:pointer-events-none`}
-              aria-label={label}
-            >
-              <SanityAspectMedia
-                media={item}
-                alt={alt}
-                maxWidth={thumbMaxWidth}
-                quality={quality}
-                sizes={sizes}
-                unoptimized={unoptimized}
-              />
-            </button>
+            isSanityVideo(item) ? (
+              <div
+                role="button"
+                tabIndex={0}
+                onClick={() => openLightbox(i)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    openLightbox(i);
+                  }
+                }}
+                className={tileClass}
+                aria-label={label}
+              >
+                {media}
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => openLightbox(i)}
+                className={tileClass}
+                aria-label={label}
+              >
+                {media}
+              </button>
+            )
           ) : (
-            <div className="w-full text-left">
-              <SanityAspectMedia
-                media={item}
-                alt={alt}
-                maxWidth={thumbMaxWidth}
-                quality={quality}
-                sizes={sizes}
-                unoptimized={unoptimized}
-              />
-            </div>
+            <div className="w-full text-left [&_iframe]:pointer-events-auto">{media}</div>
           );
 
           if (layout === "masonry") {
@@ -99,16 +160,16 @@ export function ClickablePhotoGrid({
           }
 
           return (
-            <div key={sanityMediaKey(item, i)}>
+            <div key={itemKey} className="min-w-0 self-stretch">
               {tile}
             </div>
           );
         })}
       </div>
 
-      {activeIndex !== null ? (
+      {activeIndex !== null && lightboxItems.length > 0 ? (
         <MediaLightbox
-          items={validMedia}
+          items={lightboxItems}
           index={activeIndex}
           onClose={() => setActiveIndex(null)}
           onIndexChange={setActiveIndex}
@@ -118,17 +179,9 @@ export function ClickablePhotoGrid({
   );
 }
 
-export function projectGalleryGridClass(columns: number): string {
-  if (columns === 1) return "grid grid-cols-1 gap-3";
-  if (columns === 2) return "grid grid-cols-2 gap-2 sm:gap-3";
-  if (columns === 3) return "grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3";
-  return "grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4";
-}
-
-/** Story gallery — gap from --story-media-items-gap (no Tailwind gap utilities). */
-export function projectStoryGalleryGridClass(columns: number): string {
-  if (columns === 1) return "grid grid-cols-1";
-  if (columns === 2) return "grid grid-cols-2";
-  if (columns === 3) return "grid grid-cols-2 sm:grid-cols-3";
-  return "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4";
-}
+export {
+  galleryGridMobileStyle,
+  normalizeGalleryColumns,
+  projectGalleryGridClass,
+  projectStoryGalleryGridClass,
+} from "@/lib/projectStory/galleryGrid";

@@ -1,6 +1,6 @@
 "use client";
 
-import {useCallback, useEffect, useRef, useState} from "react";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {MediaLightbox} from "@/components/MediaLightbox";
 import {SanityAspectMedia} from "@/components/sections/SanityAspectMedia";
 import {useTypoClass} from "@/components/TypographyProvider";
@@ -8,8 +8,36 @@ import {
   FULL_WIDTH_MEDIA_DISPLAY_PX,
   FULL_WIDTH_MEDIA_SIZES,
 } from "@/lib/sanity/imageRequestWidth";
-import {isSanityImage, isSanityMedia, isSanityVideo, sanityMediaKey} from "@/lib/sanity/media";
+import {
+  isSanityImage,
+  isSanityLightboxMedia,
+  isSanityMedia,
+  isSanityVideo,
+  isSanityYoutube,
+  sanityMediaKey,
+} from "@/lib/sanity/media";
 import type {SanityMediaField} from "@/lib/types/project";
+import {resolveYoutubeVideoAspect} from "@/lib/youtube/parseYoutubeUrl";
+
+function estimatedSlideHeight(
+  item: NonNullable<SanityMediaField>,
+  containerWidth: number,
+): number | null {
+  if (containerWidth <= 0) return null;
+  if (isSanityImage(item)) {
+    const d = item.asset?.metadata?.dimensions;
+    if (d?.width && d?.height && d.width > 0) {
+      return containerWidth * (d.height / d.width);
+    }
+    return containerWidth * (9 / 16);
+  }
+  if (isSanityYoutube(item)) {
+    const portrait = resolveYoutubeVideoAspect(item.url, item.videoAspect) === "portrait";
+    const width = containerWidth;
+    return width * (portrait ? 16 / 9 : 9 / 16);
+  }
+  return null;
+}
 
 export function MediaCarousel({
   images,
@@ -17,25 +45,37 @@ export function MediaCarousel({
   thumbMaxWidth = FULL_WIDTH_MEDIA_DISPLAY_PX,
   sizes = FULL_WIDTH_MEDIA_SIZES,
   quality = 95,
-  unoptimized = false,
 }: {
   images: SanityMediaField[];
   caption?: string | null;
   thumbMaxWidth?: number;
   sizes?: string;
   quality?: number;
-  unoptimized?: boolean;
 }) {
   const metaClass = useTypoClass("meta");
   const validMedia = images.filter(isSanityMedia) as NonNullable<SanityMediaField>[];
+  const lightboxItems = validMedia.filter(isSanityLightboxMedia);
   const [index, setIndex] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [slideHeights, setSlideHeights] = useState<number[]>([]);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const count = validMedia.length;
   const hasMultiple = count > 1;
   const safeIndex = count > 0 ? Math.min(index, count - 1) : 0;
+
+  const estimatedHeights = useMemo(
+    () =>
+      validMedia.map((item) => estimatedSlideHeight(item, containerWidth) ?? 0),
+    [validMedia, containerWidth],
+  );
+
+  const measuredHeight = slideHeights[safeIndex] ?? slideHeights[0] ?? 0;
+  const estimatedHeight = estimatedHeights[safeIndex] || estimatedHeights[0] || 0;
+  const viewportHeight = measuredHeight > 0 ? measuredHeight : estimatedHeight;
 
   const goTo = useCallback(
     (next: number) => {
@@ -69,22 +109,61 @@ export function MediaCarousel({
 
   useEffect(() => {
     setIndex(0);
+    setSlideHeights([]);
     slideRefs.current = [];
     scrollRef.current?.scrollTo({left: 0});
   }, [count]);
+
+  useEffect(() => {
+    if (!hasMultiple) return;
+    const root = containerRef.current;
+    if (!root) return;
+
+    const observer = new ResizeObserver(([entry]) => {
+      const width = entry?.contentRect.width ?? 0;
+      setContainerWidth((prev) => (prev === width ? prev : width));
+    });
+    observer.observe(root);
+    return () => observer.disconnect();
+  }, [hasMultiple]);
+
+  useEffect(() => {
+    if (!hasMultiple) return;
+
+    const observers = slideRefs.current.map((slide, i) => {
+      if (!slide) return null;
+
+      const observer = new ResizeObserver(([entry]) => {
+        const height = entry?.contentRect.height ?? 0;
+        if (height <= 0) return;
+        setSlideHeights((prev) => {
+          if (prev[i] === height) return prev;
+          const next = prev.length === count ? [...prev] : Array.from({length: count}, () => 0);
+          next[i] = height;
+          return next;
+        });
+      });
+      observer.observe(slide);
+      return observer;
+    });
+
+    return () => {
+      observers.forEach((observer) => observer?.disconnect());
+    };
+  }, [hasMultiple, count, validMedia]);
 
   if (count === 0) return null;
 
   const openLightbox = (i: number) => {
     const item = validMedia[i];
-    if (isSanityImage(item) || isSanityVideo(item)) {
-      setLightboxIndex(i);
-    }
+    if (!isSanityLightboxMedia(item)) return;
+    const lbIndex = lightboxItems.indexOf(item);
+    if (lbIndex >= 0) setLightboxIndex(lbIndex);
   };
 
   const renderSlide = (item: NonNullable<SanityMediaField>, i: number) => {
     const alt = item?.alt ?? "";
-    const isClickable = isSanityImage(item) || isSanityVideo(item);
+    const isClickable = isSanityLightboxMedia(item);
     const label = isSanityVideo(item)
       ? alt
         ? `Play ${alt}`
@@ -100,23 +179,39 @@ export function MediaCarousel({
         maxWidth={thumbMaxWidth}
         quality={quality}
         sizes={sizes}
-        unoptimized={unoptimized}
       />
     );
 
     if (!isClickable) {
-      return <div className="w-full">{media}</div>;
+      return <div className="w-full [&_iframe]:pointer-events-auto">{media}</div>;
+    }
+
+    const tileClass = `group w-full text-left transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.006] active:translate-y-0 active:scale-[0.997] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400 ${
+      isSanityImage(item) ? "cursor-zoom-in" : "cursor-pointer"
+    } [&_video]:pointer-events-none`;
+
+    if (isSanityVideo(item)) {
+      return (
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => openLightbox(i)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              openLightbox(i);
+            }
+          }}
+          className={tileClass}
+          aria-label={label}
+        >
+          {media}
+        </div>
+      );
     }
 
     return (
-      <button
-        type="button"
-        onClick={() => openLightbox(i)}
-        className={`group w-full text-left transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.006] active:translate-y-0 active:scale-[0.997] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400 ${
-          isSanityImage(item) ? "cursor-zoom-in" : "cursor-pointer"
-        } [&_video]:pointer-events-none`}
-        aria-label={label}
-      >
+      <button type="button" onClick={() => openLightbox(i)} className={tileClass} aria-label={label}>
         {media}
       </button>
     );
@@ -129,9 +224,9 @@ export function MediaCarousel({
         {caption ? (
           <figcaption className={`mt-3 text-sm text-zinc-500 ${metaClass}`}>{caption}</figcaption>
         ) : null}
-        {lightboxIndex !== null ? (
+        {lightboxIndex !== null && lightboxItems.length > 0 ? (
           <MediaLightbox
-            items={validMedia}
+            items={lightboxItems}
             index={lightboxIndex}
             onClose={() => setLightboxIndex(null)}
             onIndexChange={setLightboxIndex}
@@ -143,25 +238,30 @@ export function MediaCarousel({
 
   return (
     <figure className="w-full">
-      <div className="relative">
+      <div className="relative" ref={containerRef}>
         <div
-          ref={scrollRef}
-          className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          aria-roledescription="carousel"
-          aria-label="Image carousel"
+          className="overflow-hidden transition-[height] duration-300 ease-out motion-reduce:transition-none"
+          style={viewportHeight > 0 ? {height: `${viewportHeight}px`} : undefined}
         >
-          {validMedia.map((item, i) => (
-            <div
-              key={sanityMediaKey(item, i)}
-              ref={(el) => {
-                slideRefs.current[i] = el;
-              }}
-              className="w-full shrink-0 snap-start"
-              aria-hidden={i !== safeIndex}
-            >
-              {renderSlide(item, i)}
-            </div>
-          ))}
+          <div
+            ref={scrollRef}
+            className="flex items-start snap-x snap-mandatory overflow-x-auto scroll-smooth [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            aria-roledescription="carousel"
+            aria-label="Image carousel"
+          >
+            {validMedia.map((item, i) => (
+              <div
+                key={sanityMediaKey(item, i)}
+                ref={(el) => {
+                  slideRefs.current[i] = el;
+                }}
+                className="w-full shrink-0 snap-start"
+                aria-hidden={i !== safeIndex}
+              >
+                {renderSlide(item, i)}
+              </div>
+            ))}
+          </div>
         </div>
 
         <button
@@ -204,9 +304,9 @@ export function MediaCarousel({
         <figcaption className={`mt-2 text-sm text-zinc-500 ${metaClass}`}>{caption}</figcaption>
       ) : null}
 
-      {lightboxIndex !== null ? (
+      {lightboxIndex !== null && lightboxItems.length > 0 ? (
         <MediaLightbox
-          items={validMedia}
+          items={lightboxItems}
           index={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
           onIndexChange={setLightboxIndex}

@@ -5,8 +5,8 @@ import {useState, type CSSProperties} from "react";
 import {MediaLightbox} from "@/components/MediaLightbox";
 import {PhotoLightbox} from "@/components/PhotoLightbox";
 import {useTypoClass} from "@/components/TypographyProvider";
-import {urlForImage} from "@/lib/sanity/image";
-import {isSanityImage, isSanityVideo, sanityVideoUrl} from "@/lib/sanity/media";
+import {buildSanityImageSrc} from "@/lib/sanity/image";
+import {isSanityImage, isSanityVideo, sanityInlineLoopVideoUrl, sanityVideoUrl} from "@/lib/sanity/media";
 import type {SanityMediaField} from "@/lib/types/project";
 
 export const PROJECT_HERO_COMPACT =
@@ -167,10 +167,9 @@ export function ProjectHero({
   const [lightboxOpen, setLightboxOpen] = useState(false);
 
   if (isSanityVideo(media)) {
-    const src = sanityVideoUrl(media);
-    if (!src) return null;
-
     const loop = media.loop ?? true;
+    const src = loop ? sanityInlineLoopVideoUrl(media) : sanityVideoUrl(media);
+    if (!src) return null;
     const videoAlt = media.alt?.trim() || alt;
     const layoutW = intrinsicWidth && intrinsicHeight ? intrinsicWidth : 1920;
     const layoutH = intrinsicWidth && intrinsicHeight ? intrinsicHeight : 1080;
@@ -236,7 +235,7 @@ export function ProjectHero({
   }
 
   const image = media;
-  const src = urlForImage(image).width(2400).quality(92).url();
+  const src = buildSanityImageSrc(image, {displayWidth: 2400, quality: 92}) ?? "";
 
   const layoutW = intrinsicWidth && intrinsicHeight ? intrinsicWidth : 2400;
   const layoutH = intrinsicWidth && intrinsicHeight ? intrinsicHeight : 1600;
@@ -261,6 +260,7 @@ export function ProjectHero({
             priority
             sizes="100vw"
             className="object-cover"
+            unoptimized
           />
         </button>
         <ProjectHeroChrome title={title} subtitle={subtitle} />
@@ -284,6 +284,7 @@ export function ProjectHero({
             priority
             sizes="100vw"
             className="block h-auto w-full max-w-full"
+            unoptimized
           />
         </button>
         <HeroMobileScrollNavigator />

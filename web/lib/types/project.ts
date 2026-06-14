@@ -1,4 +1,5 @@
 import type {PortableTextBlock} from "@portabletext/types";
+import type {GridAspectRatio, GridCropFocus} from "@/lib/gridAspectRatio";
 
 /** CMS typography options — keep in sync with `schemaTypes/fontStyle.js` */
 export type SiteBrandFont =
@@ -50,30 +51,46 @@ export type SanityImageField = {
 
 export type BannerFocus = "auto" | "top" | "center" | "lower";
 
-export type SanityVideoField = {
-  _type?: "file";
-  asset?: {
-    _ref?: string;
-    _id?: string;
-    url?: string | null;
-    mimeType?: string | null;
-    originalFilename?: string | null;
-  } | null;
-  alt?: string;
-  loop?: boolean;
+export type SanityFileAsset = {
+  _ref?: string;
+  _id?: string;
+  url?: string | null;
+  mimeType?: string | null;
+  originalFilename?: string | null;
 } | null;
 
-export type SanityMediaField = SanityImageField | SanityVideoField;
+export type SanityVideoField = {
+  _type?: "file";
+  asset?: SanityFileAsset;
+  /** Optional lightweight file for inline loop playback (full asset used in lightbox). */
+  loopPreview?: {asset?: SanityFileAsset} | null;
+  alt?: string;
+  loop?: boolean;
+  loopDissolve?: boolean;
+} | null;
+
+export type SanityYoutubeField = {
+  _type: "youtube";
+  url: string;
+  alt?: string;
+  videoAspect?: "auto" | "landscape" | "portrait" | null;
+};
+
+export type SanityMediaField = SanityImageField | SanityVideoField | SanityYoutubeField;
 
 /** Raw CMS object before normalization (Studio-safe shape). */
 export type CmsMediaItemRaw = {
   _type?: "cmsMediaItem";
   _key?: string;
-  mediaType?: "image" | "video" | null;
+  mediaType?: "image" | "video" | "youtube" | null;
   image?: SanityImageField;
   video?: SanityVideoField;
+  youtubeUrl?: string | null;
+  videoAspect?: "auto" | "landscape" | "portrait" | null;
   alt?: string | null;
   loop?: boolean | null;
+  loopDissolve?: boolean | null;
+  loopPreview?: {asset?: SanityFileAsset} | null;
 } | null;
 
 export type CmsMediaInput = SanityMediaField | CmsMediaItemRaw;
@@ -84,7 +101,6 @@ export type ProjectListItem = {
   slug: string | null;
   subtitle?: string | null;
   year?: string | null;
-  role?: string;
   coverImage: SanityImageField;
   /** Detail-page hero; used as Work grid thumbnail when coverImage is empty */
   heroImage?: CmsMediaInput;
@@ -166,12 +182,53 @@ export type ProjectMediaBlock = {
   caption?: string | null;
 } & ProjectStoryLayoutFields;
 
+export type GridMediaCropFields = {
+  gridAspectRatio?: GridAspectRatio | null;
+  cropFocus?: GridCropFocus | null;
+};
+
 export type ProjectGalleryBlock = {
   _type: "projectGallery";
   _key?: string;
   images?: CmsMediaInput[] | null;
   caption?: string | null;
   columns?: number | null;
+  /** Beside the grid when Width is narrow or medium */
+  body?: PortableTextBlock[] | null;
+  layout?: "auto" | "textLeft" | "textRight" | null;
+  mobileStackOrder?: ProjectZigzagMobileStackOrder | null;
+} & ProjectBodyTypographyFields &
+  ProjectStoryLayoutFields &
+  GridMediaCropFields;
+
+export type ProjectProcessStep = {
+  _key?: string;
+  media?: CmsMediaInput | null;
+  caption?: string | null;
+};
+
+export type ProjectProcessBlock = {
+  _type: "projectProcess";
+  _key?: string;
+  steps?: ProjectProcessStep[] | null;
+  columns?: number | null;
+  caption?: string | null;
+} & ProjectStoryLayoutFields &
+  GridMediaCropFields;
+
+export type BentoTileSize = "small" | "square" | "wide" | "tall" | "hero" | "full";
+
+export type CollageItem = {
+  _key?: string;
+  media?: CmsMediaInput | null;
+  tileSize?: BentoTileSize | null;
+};
+
+export type ProjectCollageBlock = {
+  _type: "projectCollage";
+  _key?: string;
+  items?: CollageItem[] | null;
+  caption?: string | null;
 } & ProjectStoryLayoutFields;
 
 export type ProjectColumnsBlock = {
@@ -189,6 +246,48 @@ export type ProjectQuoteBlock = {
   attribution?: string | null;
 };
 
+export type ProjectInstagramFeedBlock = {
+  _type: "projectInstagramFeed";
+  _key?: string;
+  handle?: string | null;
+  maxPosts?: number | null;
+  columns?: number | null;
+  caption?: string | null;
+} & GridMediaCropFields;
+
+export type SanityAudioField = {
+  asset?: {
+    _ref?: string | null;
+    _id?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    originalFilename?: string | null;
+  } | null;
+};
+
+export type ProjectAudioBlock = {
+  _type: "projectAudio";
+  _key?: string;
+  title?: string | null;
+  audio?: SanityAudioField | null;
+  cover?: SanityImageField;
+  caption?: string | null;
+  loop?: boolean | null;
+  autoplay?: boolean | null;
+  mediaWidth?: ProjectStoryMediaWidth | null;
+  mediaAlign?: ProjectStoryMediaAlign | null;
+};
+
+export type ProjectYoutubeBlock = {
+  _type: "projectYoutube";
+  _key?: string;
+  url?: string | null;
+  /** iframe title / accessibility */
+  title?: string | null;
+  caption?: string | null;
+  videoAspect?: "auto" | "landscape" | "portrait" | null;
+} & ProjectStoryLayoutFields;
+
 export type ProjectTextBoxBlock = {
   _type: "projectTextBox";
   _key?: string;
@@ -202,7 +301,14 @@ export type ProjectZigzagRowBlock = {
   _key?: string;
   layout?: "auto" | "textLeft" | "textRight" | null;
   mobileStackOrder?: ProjectZigzagMobileStackOrder | null;
+  /** Tablet & desktop (≥48rem) — vertically center short text against the media column */
+  centerTextWithMedia?: boolean | null;
   body?: PortableTextBlock[] | null;
+  /** Small image grid under the text column */
+  bodyImages?: CmsMediaInput[] | null;
+  bodyImageColumns?: number | null;
+  bodyGridAspectRatio?: GridAspectRatio | null;
+  bodyCropFocus?: GridCropFocus | null;
   /** Current schema: array of media. Legacy rows may still have a single `media` object. */
   images?: CmsMediaInput[] | null;
   media?: CmsMediaItemRaw;
@@ -214,14 +320,20 @@ export type ProjectStoryBlock =
   | ProjectTextBoxBlock
   | ProjectMediaBlock
   | ProjectGalleryBlock
+  | ProjectCollageBlock
+  | ProjectProcessBlock
   | ProjectQuoteBlock
   | ProjectZigzagRowBlock
-  | ProjectColumnsBlock;
+  | ProjectInstagramFeedBlock
+  | ProjectColumnsBlock
+  | ProjectAudioBlock
+  | ProjectYoutubeBlock;
 
 export type ProjectDetail = ProjectListItem & {
   /** Width/height of the asset used for the detail hero (for compact layout). */
   projectHeroDimensions?: {width: number; height: number} | null;
-  lead?: string | null;
+  /** Portable text; legacy projects may still return a plain string until re-saved. */
+  lead?: PortableTextBlock[] | string | null;
   details?: DetailLine[] | null;
   highlights?: string[] | null;
   partners?: ProjectPartner[] | null;
@@ -249,7 +361,7 @@ export type GallerySection = {
   images?: CmsMediaInput[] | null;
   caption?: string | null;
   columns?: number | null;
-};
+} & GridMediaCropFields;
 
 export type TwoColumnSection = {
   _type: "twoColumnSection";

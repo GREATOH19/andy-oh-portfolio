@@ -1,4 +1,4 @@
-import {urlForImage} from "@/lib/sanity/image";
+import {buildSanityImageSrc, urlForImage} from "@/lib/sanity/image";
 import {isSanityImage, isSanityVideo, normalizeMediaItem} from "@/lib/sanity/media";
 import type {ProjectListItem} from "@/lib/types/project";
 
@@ -19,7 +19,7 @@ export function getProjectCardImageUrl(
 ) {
   const image = getProjectCardImage(project);
   if (!image?.asset?._ref) return null;
-  return urlForImage(image).width(width).height(height).quality(88).url();
+  return urlForImage(image).width(width).height(height).quality(88).auto("format").fit("crop").url();
 }
 
 export function projectCardHasVideoHero(project: ProjectListItem) {

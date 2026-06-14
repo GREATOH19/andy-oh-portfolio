@@ -34,8 +34,6 @@ export type StoryImageSizing = {
   displayPx: number;
   sizes: string;
   quality: number;
-  /** Use Sanity URL as-is when true (avoids Next optimizer downscaling bleed images) */
-  unoptimized: boolean;
 };
 
 export function storyImageSizing(
@@ -46,16 +44,22 @@ export function storyImageSizing(
       displayPx: BLEED_MEDIA_DISPLAY_PX,
       sizes: BLEED_MEDIA_SIZES,
       quality: 96,
-      unoptimized: true,
     };
   }
 
-  if (mediaWidth === "full") {
+  if (mediaWidth === "narrow") {
     return {
-      displayPx: FULL_WIDTH_MEDIA_DISPLAY_PX,
-      sizes: FULL_WIDTH_MEDIA_SIZES,
-      quality: 95,
-      unoptimized: false,
+      displayPx: 720,
+      sizes: "(max-width: 768px) 100vw, 65ch",
+      quality: 90,
+    };
+  }
+
+  if (mediaWidth === "medium") {
+    return {
+      displayPx: 960,
+      sizes: "(max-width: 768px) 100vw, min(48rem, 90vw)",
+      quality: 92,
     };
   }
 
@@ -63,6 +67,5 @@ export function storyImageSizing(
     displayPx: FULL_WIDTH_MEDIA_DISPLAY_PX,
     sizes: FULL_WIDTH_MEDIA_SIZES,
     quality: 95,
-    unoptimized: false,
   };
 }

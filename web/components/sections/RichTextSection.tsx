@@ -2,7 +2,7 @@
 
 import {PortableBody} from "@/components/PortableBody";
 import {useTypoClass} from "@/components/TypographyProvider";
-import {cmsMagazineOrFont} from "@/lib/cmsFontClass";
+import {cmsChapterTitleFont, cmsMagazineOrFont} from "@/lib/cmsFontClass";
 import {
   filterEmptyPortableTextBlocks,
   portableTextHasVisibleContent,
@@ -66,7 +66,8 @@ export function RichTextSection({
 
   const desktopSizeClass = titleSize ? TITLE_SIZE_CLASS[titleSize] : "text-4xl";
   const titleSizeClasses = `text-3xl md:${desktopSizeClass}`;
-  const fontClass = cmsMagazineOrFont(titleFont);
+  const fontClass =
+    spacing === "story" ? cmsChapterTitleFont(titleFont) : cmsMagazineOrFont(titleFont);
   const hasTitle = Boolean(title?.trim());
   const hasTocLabel = Boolean(tocTitle?.trim());
   const hasBody = portableTextHasVisibleContent(body);

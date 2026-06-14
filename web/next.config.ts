@@ -4,6 +4,15 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+  async redirects() {
+    return [
+      {
+        source: "/projects/caustic",
+        destination: "/projects/caustics",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

@@ -53,6 +53,10 @@ export function ProjectSections({sections}: {sections: ProjectSection[]}) {
 
                 columns={section.columns}
 
+                gridAspectRatio={section.gridAspectRatio}
+
+                cropFocus={section.cropFocus}
+
               />
 
             );

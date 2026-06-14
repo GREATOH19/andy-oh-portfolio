@@ -7,6 +7,7 @@ import {client} from "@/lib/sanity/client";
 import {fetchProjectBySlug} from "@/lib/sanity/fetchProject";
 import {isSanityImage, normalizeMediaItem} from "@/lib/sanity/media";
 import {projectSlugsQuery} from "@/lib/sanity/queries";
+import {leadExcerptText} from "@/lib/portableText/leadContent";
 import type {ProjectDetail} from "@/lib/types/project";
 import type {Metadata} from "next";
 import {notFound} from "next/navigation";
@@ -20,19 +21,13 @@ export async function generateStaticParams() {
   return slugs.filter(Boolean).map((slug) => ({slug}));
 }
 
-function leadExcerpt(lead?: string | null): string | undefined {
-  if (!lead?.trim()) return undefined;
-  const first = lead.split(/\n\s*\n+/)[0]?.trim();
-  return first || undefined;
-}
-
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {slug} = await params;
   const project = await fetchProjectBySlug(slug);
   if (!project) return {title: "Project"};
   return {
     title: project.title,
-    description: leadExcerpt(project.lead) ?? project.subtitle ?? undefined,
+    description: leadExcerptText(project.lead) ?? project.subtitle ?? undefined,
   };
 }
 

@@ -112,6 +112,31 @@ function mapAwards(awards) {
     }))
 }
 
+function splitLegacyParagraphs(value) {
+  return value
+    .split(/\n\s*\n+/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+}
+
+function legacyLeadToBlocks(value) {
+  if (typeof value !== 'string' || !value.trim()) return []
+  return splitLegacyParagraphs(value).map((text, index) => ({
+    _type: 'block',
+    _key: `legacy-lead-${index}`,
+    style: 'normal',
+    markDefs: [],
+    children: [
+      {
+        _type: 'span',
+        _key: `legacy-lead-${index}-span`,
+        text,
+        marks: [],
+      },
+    ],
+  }))
+}
+
 function mapDetails(metaItems) {
   if (!Array.isArray(metaItems)) return undefined
   return metaItems
@@ -149,7 +174,11 @@ async function main() {
     const set = {}
     const unset = []
 
-    if (!doc.lead && doc.excerpt) set.lead = doc.excerpt
+    if (typeof doc.lead === 'string') {
+      set.lead = legacyLeadToBlocks(doc.lead)
+    } else if (!doc.lead && doc.excerpt) {
+      set.lead = typeof doc.excerpt === 'string' ? legacyLeadToBlocks(doc.excerpt) : doc.excerpt
+    }
     if (!doc.details?.length && doc.metaItems?.length) set.details = mapDetails(doc.metaItems)
     if (!doc.highlights?.length && doc.contributions?.length) set.highlights = doc.contributions
     if (!doc.partners?.length && doc.collaborators?.length) {

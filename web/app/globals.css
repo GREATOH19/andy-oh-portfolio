@@ -166,51 +166,11 @@
 }
 
 /*
- * STORY LAYOUT GRAMMAR (non-negotiable)
- * -----------------------------------
- * Story spacing: chapter 1.6rem (mobile) / 2.3rem (web ≥48rem); within-chapter 1.75rem;
- * between-chapters / media / zigzag: 0.4rem (mobile); web between-blocks = within-chapter (1.75rem)
- * Chapter unit gap: project-story-grammar.css (data-story-chapter-gap on .project-story-chapter-unit)
- * Between-chapter blocks: --story-between-chapters-gap on .project-story-between-chapters
- * Chapter title/body: --story-within-chapter-gap | prose blocks: --story-prose-gap (1rem mobile)
+ * Story spacing variables + zigzag/between-chapter rhythm: storySpacingRules.ts (injected on ProjectStory).
+ * Chapter unit gap: project-story-grammar.css
  */
-.project-story {
-  /* Blocks after a chapter marker until the next projectChapter */
-  --story-between-chapters-gap: 0.4rem;
-  --story-within-chapter-gap: 1.75rem;
-  --story-prose-gap: 1rem;
-  --story-chapter-gap: 1.6rem;
-  --story-media-items-gap: 0.4rem;
-  --story-zigzag-gap: 0.4rem;
-}
-
-@media (min-width: 48rem) {
-  .project-story {
-    --story-chapter-gap: 2.3rem;
-    --story-between-chapters-gap: var(--story-within-chapter-gap);
-    --story-prose-gap: var(--story-within-chapter-gap);
-    --story-zigzag-gap: 0.75rem;
-  }
-}
-
-@media (max-width: 47.999rem) {
-  .project-story {
-    --story-zigzag-block-gap: 1rem;
-    --story-chapter-body-media-gap: 1rem;
-  }
-}
-
 .project-story-chapter-title {
-  margin-bottom: var(--story-within-chapter-gap);
-}
-
-/* Pre-first-chapter solo blocks only */
-.story-spacing-between-chapters {
-  margin-top: var(--story-between-chapters-gap, 0.4rem);
-}
-
-.story-spacing-zigzag {
-  gap: var(--story-zigzag-gap, 0.4rem); /* zigzag internal — not between-chapter components */
+  margin-bottom: var(--story-within-chapter-gap, 1.75rem);
 }
 
 /* Work homepage thumbnails — mobile matches pre-launch; larger from sm+ */
@@ -478,37 +438,6 @@
   .project-story {
     display: flex;
     flex-direction: column;
-    --story-between-chapters-gap: 0.4rem;
-    --story-within-chapter-gap: 1.75rem;
-    --story-prose-gap: 1rem;
-    --story-chapter-gap: 1.6rem;
-    --story-media-items-gap: 0.4rem;
-    --story-zigzag-gap: 0.4rem;
-  }
-
-  @media (min-width: 48rem) {
-    .project-story {
-      --story-chapter-gap: 2.3rem;
-      --story-between-chapters-gap: var(--story-within-chapter-gap);
-      --story-prose-gap: var(--story-within-chapter-gap);
-      --story-zigzag-gap: 0.75rem;
-    }
-  }
-
-  .project-story-between-chapters {
-    display: flex;
-    flex-direction: column;
-    gap: var(--story-between-chapters-gap);
-  }
-
-  /* Chapter body → blocks below (padding only; not chapter↔chapter gap) */
-  .project-story-chapter-head + .project-story-between-chapters {
-    margin-top: 0;
-    padding-top: var(--story-between-chapters-gap);
-  }
-
-  .project-story-between-chapters > * {
-    margin-top: 0 !important;
   }
 
   .project-story-between-chapters > *:last-child {
@@ -568,15 +497,17 @@
     margin-top: var(--story-within-chapter-gap) !important;
   }
 
-  /* Project story — readable line length on small screens; full width in bleed layout */
-  .project-story-prose {
+  /* Story + overview lead — readable line length; shared body font-size variable */
+  .project-story-prose,
+  .project-overview-prose {
     width: 100%;
     max-width: 65ch;
     --story-body-font-size: 1.02rem;
   }
 
   @media (min-width: 48rem) {
-    .project-story-prose {
+    .project-story-prose,
+    .project-overview-prose {
       --story-body-font-size: 17px;
     }
   }
@@ -619,75 +550,16 @@
     }
   }
 
-  /* Mobile: zigzag stack + chapter body ↔ media rhythm */
+  /* Mobile block reorder structure (spacing in storySpacingRules.ts) */
   @media (max-width: 47.999rem) {
-    .project-story {
-      --story-zigzag-block-gap: 1rem;
-      --story-chapter-body-media-gap: 1rem;
-    }
-
-    .project-story-chapter-head:has(.project-story-prose)
-      + .project-story-between-chapters {
-      padding-top: var(--story-chapter-body-media-gap);
-    }
-
     .project-story-chapter-unit--mobile-block-reorder {
       display: flex;
       flex-direction: column;
-      row-gap: var(--story-chapter-body-media-gap, 1rem);
     }
 
     .project-story-chapter-unit--mobile-block-reorder .project-story-chapter-head,
     .project-story-chapter-unit--mobile-block-reorder .project-story-between-chapters {
       display: contents;
-    }
-
-    .project-story-chapter-unit--mobile-block-reorder
-      .project-story-chapter-head
-      + .project-story-between-chapters {
-      padding-top: 0;
-    }
-
-    /* Text block (not zigzag) → next block: 1rem total (flex gap + margin) */
-    .project-story-between-chapters
-      > *:has(.project-story-prose):not(.story-spacing-zigzag)
-      + * {
-      margin-top: calc(
-        var(--story-chapter-body-media-gap, 1rem) -
-          var(--story-between-chapters-gap, 0.4rem)
-      ) !important;
-    }
-
-    /* Zigzag block ↔ zigzag block: 1rem total */
-    .project-story-between-chapters > .story-spacing-zigzag + .story-spacing-zigzag,
-    .project-story > .story-spacing-zigzag + .story-spacing-zigzag {
-      margin-top: calc(
-        var(--story-zigzag-block-gap, 1rem) - var(--story-between-chapters-gap, 0.4rem)
-      ) !important;
-    }
-
-    .project-story-between-chapters--media-first > *,
-    .project-story-between-chapters--text-first > * {
-      margin-top: 0 !important;
-    }
-
-    .project-story-between-chapters--media-first
-      > *:has(.project-story-prose):not(.story-spacing-zigzag)
-      + *,
-    .project-story-between-chapters--text-first
-      > *:has(.project-story-prose):not(.story-spacing-zigzag)
-      + * {
-      margin-top: calc(
-        var(--story-chapter-body-media-gap, 1rem) -
-          var(--story-between-chapters-gap, 0.4rem)
-      ) !important;
-    }
-
-    .project-story-between-chapters--media-first > .story-spacing-zigzag + .story-spacing-zigzag,
-    .project-story-between-chapters--text-first > .story-spacing-zigzag + .story-spacing-zigzag {
-      margin-top: calc(
-        var(--story-zigzag-block-gap, 1rem) - var(--story-between-chapters-gap, 0.4rem)
-      ) !important;
     }
   }
 
@@ -1468,57 +1340,35 @@
 
 /* Story grammar — chapter unit ↔ chapter unit (after all @layer) */
 html body .project-story > .project-story-chapter-unit + .project-story-chapter-unit,
+html body .project-story > *:not(.project-story-chapter-unit) + .project-story-chapter-unit,
 html body .project-story > .project-story-chapter-unit[data-story-chapter-gap],
 html body .project-story > .project-story-chapter-unit.project-story-chapter-gap-active {
   margin-top: var(--story-chapter-gap, 1.6rem) !important;
   padding-top: 0 !important;
 }
 
-html body .project-story .project-story-between-chapters {
-  gap: var(--story-between-chapters-gap, 0.4rem) !important;
-  margin-top: 0 !important;
+html body .project-story .project-story-media-grid {
+  gap: var(--story-media-items-gap, 0.4rem) !important;
 }
 
+/* Image grid — mobile only: CMS column count (desktop keeps Tailwind sm/md classes) */
+@media (max-width: 47.999rem) {
+  html body .gallery-grid--mobile-cols {
+    grid-template-columns: repeat(var(--gallery-cols, 2), minmax(0, 1fr)) !important;
+  }
+}
+
+/* CMS columns > 4 — Tailwind only goes to 4 on desktop */
 @media (min-width: 48rem) {
-  html body .project-story .project-story-chapter-head + .project-story-between-chapters {
-    margin-top: 0 !important;
-    padding-top: var(--story-between-chapters-gap, 1.75rem) !important;
+  html body .gallery-grid--desktop-overflow-cols {
+    grid-template-columns: repeat(var(--gallery-cols, 4), minmax(0, 1fr)) !important;
   }
 }
 
 @media (max-width: 47.999rem) {
-  html body .project-story .project-story-chapter-head + .project-story-between-chapters {
-    margin-top: 0 !important;
-    padding-top: var(--story-between-chapters-gap, 0.4rem) !important;
-  }
-
-  html body .project-story .project-story-chapter-head:has(.project-story-prose)
-    + .project-story-between-chapters {
-    padding-top: var(--story-chapter-body-media-gap, 1rem) !important;
-  }
-
-  html body
-    .project-story
-    .project-story-between-chapters
-    > *:has(.project-story-prose):not(.story-spacing-zigzag)
-    + * {
-    margin-top: calc(
-      var(--story-chapter-body-media-gap, 1rem) -
-        var(--story-between-chapters-gap, 0.4rem)
-    ) !important;
-  }
-
-  html body .project-story .project-story-between-chapters > .story-spacing-zigzag + .story-spacing-zigzag,
-  html body .project-story > .story-spacing-zigzag + .story-spacing-zigzag {
-    margin-top: calc(
-      var(--story-zigzag-block-gap, 1rem) - var(--story-between-chapters-gap, 0.4rem)
-    ) !important;
-  }
-
   html body .project-story .project-story-chapter-unit--mobile-block-reorder {
     display: flex !important;
     flex-direction: column !important;
-    row-gap: var(--story-chapter-body-media-gap, 1rem) !important;
   }
 
   html body
@@ -1533,30 +1383,6 @@ html body .project-story .project-story-between-chapters {
   }
 }
 
-html body .project-story .project-story-media-grid {
-  gap: var(--story-media-items-gap, 0.4rem) !important;
-}
-
-html body .project-story .story-spacing-zigzag {
-  gap: var(--story-zigzag-gap, 0.4rem) !important;
-}
-
-@media (min-width: 48rem) {
-  html body .project-story .story-spacing-zigzag {
-    gap: var(--story-zigzag-gap, 0.75rem) !important;
-  }
-}
-
-@media (max-width: 47.999rem) {
-  html body
-    .project-story
-    .project-story-chapter-unit--mobile-block-reorder
-    .project-story-chapter-head
-    + .project-story-between-chapters {
-    padding-top: 0 !important;
-  }
-}
-
 html body .project-story .project-story-prose-stack {
   gap: var(--story-prose-gap, 1rem) !important;
 }
@@ -1565,17 +1391,20 @@ html body .project-story .project-story-chapter-title {
   margin-bottom: var(--story-within-chapter-gap, 1.75rem);
 }
 
-/* Story body — one size on mobile; desktop default 17px (see .project-story-prose above) */
+/* Story + overview lead body — mobile 1.02rem; desktop default 17px */
 @media (max-width: 47.999rem) {
-  html body .project-story .project-story-prose {
+  html body .project-story .project-story-prose,
+  html body .project-header .project-overview-prose {
     --story-body-font-size: 1.02rem !important;
   }
 
-  html body .project-story .project-story-prose-stack :is(p, li) {
+  html body .project-story .project-story-prose-stack :is(p, li),
+  html body .project-header .project-overview-prose .project-story-prose-stack :is(p, li) {
     font-size: 1.02rem !important;
   }
 
-  html body .project-story .project-story-prose-stack :is(p, li) * {
+  html body .project-story .project-story-prose-stack :is(p, li) *,
+  html body .project-header .project-overview-prose .project-story-prose-stack :is(p, li) * {
     font-size: inherit !important;
   }
 }
@@ -1586,12 +1415,14 @@ html body .project-story .project-story-chapter-title {
   }
 
   html body .project-story .project-story-prose-stack :is(p.story-body-text, li.story-body-text),
-  html body .project-story .story-spacing-zigzag .project-story-prose-stack :is(p, li) {
+  html body .project-story .story-spacing-zigzag .project-story-prose-stack :is(p, li),
+  html body .project-header .project-overview-prose .project-story-prose-stack :is(p, li) {
     font-size: var(--story-body-font-size, 17px);
   }
 
   html body .project-story .project-story-prose-stack li.story-body-text > p,
-  html body .project-story .story-spacing-zigzag .project-story-prose-stack li > p {
+  html body .project-story .story-spacing-zigzag .project-story-prose-stack li > p,
+  html body .project-header .project-overview-prose .project-story-prose-stack li > p {
     font-size: inherit;
     font-family: inherit;
   }

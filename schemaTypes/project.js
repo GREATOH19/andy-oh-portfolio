@@ -1,5 +1,7 @@
 import {orderRankField, orderRankOrdering} from '@sanity/orderable-document-list'
 import {defineField, defineType} from 'sanity'
+import {projectPortableTextMembers} from './project/projectPortableText'
+import {defaultProjectDetails} from './project/projectDetailDefaults'
 
 export const project = defineType({
   name: 'project',
@@ -47,13 +49,6 @@ export const project = defineType({
       description: 'Shown on cards and intro — e.g. 2024 or 2022 ~ 2024.',
     }),
     defineField({
-      name: 'role',
-      title: 'Your role',
-      type: 'string',
-      group: 'listing',
-      description: 'e.g. Industrial design · CMF · Prototyping',
-    }),
-    defineField({
       name: 'coverImage',
       title: 'Card thumbnail',
       type: 'image',
@@ -85,19 +80,21 @@ export const project = defineType({
     defineField({
       name: 'lead',
       title: 'Lead',
-      type: 'text',
-      rows: 8,
+      type: 'array',
       group: 'intro',
+      of: projectPortableTextMembers(),
       description:
-        '2–3 short paragraphs for the intro block. Separate paragraphs with a blank line.',
+        'Intro copy below the hero — same editor as story text boxes (lists, headings, inline font/size). No block-level body font/size fields here.',
     }),
     defineField({
       name: 'details',
       title: 'Project details',
       type: 'array',
       group: 'intro',
-      description: 'Sidebar lines — Client, Duration, Team, etc.',
+      description:
+        'Sidebar lines — new projects start with Type, Duration, Key skills, Size, Material. Drag to reorder, add or remove rows anytime. Empty values are hidden on the site.',
       of: [{type: 'detailLine'}],
+      initialValue: defaultProjectDetails,
     }),
     defineField({
       name: 'highlights',
@@ -147,15 +144,20 @@ export const project = defineType({
       type: 'array',
       group: 'story',
       description:
-        'Build top to bottom: chapters, text boxes, media, grids, zigzag, two columns, and quotes. Use Width/Alignment on media blocks.',
+        'Build top to bottom: chapters, text boxes, media, audio, YouTube, grids, collages, process steps, Instagram feeds, zigzag, two columns, and quotes. Use Width/Alignment on media blocks.',
       of: [
         {type: 'projectChapter'},
         {type: 'projectTextBox'},
         {type: 'projectMedia'},
         {type: 'projectGallery'},
+        {type: 'projectCollage'},
+        {type: 'projectProcess'},
         {type: 'projectQuote'},
         {type: 'projectZigzagRow'},
+        {type: 'projectInstagramFeed'},
         {type: 'projectColumns'},
+        {type: 'projectAudio'},
+        {type: 'projectYoutube'},
       ],
     }),
   ],

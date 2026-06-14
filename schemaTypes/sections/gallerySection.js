@@ -1,4 +1,5 @@
 import {defineField, defineType} from 'sanity'
+import {gridAspectRatioField, gridCropFocusField} from '../project/gridMediaFields'
 
 
 
@@ -49,6 +50,10 @@ export const gallerySection = defineType({
       validation: (Rule) => Rule.min(1).max(4),
 
     }),
+
+    gridAspectRatioField(),
+
+    gridCropFocusField(),
 
   ],
 

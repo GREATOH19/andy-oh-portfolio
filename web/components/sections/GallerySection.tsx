@@ -1,14 +1,19 @@
 "use client";
 
+import {ClickablePhotoGrid} from "@/components/ClickablePhotoGrid";
 import {
-  ClickablePhotoGrid,
+  galleryGridDesktopOverflowStyle,
+  galleryGridMobileStyle,
+  galleryGridThumbSizes,
+  normalizeGalleryColumns,
   projectGalleryGridClass,
   projectStoryGalleryGridClass,
-} from "@/components/ClickablePhotoGrid";
+} from "@/lib/projectStory/galleryGrid";
 import {MediaCarousel} from "@/components/MediaCarousel";
 import {useTypoClass} from "@/components/TypographyProvider";
 import {storyImageSizing} from "@/lib/sanity/imageRequestWidth";
 import {normalizeMediaList} from "@/lib/sanity/media";
+import type {GridAspectRatio, GridCropFocus} from "@/lib/gridAspectRatio";
 import type {CmsMediaInput, ProjectStoryMediaWidth} from "@/lib/types/project";
 
 export function GallerySection({
@@ -17,6 +22,8 @@ export function GallerySection({
   columns,
   storyMobileCarousel = false,
   mediaWidth,
+  gridAspectRatio = "auto",
+  cropFocus = "auto",
 }: {
   images?: CmsMediaInput[] | null;
   caption?: string | null;
@@ -24,18 +31,23 @@ export function GallerySection({
   /** Story: swipe carousel below md instead of multi-column grid */
   storyMobileCarousel?: boolean;
   mediaWidth?: ProjectStoryMediaWidth | null;
+  gridAspectRatio?: GridAspectRatio | null;
+  cropFocus?: GridCropFocus | null;
 }) {
   const metaClass = useTypoClass("meta");
   const items = normalizeMediaList(images);
   if (items.length === 0) return null;
 
-  const cols = columns && columns >= 1 && columns <= 4 ? columns : 2;
-  const useMobileCarousel = storyMobileCarousel && items.length > 1;
+  const cols = normalizeGalleryColumns(columns);
+  const gridStyle = {
+    ...galleryGridMobileStyle(cols),
+    ...galleryGridDesktopOverflowStyle(cols),
+  };
+  /** Multi-column grids stay grid on mobile; carousel only for single-column stacks. */
+  const useMobileCarousel = storyMobileCarousel && items.length > 1 && cols < 2;
   const sizing = storyImageSizing(mediaWidth);
   const gridSizes =
-    mediaWidth === "bleed"
-      ? sizing.sizes
-      : "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw";
+    mediaWidth === "bleed" ? sizing.sizes : galleryGridThumbSizes(cols);
 
   const storyGrid =
     storyMobileCarousel !== undefined || mediaWidth != null;
@@ -47,10 +59,13 @@ export function GallerySection({
           ? `project-story-media-grid ${projectStoryGalleryGridClass(cols)}`
           : projectGalleryGridClass(cols)
       }
+      gridStyle={gridStyle}
       thumbMaxWidth={sizing.displayPx}
       sizes={gridSizes}
       quality={sizing.quality}
-      unoptimized={sizing.unoptimized}
+      gridAspectRatio={gridAspectRatio}
+      cropFocus={cropFocus}
+      columns={cols}
     />
   );
 
@@ -64,7 +79,6 @@ export function GallerySection({
             thumbMaxWidth={sizing.displayPx}
             sizes={sizing.sizes}
             quality={sizing.quality}
-            unoptimized={sizing.unoptimized}
           />
         </div>
         <div className="hidden md:block">

@@ -1,3 +1,4 @@
+import {sanityCroppedDimensions} from "@/lib/imageAspect";
 import {urlForImage} from "@/lib/sanity/image";
 import type {SanityImageField} from "@/lib/types/project";
 
@@ -8,23 +9,12 @@ const BANNER_QUALITY = 95;
 
 /** Pixel size after Sanity Studio crop (crop fractions on each edge). */
 export function workHomeBannerCroppedDimensions(image: NonNullable<SanityImageField>) {
+  const cropped = sanityCroppedDimensions(image);
+  if (cropped) return cropped;
   const dims = image.asset?.metadata?.dimensions;
-  const fullW = dims?.width ?? BANNER_MIN_WIDTH;
-  const fullH = dims?.height ?? 500;
-  const crop = image.crop;
-
-  if (!crop) {
-    return {width: fullW, height: fullH};
-  }
-
-  const left = crop.left ?? 0;
-  const right = crop.right ?? 0;
-  const top = crop.top ?? 0;
-  const bottom = crop.bottom ?? 0;
-
   return {
-    width: Math.max(1, Math.round(fullW * (1 - left - right))),
-    height: Math.max(1, Math.round(fullH * (1 - top - bottom))),
+    width: dims?.width ?? BANNER_MIN_WIDTH,
+    height: dims?.height ?? 500,
   };
 }
 

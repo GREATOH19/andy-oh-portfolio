@@ -52,6 +52,8 @@ export const projectChapter = defineType({
       name: 'titleFont',
       title: 'Heading font',
       type: 'string',
+      initialValue: 'spaceGrotesk',
+      description: 'Defaults to Space Grotesk. Pick another font here to override.',
       options: {list: CMS_FONT_OPTIONS, layout: 'dropdown'},
     }),
     defineField({

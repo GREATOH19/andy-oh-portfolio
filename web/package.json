@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "sync:vercel-env": "node scripts/sync-env-to-vercel.mjs"
   },
   "dependencies": {
     "@portabletext/react": "^6.0.3",

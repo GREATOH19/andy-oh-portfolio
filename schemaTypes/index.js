@@ -7,6 +7,7 @@ import {siteSettings} from './siteSettings'
 
 import {cmsImage} from './objects/cmsImage'
 import {cmsMediaItem} from './objects/cmsMediaItem'
+import {collageItem} from './objects/collageItem'
 import {photoAlbum} from './objects/photoAlbum'
 import {siteBrand} from './objects/siteBrand'
 
@@ -32,8 +33,13 @@ import {projectMedia} from './project/projectMedia'
 import {projectQuote} from './project/projectQuote'
 import {projectZigzagRow} from './project/projectZigzagRow'
 import {projectTextBox} from './project/projectTextBox'
+import {projectInstagramFeed} from './project/projectInstagramFeed'
 import {projectInlineMedia} from './project/projectInlineMedia'
 import {projectColumns} from './project/projectColumns'
+import {projectAudio} from './project/projectAudio'
+import {projectYoutube} from './project/projectYoutube'
+import {projectProcess} from './project/projectProcess'
+import {projectCollage} from './project/projectCollage'
 
 export const schemaTypes = [
   about,
@@ -44,6 +50,7 @@ export const schemaTypes = [
   siteSettings,
   cmsImage,
   cmsMediaItem,
+  collageItem,
   photoAlbum,
   siteBrand,
   detailLine,
@@ -56,8 +63,13 @@ export const schemaTypes = [
   projectQuote,
   projectZigzagRow,
   projectTextBox,
+  projectInstagramFeed,
   projectInlineMedia,
   projectColumns,
+  projectAudio,
+  projectYoutube,
+  projectProcess,
+  projectCollage,
   contactCtaSection,
   gallerySection,
   heroSection,

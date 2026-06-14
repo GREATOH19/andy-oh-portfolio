@@ -27,10 +27,11 @@ export const projectInlineMedia = defineType({
           ? media.video
           : media?.mediaType === 'image'
             ? media.image
-            : media
+            : undefined
       return {
-        title: caption || 'Inline image',
-        subtitle: 'In chapter body',
+        title: caption || (media?.mediaType === 'youtube' ? 'YouTube' : 'Inline media'),
+        subtitle:
+          media?.mediaType === 'youtube' ? media.youtubeUrl : 'In chapter body',
         media: m,
       }
     },

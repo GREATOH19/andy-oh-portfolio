@@ -1,11 +1,12 @@
+import type {GridCropFocus} from "@/lib/gridAspectRatio";
+import type {BannerFocus} from "@/lib/types/project";
+
+export type {BannerFocus};
+
 type SanityHotspot = {
   x?: number | null;
   y?: number | null;
 };
-
-import type {BannerFocus} from "@/lib/types/project";
-
-export type {BannerFocus};
 
 type ImageWithHotspot = {
   hotspot?: SanityHotspot | null;
@@ -32,5 +33,30 @@ export function sanityImageObjectPosition(
     default:
       /* Slightly below center — keeps top of wide banner marks visible in cover crop */
       return "center 42%";
+  }
+}
+
+/** Focal point for uniform grid crops — per-image hotspot wins when focus is auto. */
+export function gridCropObjectPosition(
+  image?: ImageWithHotspot,
+  focus: GridCropFocus = "auto",
+): string {
+  if (focus === "auto") {
+    return sanityImageObjectPosition(image, "auto");
+  }
+
+  switch (focus) {
+    case "center":
+      return "center center";
+    case "top":
+      return "center top";
+    case "bottom":
+      return "center bottom";
+    case "left":
+      return "left center";
+    case "right":
+      return "right center";
+    default:
+      return "center center";
   }
 }

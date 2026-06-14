@@ -10,8 +10,13 @@ import {
   getProjectCardImageUrl,
   projectCardHasVideoHero,
 } from "@/lib/projectCardMedia";
-import {urlForImage} from "@/lib/sanity/image";
-import {isSanityImage, isSanityVideo, normalizeMediaItem, sanityVideoUrl} from "@/lib/sanity/media";
+import {buildSanityImageSrc} from "@/lib/sanity/image";
+import {
+  isSanityImage,
+  isSanityVideo,
+  normalizeMediaItem,
+  sanityInlineLoopVideoUrl,
+} from "@/lib/sanity/media";
 import {useSiteTypography, useTypoClass} from "@/components/TypographyProvider";
 import type {ProjectListItem} from "@/lib/types/project";
 
@@ -104,7 +109,7 @@ function ProjectCardHeroVideo({
       muted
       loop={loop}
       playsInline
-      preload="metadata"
+      preload="none"
       aria-label={alt || undefined}
     />
   );
@@ -145,9 +150,9 @@ export function ProjectCard({
   const thumbSrc = getProjectCardImageUrl(project, {width: 1600, height: 1200});
   const heroImageSrc =
     heroImage?.asset?._ref && heroImage !== thumbnail
-      ? urlForImage(heroImage).width(1600).height(1200).quality(90).url()
+      ? buildSanityImageSrc(heroImage, {displayWidth: 1600, quality: 90})
       : null;
-  const heroVideoSrc = heroVideo ? sanityVideoUrl(heroVideo) : null;
+  const heroVideoSrc = heroVideo ? sanityInlineLoopVideoUrl(heroVideo) : null;
 
   const thumbAlt = thumbnail?.alt ?? project.title;
   const heroAlt = heroVideo?.alt ?? heroImage?.alt ?? project.title;
@@ -202,6 +207,7 @@ export function ProjectCard({
             fill
             className={`object-cover transition-opacity duration-500 ease-out ${thumbHiddenClass}`}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            unoptimized
           />
         ) : null}
         {hasDistinctHeroVideo && heroVideoSrc ? (
@@ -220,6 +226,7 @@ export function ProjectCard({
             fill
             className={`object-cover transition-opacity duration-500 ease-out ${heroOverlayClass}`}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            unoptimized
           />
         ) : null}
         {hasVideoOnlyHero && heroVideoSrc ? (
@@ -238,6 +245,7 @@ export function ProjectCard({
             fill
             className={`object-cover transition-[filter] duration-500 ease-out ${overlayOpen ? "blur-[1px]" : "blur-0"} [@media(hover:hover)]:group-hover:blur-[1px] group-focus-within:blur-[1px]`}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            unoptimized
           />
         ) : null}
         {!hasDistinctHero && !hasVideoOnlyHero && !thumbSrc ? (

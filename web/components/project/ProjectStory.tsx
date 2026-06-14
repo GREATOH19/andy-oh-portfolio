@@ -6,7 +6,16 @@ import {
   STORY_CHAPTER_GAP_CLASS,
   STORY_CHAPTER_UNIT_CLASS,
   STORY_CHAPTER_UNIT_MOBILE_REORDER_CLASS,
+  STORY_ZIGZAG_BODY_IMAGES_CLASS,
+  STORY_ZIGZAG_BODY_IMAGES_CAPTION_ROW_CLASS,
+  STORY_ZIGZAG_BODY_IMAGES_END_CLASS,
+  STORY_ZIGZAG_CENTER_TEXT_CLASS,
+  STORY_ZIGZAG_MEDIA_CAPTION_CLASS,
+  STORY_ZIGZAG_MEDIA_MAIN_CLASS,
+  STORY_ZIGZAG_TEXT_BODY_CLASS,
+  STORY_ZIGZAG_TEXT_COL_CLASS,
 } from "@/lib/projectStory/storySpacingGrammar";
+import {PROJECT_STORY_SPACING_CSS} from "@/lib/projectStory/storySpacingRules";
 import {PortableBody} from "@/components/PortableBody";
 import {
   projectBodyProseFontClass,
@@ -19,7 +28,18 @@ import {zigzagRowMedia} from "@/lib/sanity/zigzagRowMedia";
 import {QuoteSection} from "@/components/sections/QuoteSection";
 import {RichTextSection} from "@/components/sections/RichTextSection";
 import {ProjectColumnsSection} from "@/components/project/ProjectColumnsSection";
+import {ProjectInstagramFeed} from "@/components/project/ProjectInstagramFeed";
+import {ProjectAudioSection} from "@/components/project/ProjectAudioSection";
+import {ProjectYoutubeEmbed} from "@/components/project/ProjectYoutubeEmbed";
+import {ProjectCollageSection} from "@/components/project/ProjectCollageSection";
+import {ProjectProcessSection} from "@/components/project/ProjectProcessSection";
 import {StoryBlockLayout} from "@/components/project/StoryBlockLayout";
+import {
+  galleryColumnWidthClass,
+  gallerySupportsSideText,
+  galleryTextIsLeft,
+  mobileOnlyStackOrderClass,
+} from "@/lib/projectStory/gallerySideLayout";
 import {storyUsesMobileCarousel} from "@/lib/projectStory/layout";
 import {useTypoClass} from "@/components/TypographyProvider";
 import {portableTextHasVisibleContent} from "@/lib/portableText/filterEmptyBlocks";
@@ -28,6 +48,7 @@ import {
   buildStorySegments,
   mobileBlockOrderClass,
   type StorySegment,
+  zigzagBodyImagesEndGridClasses,
   zigzagMobileOrderClasses,
 } from "@/lib/projectStory/chapterGroups";
 import type {
@@ -51,7 +72,15 @@ function storyLayoutFromBlock(block: ProjectStoryLayoutFields) {
 }
 
 function storyBlockUsesMobileEdge(block: ProjectStoryBlock): boolean {
-  if (block._type !== "projectMedia" && block._type !== "projectGallery") return false;
+  if (
+    block._type !== "projectMedia" &&
+    block._type !== "projectGallery" &&
+    block._type !== "projectCollage" &&
+    block._type !== "projectProcess" &&
+    block._type !== "projectYoutube"
+  ) {
+    return false;
+  }
   const width = block.mediaWidth ?? "full";
   return width === "full" || width === "bleed";
 }
@@ -80,6 +109,7 @@ function storyBlockSpacing(type: StoryBlockType, prevType: StoryBlockType | null
 type RenderContext = {
   blocks: ProjectStoryBlock[];
   bodyClass: string;
+  metaClass: string;
   prevType: StoryBlockType | null;
   mobileBlockOrder: ProjectChapterMobileBlockOrder;
   deferChapterBody: boolean;
@@ -100,6 +130,7 @@ function renderStoryBlock(ctx: RenderContext, idx: number): ReactNode {
   const {
     blocks,
     bodyClass,
+    metaClass,
     prevType,
     mobileBlockOrder,
     deferChapterBody,
@@ -198,20 +229,156 @@ function renderStoryBlock(ctx: RenderContext, idx: number): ReactNode {
           </StoryBlockLayout>
         </div>
       );
-    case "projectGallery":
+    case "projectGallery": {
+      const hasSideText =
+        portableTextHasVisibleContent(block.body) &&
+        gallerySupportsSideText(block.mediaWidth);
+
+      if (hasSideText) {
+        const isTextLeft = galleryTextIsLeft(block.layout, block.mediaAlign);
+        const {text: textOrderClass, media: mediaOrderClass} = zigzagMobileOrderClasses(
+          block.mobileStackOrder,
+          isTextLeft,
+        );
+
+        return (
+          <div key={key} className={storyBlockWrapperClass(block, spacingClass, mobileOrderClass)}>
+            <section
+              className={[
+                "flex flex-col items-start story-spacing-zigzag",
+                isTextLeft ? "md:flex-row" : "md:flex-row-reverse",
+              ].join(" ")}
+            >
+              <div
+                className={[mobileOnlyStackOrderClass(textOrderClass), "min-w-0 flex-1"]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                <div
+                  className={[
+                    "project-story-prose",
+                    projectBodyProseFontClass(block),
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  style={projectBodyProseStyle(block)}
+                >
+                  <PortableBody
+                    value={block.body ?? undefined}
+                    className={bodyClass}
+                    bodyFont={block.bodyFont}
+                    spacing="story"
+                  />
+                </div>
+              </div>
+              <div
+                className={[
+                  mobileOnlyStackOrderClass(mediaOrderClass),
+                  galleryColumnWidthClass(block.mediaWidth),
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
+                <GallerySection
+                  images={block.images}
+                  caption={block.caption}
+                  columns={block.columns}
+                  mediaWidth={block.mediaWidth}
+                  storyMobileCarousel={storyUsesMobileCarousel(block.mobileCarousel)}
+                  gridAspectRatio={block.gridAspectRatio}
+                  cropFocus={block.cropFocus}
+                />
+              </div>
+            </section>
+          </div>
+        );
+      }
+
       return (
         <div key={key} className={storyBlockWrapperClass(block, spacingClass, mobileOrderClass)}>
           <StoryBlockLayout layout={storyLayoutFromBlock(block)}>
-                  <GallerySection
-                    images={block.images}
-                    caption={block.caption}
-                    columns={block.columns}
-                    mediaWidth={block.mediaWidth}
-                    storyMobileCarousel={storyUsesMobileCarousel(block.mobileCarousel)}
-                  />
+            <GallerySection
+              images={block.images}
+              caption={block.caption}
+              columns={block.columns}
+              mediaWidth={block.mediaWidth}
+              storyMobileCarousel={storyUsesMobileCarousel(block.mobileCarousel)}
+              gridAspectRatio={block.gridAspectRatio}
+              cropFocus={block.cropFocus}
+            />
           </StoryBlockLayout>
         </div>
       );
+    }
+    case "projectCollage": {
+      if (!block.items?.length) return null;
+      return (
+        <div key={key} className={storyBlockWrapperClass(block, spacingClass, mobileOrderClass)}>
+          <StoryBlockLayout layout={storyLayoutFromBlock(block)}>
+            <ProjectCollageSection
+              items={block.items}
+              caption={block.caption}
+              mediaWidth={block.mediaWidth}
+            />
+          </StoryBlockLayout>
+        </div>
+      );
+    }
+    case "projectProcess": {
+      if (!block.steps?.length) return null;
+      return (
+        <div key={key} className={storyBlockWrapperClass(block, spacingClass, mobileOrderClass)}>
+          <StoryBlockLayout layout={storyLayoutFromBlock(block)}>
+            <ProjectProcessSection
+              steps={block.steps}
+              columns={block.columns}
+              caption={block.caption}
+              mediaWidth={block.mediaWidth}
+              gridAspectRatio={block.gridAspectRatio}
+              cropFocus={block.cropFocus}
+            />
+          </StoryBlockLayout>
+        </div>
+      );
+    }
+    case "projectInstagramFeed": {
+      if (!block.handle?.trim()) return null;
+      return (
+        <div key={key} className={`w-full ${spacingClass} ${mobileOrderClass}`.trim()}>
+          <ProjectInstagramFeed
+            handle={block.handle}
+            maxPosts={block.maxPosts}
+            columns={block.columns}
+            caption={block.caption}
+            gridAspectRatio={block.gridAspectRatio}
+            cropFocus={block.cropFocus}
+          />
+        </div>
+      );
+    }
+    case "projectAudio": {
+      return (
+        <div key={key} className={`w-full ${spacingClass} ${mobileOrderClass}`.trim()}>
+          <ProjectAudioSection block={block} />
+        </div>
+      );
+    }
+    case "projectYoutube": {
+      if (!block.url?.trim()) return null;
+      return (
+        <div key={key} className={storyBlockWrapperClass(block, spacingClass, mobileOrderClass)}>
+          <StoryBlockLayout layout={storyLayoutFromBlock(block)}>
+            <ProjectYoutubeEmbed
+              url={block.url}
+              title={block.title}
+              caption={block.caption}
+              videoAspect={block.videoAspect}
+              mediaAlign={block.mediaAlign}
+            />
+          </StoryBlockLayout>
+        </div>
+      );
+    }
     case "projectColumns":
       return (
         <div key={key} className={`w-full ${spacingClass} ${mobileOrderClass}`.trim()}>
@@ -246,9 +413,10 @@ function renderStoryBlock(ctx: RenderContext, idx: number): ReactNode {
     }
     case "projectZigzagRow": {
       const hasText = Boolean(block.body?.length);
+      const hasBodyImages = Boolean(block.bodyImages?.length);
       const zigzagMedia = zigzagRowMedia(block);
       const hasMedia = zigzagMedia.length > 0;
-      if (!hasText && !hasMedia) return null;
+      if (!hasText && !hasBodyImages && !hasMedia) return null;
 
       const zigzagRowIndex = blocks
         .slice(0, idx)
@@ -261,37 +429,108 @@ function renderStoryBlock(ctx: RenderContext, idx: number): ReactNode {
         block.mobileStackOrder,
         isTextLeft,
       );
+      const bodyImagesEnd = hasBodyImages && hasMedia;
+      const bodyImagesEndGrid = bodyImagesEnd
+        ? zigzagBodyImagesEndGridClasses(isTextLeft)
+        : null;
+
+      const alignClass = block.centerTextWithMedia ? STORY_ZIGZAG_CENTER_TEXT_CLASS : "";
+      const bodyImagesEndClass = bodyImagesEnd ? STORY_ZIGZAG_BODY_IMAGES_END_CLASS : "";
+      const bodyImagesCaptionRowClass =
+        bodyImagesEnd && block.caption ? STORY_ZIGZAG_BODY_IMAGES_CAPTION_ROW_CLASS : "";
 
       return (
         <section
           key={key}
-          className={`grid items-start story-spacing-zigzag md:grid-cols-2 ${spacingClass} ${mobileOrderClass}`.trim()}
+          className={[
+            "grid items-start story-spacing-zigzag md:grid-cols-2",
+            bodyImagesEnd ? "md:items-stretch" : "",
+            alignClass,
+            bodyImagesEndClass,
+            bodyImagesCaptionRowClass,
+            spacingClass,
+            mobileOrderClass,
+          ]
+            .filter(Boolean)
+            .join(" ")}
         >
-          <div className={textOrderClass}>
+          <div
+            className={[
+              textOrderClass,
+              STORY_ZIGZAG_TEXT_COL_CLASS,
+              bodyImagesEndGrid?.text,
+            ]
+              .filter(Boolean)
+              .join(" ")}
+          >
             {hasText ? (
-              <div
-                className={[
-                  "project-story-prose",
-                  projectBodyProseFontClass(block),
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-                style={projectBodyProseStyle(block)}
-              >
-                <PortableBody
-                  value={block.body ?? undefined}
-                  className={bodyClass}
-                  bodyFont={block.bodyFont}
-                  spacing="story"
+              <div className={bodyImagesEnd ? STORY_ZIGZAG_TEXT_BODY_CLASS : undefined}>
+                <div
+                  className={[
+                    "project-story-prose",
+                    projectBodyProseFontClass(block),
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  style={projectBodyProseStyle(block)}
+                >
+                  <PortableBody
+                    value={block.body ?? undefined}
+                    className={bodyClass}
+                    bodyFont={block.bodyFont}
+                    spacing="story"
+                  />
+                </div>
+              </div>
+            ) : null}
+            {hasBodyImages ? (
+              <div className={STORY_ZIGZAG_BODY_IMAGES_CLASS}>
+                <GallerySection
+                  images={block.bodyImages}
+                  columns={block.bodyImageColumns ?? 3}
+                  storyMobileCarousel={false}
+                  gridAspectRatio={block.bodyGridAspectRatio}
+                  cropFocus={block.bodyCropFocus}
                 />
               </div>
             ) : null}
           </div>
-          <div className={mediaOrderClass}>
-            {hasMedia ? (
-              <MediaCarousel images={zigzagMedia} caption={block.caption} />
-            ) : null}
-          </div>
+          {hasMedia ? (
+            <div
+              className={[
+                mediaOrderClass,
+                bodyImagesEnd ? STORY_ZIGZAG_MEDIA_MAIN_CLASS : "",
+                bodyImagesEndGrid?.media,
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              <MediaCarousel
+                images={zigzagMedia}
+                caption={bodyImagesEnd ? undefined : block.caption}
+              />
+              {bodyImagesEnd && block.caption ? (
+                <p className={`mt-3 text-sm text-zinc-500 md:hidden ${metaClass}`}>
+                  {block.caption}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+          {bodyImagesEnd && block.caption ? (
+            <p
+              className={[
+                STORY_ZIGZAG_MEDIA_CAPTION_CLASS,
+                mediaOrderClass,
+                bodyImagesEndGrid?.caption,
+                "hidden text-sm text-zinc-500 md:block",
+                metaClass,
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
+              {block.caption}
+            </p>
+          ) : null}
         </section>
       );
     }
@@ -311,6 +550,7 @@ function betweenChaptersModifier(
 function renderBetweenChapters(
   blocks: ProjectStoryBlock[],
   bodyClass: string,
+  metaClass: string,
   segment: Extract<StorySegment, {kind: "betweenChapters"}>,
   prevType: StoryBlockType | null,
 ): {nodes: ReactNode[]; lastType: StoryBlockType | null} {
@@ -325,6 +565,7 @@ function renderBetweenChapters(
     const ctx: RenderContext = {
       blocks,
       bodyClass,
+      metaClass,
       prevType: betweenPrevType,
       mobileBlockOrder: segment.mobileBlockOrder,
       deferChapterBody: false,
@@ -352,6 +593,7 @@ function renderBetweenChapters(
 
 export function ProjectStory({blocks}: {blocks: ProjectStoryBlock[]}) {
   const bodyClass = useTypoClass("body");
+  const metaClass = useTypoClass("meta");
   const renderUnits = buildStoryRenderUnits(buildStorySegments(blocks));
   const nodes: ReactNode[] = [];
   let prevType: StoryBlockType | null = null;
@@ -362,6 +604,7 @@ export function ProjectStory({blocks}: {blocks: ProjectStoryBlock[]}) {
       const ctx: RenderContext = {
         blocks,
         bodyClass,
+        metaClass,
         prevType,
         mobileBlockOrder: "default",
         deferChapterBody: false,
@@ -375,7 +618,7 @@ export function ProjectStory({blocks}: {blocks: ProjectStoryBlock[]}) {
     }
 
     const {head, between} = item.unit;
-    const addChapterGap = chapterUnitIndex > 0;
+    const addChapterGap = chapterUnitIndex > 0 || prevType !== null;
     chapterUnitIndex += 1;
 
     const chapterBlock = blocks[head.index];
@@ -387,6 +630,7 @@ export function ProjectStory({blocks}: {blocks: ProjectStoryBlock[]}) {
     const headCtx: RenderContext = {
       blocks,
       bodyClass,
+      metaClass,
       prevType,
       mobileBlockOrder: head.mobileBlockOrder,
       deferChapterBody,
@@ -396,7 +640,7 @@ export function ProjectStory({blocks}: {blocks: ProjectStoryBlock[]}) {
     const headNode = renderStoryBlock(headCtx, head.index);
 
     const betweenResult = between
-      ? renderBetweenChapters(blocks, bodyClass, between, prevType)
+      ? renderBetweenChapters(blocks, bodyClass, metaClass, between, prevType)
       : {nodes: [], lastType: prevType};
 
     if (!headNode && betweenResult.nodes.length === 0) continue;
@@ -429,5 +673,10 @@ export function ProjectStory({blocks}: {blocks: ProjectStoryBlock[]}) {
     prevType = betweenResult.lastType ?? chapterBlock._type;
   }
 
-  return <div className="project-story">{nodes}</div>;
+  return (
+    <>
+      <style dangerouslySetInnerHTML={{__html: PROJECT_STORY_SPACING_CSS}} />
+      <div className="project-story">{nodes}</div>
+    </>
+  );
 }

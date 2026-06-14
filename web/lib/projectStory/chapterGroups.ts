@@ -32,17 +32,30 @@ export type StoryRenderUnit =
   | {kind: "chapterUnit"; unit: ChapterUnit};
 
 function isStoryMediaBlock(block: ProjectStoryBlock): boolean {
-  if (block._type === "projectMedia" || block._type === "projectGallery") return true;
+  if (
+    block._type === "projectMedia" ||
+    block._type === "projectGallery" ||
+    block._type === "projectCollage" ||
+    block._type === "projectProcess" ||
+    block._type === "projectYoutube"
+  ) {
+    return true;
+  }
   if (block._type === "projectZigzagRow") return zigzagRowMedia(block).length > 0;
   return false;
 }
 
 function isStoryTextBlock(block: ProjectStoryBlock): boolean {
   if (block._type === "projectQuote" || block._type === "projectColumns") return true;
+  if (block._type === "projectGallery") {
+    return portableTextHasVisibleContent(block.body);
+  }
   if (block._type === "projectChapter" || block._type === "projectTextBox") {
     return portableTextHasVisibleContent(block.body);
   }
-  if (block._type === "projectZigzagRow") return Boolean(block.body?.length);
+  if (block._type === "projectZigzagRow") {
+    return Boolean(block.body?.length) || Boolean(block.bodyImages?.length);
+  }
   return false;
 }
 
@@ -143,5 +156,20 @@ export function zigzagMobileOrderClasses(
   return {
     text: isTextLeft ? "md:order-1" : "md:order-2",
     media: isTextLeft ? "md:order-2" : "md:order-1",
+  };
+}
+
+/** Desktop column placement when body images use the end-aligned grid (order alone is unreliable). */
+export function zigzagBodyImagesEndGridClasses(isTextLeft: boolean): {
+  text: string;
+  media: string;
+  caption: string;
+} {
+  const textCol = isTextLeft ? "md:col-start-1" : "md:col-start-2";
+  const mediaCol = isTextLeft ? "md:col-start-2" : "md:col-start-1";
+  return {
+    text: `${textCol} md:row-start-1`,
+    media: `${mediaCol} md:row-start-1`,
+    caption: `${mediaCol} md:row-start-2`,
   };
 }
