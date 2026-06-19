@@ -1,3 +1,5 @@
+"use client";
+
 import Image from "next/image";
 import {aspectBoxStyle, gridNaturalTileBoxStyle} from "@/lib/imageAspect";
 import {
@@ -9,7 +11,10 @@ import {
 } from "@/lib/gridAspectRatio";
 import type {MediaAspect} from "@/lib/gridRowAspect";
 import {buildSanityImageSrc, sanityImageAssetId} from "@/lib/sanity/image";
+import {imageThumbFrameClass, sanityImageHasTransparency} from "@/lib/sanity/imageThumb";
 import {gridCropObjectPosition} from "@/lib/sanity/imagePosition";
+import {trimBoxStyle, trimImageStyle} from "@/lib/sanity/transparentImageTrim";
+import {useTransparentImageTrim} from "@/lib/sanity/useTransparentImageTrim";
 import type {SanityImageField} from "@/lib/types/project";
 
 export function SanityAspectImage({
@@ -25,40 +30,76 @@ export function SanityAspectImage({
 }: {
   image: SanityImageField;
   alt: string;
-  /** Estimated max display width in CSS pixels (CDN width is scaled for 2× DPR, capped at asset size). */
   maxWidth: number;
   quality?: number;
   sizes: string;
   gridAspectRatio?: GridAspectRatio | null;
   cropFocus?: GridCropFocus | null;
-  /** Shared row tile aspect for multi-column grids. */
   gridRowAspect?: MediaAspect | null;
   fillFrame?: boolean;
 }) {
-  if (image == null || !sanityImageAssetId(image)) return null;
-  const src = buildSanityImageSrc(image, {displayWidth: maxWidth, quality});
-  if (!src) return null;
+  const src =
+    image != null && sanityImageAssetId(image)
+      ? buildSanityImageSrc(image, {displayWidth: maxWidth, quality})
+      : null;
 
   const aspect = normalizeGridAspectRatio(gridAspectRatio);
   const uniformCrop = gridUsesUniformCrop(aspect);
+  const canAutoTrim =
+    image != null &&
+    sanityImageHasTransparency(image) &&
+    !fillFrame &&
+    !uniformCrop &&
+    !gridRowAspect &&
+    aspect === "auto";
+  const trimSrc =
+    canAutoTrim && image != null
+      ? buildSanityImageSrc(image, {displayWidth: Math.min(640, maxWidth), quality: 80})
+      : null;
+  const trim = useTransparentImageTrim(trimSrc, canAutoTrim && trimSrc != null);
+
+  if (image == null || !src) return null;
+
   const fixedBox = gridAspectRatioBoxStyle(aspect);
-  const rowBox = gridRowAspect
-    ? gridNaturalTileBoxStyle(gridRowAspect.width, gridRowAspect.height)
-    : null;
-  const boxStyle = fillFrame
-    ? {width: "100%", height: "100%"}
-    : fixedBox ?? rowBox ?? aspectBoxStyle(image);
+  const rowBox =
+    !uniformCrop && gridRowAspect
+      ? gridNaturalTileBoxStyle(gridRowAspect.width, gridRowAspect.height)
+      : null;
+  const naturalBox = fixedBox ?? rowBox ?? aspectBoxStyle(image);
   const useCover = fillFrame || uniformCrop || gridRowAspect != null;
   const objectFit = useCover ? "object-cover" : "object-contain";
   const objectPosition = useCover
     ? gridCropObjectPosition(image, cropFocus ?? "auto")
     : undefined;
+  const frameClass = imageThumbFrameClass(image, fillFrame);
+
+  const boxStyle = fillFrame
+    ? {width: "100%", height: "100%"}
+    : trim
+      ? trimBoxStyle(trim)
+      : naturalBox;
+
+  const thumbClass = `media-thumb relative w-full overflow-hidden transition-[transform,box-shadow] duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-[1.006] active:translate-y-0 active:scale-[0.997] ${frameClass}`;
+
+  if (trim) {
+    return (
+      <div className={thumbClass} style={boxStyle}>
+        <Image
+          src={src}
+          alt={alt}
+          width={trim.naturalWidth}
+          height={trim.naturalHeight}
+          className="absolute max-w-none"
+          style={trimImageStyle(trim)}
+          sizes={sizes}
+          unoptimized
+        />
+      </div>
+    );
+  }
 
   return (
-    <div
-      className={`media-thumb relative w-full overflow-hidden bg-zinc-200 shadow-sm ring-1 ring-slate-200/60 transition-[transform,box-shadow] duration-200 ease-out group-hover:-translate-y-0.5 group-hover:scale-[1.006] group-hover:shadow-lg active:translate-y-0 active:scale-[0.997] ${fillFrame ? "h-full rounded-none shadow-none ring-0" : "rounded-2xl"}`}
-      style={boxStyle}
-    >
+    <div className={thumbClass} style={boxStyle}>
       <Image
         src={src}
         alt={alt}

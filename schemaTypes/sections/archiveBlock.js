@@ -28,17 +28,30 @@ export const archiveBlock = defineType({
       title: 'Archive projects',
       type: 'array',
       description:
-        'Unlimited. The More page shows 3; the full list is on /more/archive (grouped by year). Use project document actions to add or remove.',
+        'Grouped by year on /more/archive. Use project document actions to add or remove.',
       of: [{type: 'reference', to: [{type: 'project'}]}],
+    }),
+    defineField({
+      name: 'archiveAlbums',
+      title: 'Media albums',
+      type: 'array',
+      of: [{type: 'reference', to: [{type: 'mediaAlbum'}]}],
+      description:
+        'Standalone photos and videos, grouped in albums (create under More → Media albums). Each album can hold 100+ items.',
     }),
   ],
   preview: {
-    select: {heading: 'heading', enabled: 'enabled', count: 'archiveProjects'},
-    prepare({heading, enabled, count}) {
-      const n = Array.isArray(count) ? count.length : 0
+    select: {heading: 'heading', enabled: 'enabled', projects: 'archiveProjects', albums: 'archiveAlbums'},
+    prepare({heading, enabled, projects, albums}) {
+      const projectCount = Array.isArray(projects) ? projects.length : 0
+      const albumCount = Array.isArray(albums) ? albums.length : 0
+      const parts = []
+      if (projectCount > 0) parts.push(`${projectCount} project${projectCount === 1 ? '' : 's'}`)
+      if (albumCount > 0) parts.push(`${albumCount} album${albumCount === 1 ? '' : 's'}`)
+      const summary = parts.length > 0 ? parts.join(' · ') : 'Empty'
       return {
         title: heading || 'Archive',
-        subtitle: `${enabled === false ? 'Hidden · ' : ''}${n} project${n === 1 ? '' : 's'}`,
+        subtitle: `${enabled === false ? 'Hidden · ' : ''}${summary}`,
       }
     },
   },

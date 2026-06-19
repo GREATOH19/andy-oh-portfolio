@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useLayoutEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useLayoutEffect, useRef, useState } from "react";
 import { BrandMark } from "@/components/BrandMark";
 import { MoreNavLink } from "@/components/MoreNavLink";
 import type { MoreNavItem } from "@/lib/more/nav";
@@ -13,6 +14,15 @@ const navLinks = [
 ] as const;
 
 const SCROLL_THRESHOLD_PX = 16;
+const SCROLL_DIRECTION_DELTA_PX = 8;
+
+function isProjectDetailPath(pathname: string): boolean {
+  return pathname.startsWith("/projects/") && pathname.length > "/projects/".length;
+}
+
+function setChromeHiddenAttr(hidden: boolean) {
+  document.documentElement.toggleAttribute("data-chrome-hidden", hidden);
+}
 
 export function SiteHeader({
   brand,
@@ -23,23 +33,68 @@ export function SiteHeader({
   moreNavDropdownItems?: MoreNavItem[];
   moreNavLabel?: string;
 }) {
+  const pathname = usePathname();
+  const isProjectPage = isProjectDetailPath(pathname);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [chromeHidden, setChromeHidden] = useState(false);
+  const hiddenRef = useRef(false);
+  const lastScrollYRef = useRef(0);
   const showScrolledHeader = isScrolled;
 
   useLayoutEffect(() => {
     const update = () => {
-      setIsScrolled(window.scrollY > SCROLL_THRESHOLD_PX);
+      const y = window.scrollY;
+      setIsScrolled(y > SCROLL_THRESHOLD_PX);
+      const isMobile = window.matchMedia("(max-width: 768px)").matches;
+
+      if (!isProjectPage) {
+        if (hiddenRef.current) {
+          hiddenRef.current = false;
+          setChromeHidden(false);
+          setChromeHiddenAttr(false);
+        }
+        lastScrollYRef.current = y;
+        return;
+      }
+
+      const delta = y - lastScrollYRef.current;
+      let nextHidden = hiddenRef.current;
+
+      if (y <= SCROLL_THRESHOLD_PX) {
+        nextHidden = false;
+      } else if (!isMobile && delta > SCROLL_DIRECTION_DELTA_PX) {
+        nextHidden = true;
+      }
+
+      if (nextHidden !== hiddenRef.current) {
+        hiddenRef.current = nextHidden;
+        setChromeHidden(nextHidden);
+        setChromeHiddenAttr(nextHidden);
+      }
+
+      if (isMobile && hiddenRef.current) {
+        hiddenRef.current = false;
+        setChromeHidden(false);
+        setChromeHiddenAttr(false);
+      }
+
+      lastScrollYRef.current = y;
     };
+
     update();
     window.addEventListener("scroll", update, { passive: true });
-    return () => window.removeEventListener("scroll", update);
-  }, []);
+    return () => {
+      window.removeEventListener("scroll", update);
+      setChromeHiddenAttr(false);
+    };
+  }, [isProjectPage]);
 
   return (
     <header
       className={[
-        "sticky top-0 z-50 relative flex h-[var(--site-header-height)] shrink-0 overflow-visible",
-        "transition-[background-color,box-shadow,backdrop-filter] duration-300 ease-out",
+        "sticky top-0 z-50 flex h-[var(--site-header-height)] shrink-0 overflow-visible",
+        "transition-[transform,background-color,box-shadow,backdrop-filter] duration-300 ease-out",
+        isProjectPage && chromeHidden ? "-translate-y-full" : "translate-y-0",
         showScrolledHeader
           ? "bg-[rgba(234,252,255,0.58)] backdrop-blur-md shadow-[inset_0_-1px_0_rgba(17,17,17,0.06)]"
           : "bg-transparent shadow-none",

@@ -7,9 +7,9 @@ import {
   projectStoryLayoutClasses,
   type ProjectStoryLayoutOptions,
 } from "@/lib/projectStory/layout";
-import type {CmsMediaItemRaw} from "@/lib/types/project";
+import type {CmsMediaItemRaw, GridMediaCropFields} from "@/lib/types/project";
 
-type InlineMediaValue = ProjectStoryLayoutOptions & {
+type InlineMediaValue = ProjectStoryLayoutOptions & GridMediaCropFields & {
   media?: CmsMediaItemRaw;
   caption?: string | null;
 };
@@ -31,6 +31,8 @@ export function StoryInlineMedia({value}: {value: InlineMediaValue}) {
         maxWidth={1400}
         quality={90}
         sizes="(max-width: 768px) 100vw, min(1400px, 90vw)"
+        gridAspectRatio={value.gridAspectRatio}
+        cropFocus={value.cropFocus}
       />
       {value.caption ? (
         <figcaption className={`mt-2 text-sm text-zinc-500 ${metaClass}`}>{value.caption}</figcaption>

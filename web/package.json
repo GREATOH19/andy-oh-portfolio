@@ -3,11 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "sync:vercel-env": "node scripts/sync-env-to-vercel.mjs"
+    "sync:vercel-env": "node scripts/sync-env-to-vercel.mjs",
+    "instagram:refresh": "node scripts/refresh-instagram-now.mjs"
   },
   "dependencies": {
     "@portabletext/react": "^6.0.3",

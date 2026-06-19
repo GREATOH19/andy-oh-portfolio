@@ -103,12 +103,12 @@ export function RichTextSection({
           <span className="block w-full min-w-0">{title}</span>
         </h2>
       ) : showTocAnchor ? (
-        <div
+        <span
           id={anchorId}
           data-toc-anchor="true"
           data-toc-level="1"
-          className="sr-only"
           aria-label={tocTitle ?? undefined}
+          className="pointer-events-none block h-px w-full shrink-0 overflow-hidden opacity-0"
           style={{scrollMarginTop: scrollMargin}}
         />
       ) : null}

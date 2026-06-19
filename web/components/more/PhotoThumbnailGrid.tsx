@@ -16,6 +16,19 @@ function gridClass(columns: 1 | 2 | 3, fixedColumns: boolean) {
   return "grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4 lg:grid-cols-5";
 }
 
+function masonryClass(columns: 1 | 2 | 3, fixedColumns: boolean) {
+  if (columns === 1) return "columns-1 gap-x-3";
+  if (columns === 2) {
+    return fixedColumns
+      ? "columns-2 gap-x-2 sm:gap-x-3"
+      : "columns-2 gap-x-2 sm:columns-3 sm:gap-x-3";
+  }
+  if (fixedColumns) {
+    return "columns-3 gap-x-2 sm:columns-4 sm:gap-x-3";
+  }
+  return "columns-2 gap-x-2 sm:columns-3 sm:gap-x-3 md:columns-4 lg:columns-5";
+}
+
 export function PhotoThumbnailGrid({
   images,
   columns = 3,
@@ -38,7 +51,7 @@ export function PhotoThumbnailGrid({
     <ClickablePhotoGrid
       images={images}
       layout={layout}
-      gridClass={layout === "grid" ? gridClass(columns, fixedColumns) : undefined}
+      gridClass={layout === "masonry" ? masonryClass(columns, fixedColumns) : gridClass(columns, fixedColumns)}
       sizes={sizes}
     />
   );

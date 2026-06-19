@@ -1,8 +1,7 @@
 import {MoreDetailLayout} from "@/components/more/MoreDetailLayout";
 import {MorePageHeader} from "@/components/more/MorePageHeader";
-import {PhotoThumbnailGrid} from "@/components/more/PhotoThumbnailGrid";
-import {getBehindTheScenesBlock} from "@/lib/more/blocks";
-import {filterValidImages} from "@/lib/more/photos";
+import {PhotographyByYear} from "@/components/more/PhotographyByYear";
+import {getBehindTheScenesAlbums, getBehindTheScenesBlock} from "@/lib/more/blocks";
 import {fetchMorePage} from "@/lib/more/fetchMorePage";
 import type {Metadata} from "next";
 
@@ -20,15 +19,17 @@ export default async function MoreBehindTheScenesPage() {
   const page = await fetchMorePage();
   const block = getBehindTheScenesBlock(page);
   const title = block?.heading?.trim() || "Behind the scene";
-  const images = filterValidImages(block?.images);
+  const albums = getBehindTheScenesAlbums(page);
 
   return (
     <MoreDetailLayout>
       <MorePageHeader title={title} />
-      {images.length > 0 ? (
-        <PhotoThumbnailGrid images={images} columns={3} />
+      {albums.length > 0 ? (
+        <PhotographyByYear albums={albums} />
       ) : (
-        <p className="text-slate-500">No photos yet.</p>
+        <p className="text-slate-500">
+          No albums yet. Create media albums under More → Media albums, then link them in the Behind the scene block.
+        </p>
       )}
     </MoreDetailLayout>
   );

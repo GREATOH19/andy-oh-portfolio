@@ -39,6 +39,12 @@ export const deskStructure = (S, context) =>
           S.list()
             .title('More')
             .items([
+              orderableDocumentListDeskItem({
+                type: 'mediaAlbum',
+                title: 'Media albums',
+                S,
+                context,
+              }),
               S.documentTypeListItem('page').title('More page'),
             ]),
         ),

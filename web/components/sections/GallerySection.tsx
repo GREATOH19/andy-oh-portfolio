@@ -79,6 +79,8 @@ export function GallerySection({
             thumbMaxWidth={sizing.displayPx}
             sizes={sizing.sizes}
             quality={sizing.quality}
+            gridAspectRatio={gridAspectRatio}
+            cropFocus={cropFocus}
           />
         </div>
         <div className="hidden md:block">

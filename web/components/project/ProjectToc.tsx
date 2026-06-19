@@ -2,7 +2,8 @@
 
 import {useEffect, useMemo, useRef, useState} from "react";
 import type {PortableTextBlock} from "@portabletext/types";
-import type {ProjectStoryBlock} from "@/lib/types/project";
+import {BrandMark} from "@/components/BrandMark";
+import type {ProjectStoryBlock, SiteBrand} from "@/lib/types/project";
 
 type TocLevel = 1 | 2 | 3;
 
@@ -133,110 +134,156 @@ function scrollToId(id: string) {
   }
 }
 
-export function ProjectToc({blocks}: {blocks: ProjectStoryBlock[]}) {
+function resolveActiveChapterId(
+  chapterItems: TocItem[],
+  topOffset: number,
+): string | null {
+  if (!chapterItems.length) return null;
+
+  let active = chapterItems[0].id;
+  for (const item of chapterItems) {
+    const el = document.getElementById(item.id);
+    if (!el) continue;
+    if (el.getBoundingClientRect().top - topOffset <= 1) {
+      active = item.id;
+    }
+  }
+  return active;
+}
+
+export function ProjectToc({
+  blocks,
+  brand,
+}: {
+  blocks: ProjectStoryBlock[];
+  brand?: SiteBrand | null;
+}) {
   const items = useMemo(() => tocFromStory(blocks), [blocks]);
-  const [activeId, setActiveId] = useState<string | null>(items[0]?.id ?? null);
-  const mobileSentinelRef = useRef<HTMLDivElement>(null);
-  const [mobilePinned, setMobilePinned] = useState(false);
+  const chapterItems = useMemo(() => items.filter((i) => i.level === 1), [items]);
+  const [activeId, setActiveId] = useState<string | null>(chapterItems[0]?.id ?? null);
+  const [chromeHidden, setChromeHidden] = useState(false);
+  const [isStuck, setIsStuck] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const stickSentinelRef = useRef<HTMLDivElement>(null);
+  const showTocLogo = isStuck && !isMobile;
+
+  useEffect(() => {
+    const sync = () => {
+      setChromeHidden(document.documentElement.hasAttribute("data-chrome-hidden"));
+    };
+
+    sync();
+    const attrObserver = new MutationObserver(sync);
+    attrObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-chrome-hidden"],
+    });
+    return () => attrObserver.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const sync = () => setIsMobile(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   useEffect(() => {
     if (!items.length) return;
 
-    const ids = items.map((i) => i.id);
-    const els = ids.map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[];
-    if (!els.length) return;
-
-    const headerPx = cssVarToPx("--site-header-height");
-    const tocPx = cssVarToPx("--project-toc-height");
-    const topOffset = headerPx + tocPx + 12;
-
-    const obs = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .map((e) => e.target as HTMLElement);
-        if (!visible.length) return;
-
-        // Closest to top (but below sticky chrome)
-        visible.sort((a, b) => Math.abs(a.getBoundingClientRect().top - topOffset) - Math.abs(b.getBoundingClientRect().top - topOffset));
-        setActiveId(visible[0].id);
-      },
-      {
-        root: null,
-        threshold: [0.2, 0.4, 0.6],
-        rootMargin: `-${topOffset}px 0px -70% 0px`,
-      },
-    );
-
-    els.forEach((el) => obs.observe(el));
-    return () => obs.disconnect();
-  }, [items]);
-
-  useEffect(() => {
-    if (!items.length) return;
-
-    const sentinel = mobileSentinelRef.current;
+    const sentinel = stickSentinelRef.current;
     if (!sentinel) return;
 
-    const updatePinned = () => {
-      const headerPx = cssVarToPx("--site-header-height");
-      setMobilePinned(sentinel.getBoundingClientRect().top <= headerPx);
+    const updateStuck = () => {
+      setIsStuck(sentinel.getBoundingClientRect().top < 0);
     };
 
-    updatePinned();
-    window.addEventListener("scroll", updatePinned, {passive: true});
-    window.addEventListener("resize", updatePinned);
+    updateStuck();
+    window.addEventListener("scroll", updateStuck, {passive: true});
+    window.addEventListener("resize", updateStuck);
     return () => {
-      window.removeEventListener("scroll", updatePinned);
-      window.removeEventListener("resize", updatePinned);
+      window.removeEventListener("scroll", updateStuck);
+      window.removeEventListener("resize", updateStuck);
     };
   }, [items.length]);
+
+  useEffect(() => {
+    if (!chapterItems.length) return;
+
+    const measureTopOffset = () => {
+      const headerPx = isStuck || chromeHidden ? 0 : cssVarToPx("--site-header-height");
+      const tocPx = cssVarToPx("--project-toc-height");
+      return headerPx + tocPx + 12;
+    };
+
+    const syncActive = () => {
+      const next = resolveActiveChapterId(chapterItems, measureTopOffset());
+      if (next) setActiveId(next);
+    };
+
+    syncActive();
+    window.addEventListener("scroll", syncActive, {passive: true});
+    window.addEventListener("resize", syncActive);
+    return () => {
+      window.removeEventListener("scroll", syncActive);
+      window.removeEventListener("resize", syncActive);
+    };
+  }, [chapterItems, chromeHidden, isStuck]);
 
   if (items.length <= 1) return null;
 
   return (
-      <div style={{["--project-toc-height" as never]: "2.75rem"}}>
-        <div ref={mobileSentinelRef} className="pointer-events-none h-0" aria-hidden />
+    <>
+      <div ref={stickSentinelRef} className="pointer-events-none h-0" aria-hidden />
+      <div
+        className="project-toc-bar project-toc-full-bleed project-toc-bar--sticky z-[49] w-screen max-w-none border-b border-zinc-200/60 bg-[rgba(234,252,255,0.72)] backdrop-blur-md box-border"
+        style={{["--project-toc-height" as never]: "2.75rem"}}
+      >
+      <nav
+        aria-label="On this page"
+        className="flex h-[var(--project-toc-height)] w-full items-center gap-1 px-[var(--project-bleed-gutter,2.5rem)]"
+      >
         <div
           className={[
-            "z-[49] w-full border-b border-zinc-200/60 bg-[rgba(234,252,255,0.72)] backdrop-blur-md box-border",
-            mobilePinned
-              ? "fixed inset-x-0 top-[var(--site-header-height)]"
-              : "relative",
+            "flex h-full shrink-0 items-center overflow-hidden transition-[width,opacity] duration-300 ease-out",
+            showTocLogo ? "w-auto opacity-100" : "w-0 opacity-0 pointer-events-none",
           ].join(" ")}
+          aria-hidden={!showTocLogo}
         >
-          <nav
-            aria-label="On this page"
-            className="flex gap-3 overflow-x-auto px-[var(--project-bleed-gutter,2.5rem)] py-2 md:justify-center md:overflow-x-visible md:flex-wrap"
-          >
-            {items
-              .filter((i) => i.level === 1)
-              .map((item) => {
-                const isActive = activeId === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => scrollToId(item.id)}
-                    className={[
-                      "shrink-0 rounded-full border px-3 py-1 text-[12px] uppercase tracking-[0.18em]",
-                      "transition-colors",
-                      isActive
-                        ? "border-zinc-900/20 bg-white/70 text-zinc-900"
-                        : "border-zinc-900/10 bg-white/35 text-zinc-600 hover:text-zinc-900",
-                    ].join(" ")}
-                  >
-                    <span className="mr-2 tabular-nums text-zinc-500">{item.number}</span>
-                    {item.label}
-                  </button>
-                );
-              })}
-          </nav>
+          <BrandMark brand={brand} variant="toc" />
         </div>
-        {mobilePinned ? (
-          <div className="h-[var(--project-toc-height)] shrink-0" aria-hidden />
-        ) : null}
+        <div className="flex h-full min-w-0 flex-1 items-center gap-3 overflow-x-auto md:justify-center md:overflow-x-visible md:flex-wrap">
+        {chapterItems.map((item) => {
+            const isHighlighted = isStuck && activeId === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => scrollToId(item.id)}
+                className={[
+                  "shrink-0 rounded-full border px-3 py-1 text-[12px] uppercase tracking-[0.18em]",
+                  "transition-colors",
+                  isHighlighted
+                    ? "border-[#E5A800]/35 bg-[#FFC72C] text-zinc-900"
+                    : "border-zinc-900/10 bg-white/35 text-zinc-600 hover:text-zinc-900",
+                ].join(" ")}
+              >
+                <span
+                  className={[
+                    "mr-2 tabular-nums",
+                    isHighlighted ? "text-zinc-900/70" : "text-zinc-500",
+                  ].join(" ")}
+                >
+                  {item.number}
+                </span>
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+      </nav>
       </div>
+    </>
   );
 }
-

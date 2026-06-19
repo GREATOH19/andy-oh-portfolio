@@ -1,29 +1,8 @@
 import {MoreSection} from "@/components/more/MoreSection";
-import {PhotoThumbnailGrid} from "@/components/more/PhotoThumbnailGrid";
-import {ProjectCard} from "@/components/ProjectCard";
-import {masonryPreviewClass, masonryPreviewItemClass} from "@/components/ClickablePhotoGrid";
-import {flattenAlbumImages, filterValidImages} from "@/lib/more/photos";
-import {pickMorePreview} from "@/lib/more/preview";
-import {sortProjectsByYearDesc} from "@/lib/more/year";
-import type {MoreBlock, MorePageDocument, ProjectListItem} from "@/lib/types/project";
-
-function ArchiveBlockPreview({
-  projects,
-}: {
-  projects: ProjectListItem[];
-}) {
-  if (projects.length === 0) return <p className="text-sm text-slate-500">No archive projects yet.</p>;
-
-  return (
-    <div className={masonryPreviewClass}>
-      {projects.map((project) => (
-        <div key={project._id} className={masonryPreviewItemClass}>
-          <ProjectCard project={project} />
-        </div>
-      ))}
-    </div>
-  );
-}
+import {ArchiveBlockPreview} from "@/components/more/ArchiveBlockPreview";
+import {MoreMediaPreviewGrid} from "@/components/more/MoreMediaPreviewGrid";
+import {flattenAlbumImages} from "@/lib/more/photos";
+import type {MorePageDocument} from "@/lib/types/project";
 
 export function MoreBlocks({page}: {page: MorePageDocument}) {
   const blocks = page.blocks ?? [];
@@ -35,22 +14,18 @@ export function MoreBlocks({page}: {page: MorePageDocument}) {
 
         switch (block._type) {
           case "archiveBlock": {
-            const projects = pickMorePreview(
-              sortProjectsByYearDesc((block.archiveProjects ?? []).filter((p) => p?.slug)),
-              block._key,
-            );
             return (
               <MoreSection
                 key={block._key}
                 title={block.heading?.trim() || "Archive"}
                 moreHref="/more/archive"
               >
-                <ArchiveBlockPreview projects={projects} />
+                <ArchiveBlockPreview block={block} />
               </MoreSection>
             );
           }
           case "photographyBlock": {
-            const images = pickMorePreview(flattenAlbumImages(block.albums), block._key);
+            const images = flattenAlbumImages(block.albums);
             return (
               <MoreSection
                 key={block._key}
@@ -58,7 +33,7 @@ export function MoreBlocks({page}: {page: MorePageDocument}) {
                 moreHref="/more/photography"
               >
                 {images.length > 0 ? (
-                  <PhotoThumbnailGrid images={images} layout="masonry" />
+                  <MoreMediaPreviewGrid images={images} scopeKey={block._key} />
                 ) : (
                   <p className="text-sm text-slate-500">No photos yet.</p>
                 )}
@@ -66,7 +41,7 @@ export function MoreBlocks({page}: {page: MorePageDocument}) {
             );
           }
           case "behindTheScenesBlock": {
-            const images = pickMorePreview(filterValidImages(block.images), block._key);
+            const images = flattenAlbumImages(block.albums, block.images);
             return (
               <MoreSection
                 key={block._key}
@@ -74,7 +49,7 @@ export function MoreBlocks({page}: {page: MorePageDocument}) {
                 moreHref="/more/behind-the-scenes"
               >
                 {images.length > 0 ? (
-                  <PhotoThumbnailGrid images={images} layout="masonry" />
+                  <MoreMediaPreviewGrid images={images} scopeKey={block._key} />
                 ) : (
                   <p className="text-sm text-slate-500">No photos yet.</p>
                 )}

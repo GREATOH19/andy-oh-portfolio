@@ -11,7 +11,14 @@ import {
   isSanityVideo,
   sanityMediaKey,
 } from "@/lib/sanity/media";
-import {clampGridTileAspect, type GridAspectRatio, type GridCropFocus} from "@/lib/gridAspectRatio";
+import {
+  clampGridTileAspect,
+  gridClassForUniformCrop,
+  gridUsesUniformCrop,
+  normalizeGridAspectRatio,
+  type GridAspectRatio,
+  type GridCropFocus,
+} from "@/lib/gridAspectRatio";
 import {rowAspectsForItems, type MediaAspect} from "@/lib/gridRowAspect";
 import {useGalleryBreakpointColumns} from "@/lib/projectStory/useGalleryBreakpointColumns";
 import type {SanityMediaField} from "@/lib/types/project";
@@ -51,12 +58,13 @@ export function ClickablePhotoGrid({
   const validMedia = images.filter(isSanityMedia) as NonNullable<SanityMediaField>[];
   const lightboxItems = validMedia.filter(isSanityLightboxMedia);
   const visibleColumns = useGalleryBreakpointColumns(columns ?? 1);
+  const uniformCrop = gridUsesUniformCrop(normalizeGridAspectRatio(gridAspectRatio));
   const rowAspects = useMemo(
     () =>
-      layout === "grid"
+      layout === "grid" && !uniformCrop
         ? rowAspectsForItems(validMedia, visibleColumns, videoAspects, sanityMediaKey)
         : validMedia.map(() => undefined),
-    [layout, validMedia, visibleColumns, videoAspects],
+    [layout, uniformCrop, validMedia, visibleColumns, videoAspects],
   );
 
   const onVideoLayout = useCallback((key: string, aspect: MediaAspect) => {
@@ -77,11 +85,12 @@ export function ClickablePhotoGrid({
     if (lbIndex >= 0) setActiveIndex(lbIndex);
   };
 
-  const resolvedGridClass =
-    layout === "masonry" ? masonryPreviewClass : (gridClass ?? masonryPreviewClass);
+  const resolvedGridClass = gridClass ?? masonryPreviewClass;
+  const alignedGridClass =
+    layout === "grid" ? gridClassForUniformCrop(resolvedGridClass, uniformCrop) : resolvedGridClass;
   const containerClass = className
-    ? `clickable-photo-grid ${resolvedGridClass} ${className}`
-    : `clickable-photo-grid ${resolvedGridClass}`;
+    ? `clickable-photo-grid ${alignedGridClass} ${className}`
+    : `clickable-photo-grid ${alignedGridClass}`;
 
   return (
     <>
@@ -160,7 +169,10 @@ export function ClickablePhotoGrid({
           }
 
           return (
-            <div key={itemKey} className="min-w-0 self-stretch">
+            <div
+              key={itemKey}
+              className={uniformCrop ? "min-w-0 w-full self-start" : "min-w-0 self-stretch"}
+            >
               {tile}
             </div>
           );

@@ -10,6 +10,7 @@ const DEFAULT_MORE_BLOCKS: MoreBlock[] = [
     defaultExpanded: false,
     heading: "Archive",
     archiveProjects: [],
+    archiveAlbums: [],
   },
   {
     _type: "photographyBlock",
@@ -25,7 +26,7 @@ const DEFAULT_MORE_BLOCKS: MoreBlock[] = [
     enabled: true,
     defaultExpanded: false,
     heading: "Behind the scene",
-    images: [],
+    albums: [],
   },
 ];
 

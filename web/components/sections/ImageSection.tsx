@@ -6,6 +6,7 @@ import {useTypoClass} from "@/components/TypographyProvider";
 import {imageSectionMedia} from "@/lib/sanity/imageSectionMedia";
 import {storyImageSizing} from "@/lib/sanity/imageRequestWidth";
 import type {CmsMediaInput, CmsMediaItemRaw, ProjectStoryMediaWidth, SanityImageField} from "@/lib/types/project";
+import type {GridAspectRatio, GridCropFocus} from "@/lib/gridAspectRatio";
 
 export function ImageSection({
   image,
@@ -14,6 +15,8 @@ export function ImageSection({
   caption,
   storyMobileCarousel = false,
   mediaWidth,
+  gridAspectRatio = "auto",
+  cropFocus = "auto",
 }: {
   image?: SanityImageField;
   item?: CmsMediaItemRaw;
@@ -23,6 +26,8 @@ export function ImageSection({
   storyMobileCarousel?: boolean;
   /** Story Width setting — bleed uses full viewport resolution */
   mediaWidth?: ProjectStoryMediaWidth | null;
+  gridAspectRatio?: GridAspectRatio | null;
+  cropFocus?: GridCropFocus | null;
 }) {
   const metaClass = useTypoClass("meta");
   const items = imageSectionMedia({image, item, media});
@@ -38,12 +43,14 @@ export function ImageSection({
       images={items}
       gridClass={
         storyGrid
-          ? "project-story-media-grid grid grid-cols-1"
+          ? "project-story-media-grid grid grid-cols-1 items-start"
           : "grid grid-cols-1 gap-3"
       }
       thumbMaxWidth={sizing.displayPx}
       sizes={sizing.sizes}
       quality={sizing.quality}
+      gridAspectRatio={gridAspectRatio}
+      cropFocus={cropFocus}
     />
   );
 
@@ -57,6 +64,8 @@ export function ImageSection({
             thumbMaxWidth={sizing.displayPx}
             sizes={sizing.sizes}
             quality={sizing.quality}
+            gridAspectRatio={gridAspectRatio}
+            cropFocus={cropFocus}
           />
         </div>
         <div className="hidden md:block">

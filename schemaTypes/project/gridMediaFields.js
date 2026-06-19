@@ -4,9 +4,18 @@ export const GRID_ASPECT_RATIO_OPTIONS = [
   {title: 'Auto (original)', value: 'auto'},
   {title: 'Square (1:1)', value: 'square'},
   {title: 'Landscape (4:3)', value: 'landscape'},
-  {title: 'Portrait (3:4)', value: 'portrait'},
-  {title: 'Wide (16:9)', value: 'wide'},
   {title: 'Photo (3:2)', value: 'photo'},
+  {title: 'Classic print (5:4)', value: 'print'},
+  {title: 'Wide photo (5:3)', value: 'widePhoto'},
+  {title: 'Wide (16:9)', value: 'wide'},
+  {title: 'Widescreen (16:10)', value: 'widescreen'},
+  {title: 'Panorama (2:1)', value: 'panorama'},
+  {title: 'Cinematic (21:9)', value: 'cinematic'},
+  {title: 'Portrait (3:4)', value: 'portrait'},
+  {title: 'Portrait (5:6)', value: 'portrait56'},
+  {title: 'Tall feed (4:5)', value: 'portraitFeed'},
+  {title: 'Editorial (2:3)', value: 'photoPortrait'},
+  {title: 'Vertical video (9:16)', value: 'tall'},
 ]
 
 export const GRID_CROP_FOCUS_OPTIONS = [

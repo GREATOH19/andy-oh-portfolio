@@ -18,7 +18,7 @@ export function PhotographyByYear({albums}: {albums?: PhotoAlbum[] | null}) {
           ) : group.yearLabel ? (
             <div className="mb-8" />
           ) : null}
-          <PhotoThumbnailGrid images={group.images} columns={3} />
+          <PhotoThumbnailGrid images={group.images} columns={3} layout="masonry" />
         </section>
       ))}
     </div>

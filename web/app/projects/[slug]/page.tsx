@@ -6,9 +6,9 @@ import {ProjectStory} from "@/components/project/ProjectStory";
 import {client} from "@/lib/sanity/client";
 import {fetchProjectBySlug} from "@/lib/sanity/fetchProject";
 import {isSanityImage, normalizeMediaItem} from "@/lib/sanity/media";
-import {projectSlugsQuery} from "@/lib/sanity/queries";
+import {projectSlugsQuery, siteSettingsQuery} from "@/lib/sanity/queries";
 import {leadExcerptText} from "@/lib/portableText/leadContent";
-import type {ProjectDetail} from "@/lib/types/project";
+import type {ProjectDetail, SiteSettingsDocument} from "@/lib/types/project";
 import type {Metadata} from "next";
 import {notFound} from "next/navigation";
 
@@ -33,8 +33,13 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
 
 export default async function ProjectPage({params}: Props) {
   const {slug} = await params;
-  const project = await fetchProjectBySlug(slug);
+  const [project, settings] = await Promise.all([
+    fetchProjectBySlug(slug),
+    client.fetch<SiteSettingsDocument | null>(siteSettingsQuery),
+  ]);
   if (!project || !project.slug) notFound();
+
+  const brand = settings?.brand ?? null;
 
   const normalizedHero = normalizeMediaItem(project.heroImage);
   const normalizedCover = normalizeMediaItem(project.coverImage);
@@ -56,11 +61,7 @@ export default async function ProjectPage({params}: Props) {
       />
 
       <article className="container-project flex-1 pb-20 md:pb-24">
-        {chapterCount > 1 ? (
-          <div className="project-toc-full-bleed">
-            <ProjectToc blocks={story} />
-          </div>
-        ) : null}
+        {chapterCount > 1 ? <ProjectToc blocks={story} brand={brand} /> : null}
 
         <ProjectHeader
           project={project}

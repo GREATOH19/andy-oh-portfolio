@@ -1,5 +1,14 @@
 import {groq} from "next-sanity";
 
+const sanityImageAssetMetadata = groq`
+  "_ref": coalesce(_ref, _id),
+  metadata {
+    dimensions,
+    hasAlpha,
+    isOpaque
+  }
+`;
+
 const cmsMediaItemFields = groq`
   ...,
   mediaType,
@@ -18,10 +27,7 @@ const cmsMediaItemFields = groq`
   image {
     ...,
     asset->{
-      "_ref": coalesce(_ref, _id),
-      metadata {
-        dimensions
-      }
+      ${sanityImageAssetMetadata}
     }
   },
   video {
@@ -36,10 +42,16 @@ const cmsMediaItemFields = groq`
   youtubeUrl,
   videoAspect,
   asset->{
-    "_ref": coalesce(_ref, _id),
-    metadata {
-      dimensions
-    }
+    ${sanityImageAssetMetadata}
+  }
+`;
+
+const mediaAlbumFields = groq`
+  _id,
+  year,
+  title,
+  images[] {
+    ${cmsMediaItemFields}
   }
 `;
 
@@ -134,10 +146,18 @@ const projectStoryFields = groq`
   centerTextWithMedia,
   bodyFont,
   bodyFontSize,
-  body,
+  body[]{
+    ...,
+    gridAspectRatio,
+    cropFocus,
+    media {
+      ${cmsMediaItemFields}
+    }
+  },
   quote,
   attribution,
   caption,
+  portraitSide,
   url,
   videoAspect,
   loop,
@@ -155,6 +175,21 @@ const projectStoryFields = groq`
   media {
     ${cmsMediaItemFields}
   },
+  portrait {
+    ${cmsMediaItemFields}
+  },
+  strips[] {
+    _type,
+    _key,
+    ...select(
+      _type == "cmsMediaItem" => {${cmsMediaItemFields}},
+      _type == "projectPhotoCollagePair" => {
+        swap,
+        left {${cmsMediaItemFields}},
+        right {${cmsMediaItemFields}}
+      }
+    )
+  },
   images[] {
     ${cmsMediaItemFields}
   },
@@ -165,13 +200,6 @@ const projectStoryFields = groq`
   steps[] {
     _key,
     caption,
-    media {
-      ${cmsMediaItemFields}
-    }
-  },
-  items[] {
-    _key,
-    tileSize,
     media {
       ${cmsMediaItemFields}
     }
@@ -191,10 +219,7 @@ const projectStoryFields = groq`
     hotspot,
     crop,
     asset->{
-      "_ref": coalesce(_ref, _id),
-      metadata {
-        dimensions
-      }
+      ${sanityImageAssetMetadata}
     }
   }
 `;
@@ -349,12 +374,14 @@ export const morePageQuery = groq`
       archiveProjects[]-> {
         ${projectListItemFields}
       },
-      albums[] {
-        year,
-        title,
-        images[] {
-          ${cmsMediaItemFields}
-        }
+      archiveAlbums[]-> {
+        ${mediaAlbumFields}
+      },
+      archiveMedia[] {
+        ${cmsMediaItemFields}
+      },
+      albums[]-> {
+        ${mediaAlbumFields}
       },
       images[] {
         ${cmsMediaItemFields}
@@ -375,10 +402,7 @@ export const morePageQuery = groq`
       "image": image{
         ...,
         asset->{
-          "_ref": coalesce(_ref, _id),
-          metadata {
-            dimensions
-          }
+          ${sanityImageAssetMetadata}
         }
       },
       "item": item{
@@ -405,12 +429,14 @@ export const pageBySlugQuery = groq`
       archiveProjects[]-> {
         ${projectListItemFields}
       },
-      albums[] {
-        year,
-        title,
-        images[] {
-          ${cmsMediaItemFields}
-        }
+      archiveAlbums[]-> {
+        ${mediaAlbumFields}
+      },
+      archiveMedia[] {
+        ${cmsMediaItemFields}
+      },
+      albums[]-> {
+        ${mediaAlbumFields}
       },
       images[] {
         ${cmsMediaItemFields}
@@ -431,10 +457,7 @@ export const pageBySlugQuery = groq`
       "image": image{
         ...,
         asset->{
-          "_ref": coalesce(_ref, _id),
-          metadata {
-            dimensions
-          }
+          ${sanityImageAssetMetadata}
         }
       },
       "item": item{

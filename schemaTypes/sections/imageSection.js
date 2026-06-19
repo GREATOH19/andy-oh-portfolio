@@ -1,4 +1,5 @@
 import {defineField, defineType} from 'sanity'
+import {gridAspectRatioField, gridCropFocusField} from '../project/gridMediaFields'
 
 export const imageSection = defineType({
   name: 'imageSection',
@@ -30,6 +31,8 @@ export const imageSection = defineType({
       title: 'Caption',
       type: 'string',
     }),
+    gridAspectRatioField(),
+    gridCropFocusField(),
   ],
   preview: {
     select: {item: 'item', legacy: 'image', title: 'caption'},

@@ -148,9 +148,10 @@ export function SanityAspectVideo({
   const aspect = normalizeGridAspectRatio(gridAspectRatio);
   const uniformCrop = gridUsesUniformCrop(aspect);
   const fixedBox = gridAspectRatioBoxStyle(aspect);
-  const rowBox = gridRowAspect
-    ? gridNaturalTileBoxStyle(gridRowAspect.width, gridRowAspect.height)
-    : null;
+  const rowBox =
+    !uniformCrop && gridRowAspect
+      ? gridNaturalTileBoxStyle(gridRowAspect.width, gridRowAspect.height)
+      : null;
   const useCover = fillFrame || uniformCrop || gridRowAspect != null;
   const objectPosition = useCover
     ? gridCropObjectPosition(null, cropFocus ?? "auto")

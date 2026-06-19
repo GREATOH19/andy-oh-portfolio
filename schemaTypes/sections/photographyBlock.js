@@ -27,20 +27,18 @@ export const photographyBlock = defineType({
       name: 'albums',
       title: 'Albums',
       type: 'array',
-      of: [{type: 'photoAlbum'}],
+      of: [{type: 'reference', to: [{type: 'mediaAlbum'}]}],
       description:
-        'Unlimited images. The More page shows a ~2-row masonry preview; the full grid is on /more/photography.',
+        'Link media albums (create under More → Media albums). Each album can hold 100+ photos or videos, grouped by year on /more/photography.',
     }),
   ],
   preview: {
     select: {heading: 'heading', enabled: 'enabled', albums: 'albums'},
     prepare({heading, enabled, albums}) {
-      const count = Array.isArray(albums)
-        ? albums.reduce((n, a) => n + (Array.isArray(a?.images) ? a.images.length : 0), 0)
-        : 0
+      const count = Array.isArray(albums) ? albums.length : 0
       return {
         title: heading || 'Photography',
-        subtitle: `${enabled === false ? 'Hidden · ' : ''}${count} image${count === 1 ? '' : 's'}`,
+        subtitle: `${enabled === false ? 'Hidden · ' : ''}${count} album${count === 1 ? '' : 's'}`,
       }
     },
   },

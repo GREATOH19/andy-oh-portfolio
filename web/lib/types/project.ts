@@ -42,6 +42,8 @@ export type SanityImageField = {
     _id?: string;
     metadata?: {
       dimensions?: {width: number; height: number; aspectRatio?: number} | null;
+      hasAlpha?: boolean | null;
+      isOpaque?: boolean | null;
     } | null;
   } | null;
   alt?: string;
@@ -167,12 +169,18 @@ export type ProjectStoryLayoutFields = {
   mobileCarousel?: ProjectStoryMobileCarousel | null;
 };
 
+export type GridMediaCropFields = {
+  gridAspectRatio?: GridAspectRatio | null;
+  cropFocus?: GridCropFocus | null;
+};
+
 export type ProjectInlineMediaBlock = {
   _type: "projectInlineMedia";
   _key?: string;
   media?: CmsMediaItemRaw;
   caption?: string | null;
-} & ProjectStoryLayoutFields;
+} & ProjectStoryLayoutFields &
+  GridMediaCropFields;
 
 export type ProjectMediaBlock = {
   _type: "projectMedia";
@@ -180,12 +188,8 @@ export type ProjectMediaBlock = {
   items?: CmsMediaInput[] | null;
   media?: CmsMediaItemRaw;
   caption?: string | null;
-} & ProjectStoryLayoutFields;
-
-export type GridMediaCropFields = {
-  gridAspectRatio?: GridAspectRatio | null;
-  cropFocus?: GridCropFocus | null;
-};
+} & ProjectStoryLayoutFields &
+  GridMediaCropFields;
 
 export type ProjectGalleryBlock = {
   _type: "projectGallery";
@@ -216,20 +220,24 @@ export type ProjectProcessBlock = {
 } & ProjectStoryLayoutFields &
   GridMediaCropFields;
 
-export type BentoTileSize = "small" | "square" | "wide" | "tall" | "hero" | "full";
-
-export type CollageItem = {
+export type ProjectPhotoCollageBlock = {
+  _type: "projectPhotoCollage";
   _key?: string;
-  media?: CmsMediaInput | null;
-  tileSize?: BentoTileSize | null;
-};
-
-export type ProjectCollageBlock = {
-  _type: "projectCollage";
-  _key?: string;
-  items?: CollageItem[] | null;
+  portraitSide?: "left" | "right" | null;
+  portrait?: CmsMediaInput | null;
+  strips?: Array<
+    | CmsMediaInput
+    | {
+        _type: "projectPhotoCollagePair";
+        _key?: string;
+        swap?: boolean | null;
+        left?: CmsMediaInput | null;
+        right?: CmsMediaInput | null;
+      }
+  > | null;
   caption?: string | null;
-} & ProjectStoryLayoutFields;
+} & ProjectStoryLayoutFields &
+  GridMediaCropFields;
 
 export type ProjectColumnsBlock = {
   _type: "projectColumns";
@@ -286,7 +294,8 @@ export type ProjectYoutubeBlock = {
   title?: string | null;
   caption?: string | null;
   videoAspect?: "auto" | "landscape" | "portrait" | null;
-} & ProjectStoryLayoutFields;
+} & ProjectStoryLayoutFields &
+  GridMediaCropFields;
 
 export type ProjectTextBoxBlock = {
   _type: "projectTextBox";
@@ -313,6 +322,8 @@ export type ProjectZigzagRowBlock = {
   images?: CmsMediaInput[] | null;
   media?: CmsMediaItemRaw;
   caption?: string | null;
+  gridAspectRatio?: GridAspectRatio | null;
+  cropFocus?: GridCropFocus | null;
 } & ProjectBodyTypographyFields;
 
 export type ProjectStoryBlock =
@@ -320,7 +331,7 @@ export type ProjectStoryBlock =
   | ProjectTextBoxBlock
   | ProjectMediaBlock
   | ProjectGalleryBlock
-  | ProjectCollageBlock
+  | ProjectPhotoCollageBlock
   | ProjectProcessBlock
   | ProjectQuoteBlock
   | ProjectZigzagRowBlock
@@ -354,7 +365,7 @@ export type ImageSection = {
   image?: SanityImageField;
   item?: CmsMediaItemRaw;
   caption?: string | null;
-};
+} & GridMediaCropFields;
 
 export type GallerySection = {
   _type: "gallerySection";
@@ -410,6 +421,7 @@ export type HomeWelcomeIntroContent = {
 };
 
 export type PhotoAlbum = {
+  _id?: string;
   year?: string | null;
   title?: string | null;
   images?: CmsMediaInput[] | null;
@@ -425,6 +437,9 @@ export type MoreBlockBase = {
 export type ArchiveBlock = MoreBlockBase & {
   _type: "archiveBlock";
   archiveProjects?: ProjectListItem[] | null;
+  archiveAlbums?: PhotoAlbum[] | null;
+  /** @deprecated Migrated to archiveAlbums */
+  archiveMedia?: CmsMediaInput[] | null;
 };
 
 export type PhotographyBlock = MoreBlockBase & {
@@ -434,6 +449,8 @@ export type PhotographyBlock = MoreBlockBase & {
 
 export type BehindTheScenesBlock = MoreBlockBase & {
   _type: "behindTheScenesBlock";
+  albums?: PhotoAlbum[] | null;
+  /** @deprecated Migrated to albums */
   images?: CmsMediaInput[] | null;
 };
 

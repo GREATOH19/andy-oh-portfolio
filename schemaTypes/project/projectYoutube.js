@@ -1,5 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {projectStoryLayoutFields} from './projectStoryLayoutFields'
+import {gridAspectRatioField, gridCropFocusField} from './gridMediaFields'
 
 export const projectYoutube = defineType({
   name: 'projectYoutube',
@@ -44,6 +45,12 @@ export const projectYoutube = defineType({
       description:
         'Use Vertical for portrait uploads (non-Shorts). Auto detects YouTube Shorts links.',
     }),
+    gridAspectRatioField({
+      title: 'Crop aspect ratio',
+      description:
+        'Optional uniform crop frame. When set, overrides the Aspect ratio preset above for the embed box.',
+    }),
+    gridCropFocusField(),
     ...projectStoryLayoutFields.filter((field) => field.name !== 'mobileCarousel'),
   ],
   preview: {

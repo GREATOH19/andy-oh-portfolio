@@ -69,6 +69,22 @@
   }
 }
 
+/* Project story — chapter TOC sticks at viewport top; transform offsets below header */
+.project-toc-bar--sticky {
+  position: sticky;
+  top: var(--site-header-height);
+}
+
+html[data-chrome-hidden] .project-toc-bar--sticky {
+  top: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-toc-bar--sticky {
+    transition: none !important;
+  }
+}
+
 @layer base {
   body {
     background-color: #eafcff;
@@ -570,12 +586,13 @@
     margin-inline: auto;
   }
 
-  /* Project TOC — edge-to-edge band */
+  /* Project TOC — edge-to-edge band (viewport width for bg + centered nav) */
   .project-toc-full-bleed {
     --project-bleed-gutter: 2.5rem;
-    width: auto;
-    max-width: none;
-    margin-inline: calc(-1 * var(--project-container-gutter, 2.5rem));
+    width: 100vw;
+    max-width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
     box-sizing: border-box;
   }
 

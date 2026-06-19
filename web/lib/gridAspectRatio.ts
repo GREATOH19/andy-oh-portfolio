@@ -6,10 +6,17 @@ export type GridAspectRatio =
   | "square"
   | "landscape"
   | "portrait"
+  | "portrait56"
+  | "portraitFeed"
   | "wide"
   | "tall"
   | "photo"
-  | "photoPortrait";
+  | "photoPortrait"
+  | "print"
+  | "widePhoto"
+  | "widescreen"
+  | "panorama"
+  | "cinematic";
 
 export type GridCropFocus = "auto" | "center" | "top" | "bottom" | "left" | "right";
 
@@ -17,10 +24,17 @@ const GRID_ASPECT_NUMBERS: Record<Exclude<GridAspectRatio, "auto">, [number, num
   square: [1, 1],
   landscape: [4, 3],
   portrait: [3, 4],
+  portrait56: [5, 6],
+  portraitFeed: [4, 5],
   wide: [16, 9],
   tall: [9, 16],
   photo: [3, 2],
   photoPortrait: [2, 3],
+  print: [5, 4],
+  widePhoto: [5, 3],
+  widescreen: [16, 10],
+  panorama: [2, 1],
+  cinematic: [21, 9],
 };
 
 export function isGridAspectRatio(value: string | null | undefined): value is GridAspectRatio {
@@ -29,10 +43,17 @@ export function isGridAspectRatio(value: string | null | undefined): value is Gr
     value === "square" ||
     value === "landscape" ||
     value === "portrait" ||
+    value === "portrait56" ||
+    value === "portraitFeed" ||
     value === "wide" ||
     value === "tall" ||
     value === "photo" ||
-    value === "photoPortrait"
+    value === "photoPortrait" ||
+    value === "print" ||
+    value === "widePhoto" ||
+    value === "widescreen" ||
+    value === "panorama" ||
+    value === "cinematic"
   );
 }
 
@@ -44,8 +65,6 @@ export function normalizeGridAspectRatio(
   fallback: GridAspectRatio = "auto",
 ): GridAspectRatio {
   if (!isGridAspectRatio(value)) return fallback;
-  // Legacy CMS values — map to nearest supported portrait preset.
-  if (value === "tall" || value === "photoPortrait") return "portrait";
   return value;
 }
 
@@ -58,6 +77,20 @@ export function clampGridTileAspect(width: number, height: number): {width: numb
 
 export function gridUsesUniformCrop(aspect: GridAspectRatio): boolean {
   return aspect !== "auto";
+}
+
+/** Grid/flex alignment — stretch fights fixed CMS aspect-ratio crops. */
+export function gridUniformCropAlignClass(uniformCrop: boolean): "items-start" | "items-stretch" {
+  return uniformCrop ? "items-start" : "items-stretch";
+}
+
+export function gridClassForUniformCrop(gridClass: string, uniformCrop: boolean): string {
+  if (!uniformCrop) return gridClass;
+  if (gridClass.includes("items-start")) return gridClass;
+  if (gridClass.includes("items-stretch")) {
+    return gridClass.replace(/\bitems-stretch\b/g, "items-start");
+  }
+  return `${gridClass} items-start`;
 }
 
 /** Fixed tile box for uniform grid crops; `null` when using natural media aspect. */

@@ -79,6 +79,22 @@ export const projectZigzagRow = defineType({
       of: [{type: 'cmsMediaItem'}],
       description: 'Add multiple items to show a swipeable carousel in the zigzag row.',
     }),
+    gridAspectRatioField({
+      title: 'Crop aspect (main media)',
+      hidden: ({parent}) => {
+        const images = parent?.images
+        return !(Array.isArray(images) && images.length > 0) && !parent?.media
+      },
+    }),
+    gridCropFocusField({
+      title: 'Crop focus (main media)',
+      hidden: ({parent}) => {
+        const images = parent?.images
+        const hasMain =
+          (Array.isArray(images) && images.length > 0) || Boolean(parent?.media)
+        return !hasMain || (parent?.gridAspectRatio ?? 'auto') === 'auto'
+      },
+    }),
     defineField({
       name: 'media',
       title: 'Media (legacy)',

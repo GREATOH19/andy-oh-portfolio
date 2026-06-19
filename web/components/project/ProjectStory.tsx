@@ -31,7 +31,7 @@ import {ProjectColumnsSection} from "@/components/project/ProjectColumnsSection"
 import {ProjectInstagramFeed} from "@/components/project/ProjectInstagramFeed";
 import {ProjectAudioSection} from "@/components/project/ProjectAudioSection";
 import {ProjectYoutubeEmbed} from "@/components/project/ProjectYoutubeEmbed";
-import {ProjectCollageSection} from "@/components/project/ProjectCollageSection";
+import {ProjectPhotoCollageSection} from "@/components/project/ProjectPhotoCollageSection";
 import {ProjectProcessSection} from "@/components/project/ProjectProcessSection";
 import {StoryBlockLayout} from "@/components/project/StoryBlockLayout";
 import {
@@ -75,7 +75,7 @@ function storyBlockUsesMobileEdge(block: ProjectStoryBlock): boolean {
   if (
     block._type !== "projectMedia" &&
     block._type !== "projectGallery" &&
-    block._type !== "projectCollage" &&
+    block._type !== "projectPhotoCollage" &&
     block._type !== "projectProcess" &&
     block._type !== "projectYoutube"
   ) {
@@ -225,6 +225,8 @@ function renderStoryBlock(ctx: RenderContext, idx: number): ReactNode {
                     caption={block.caption}
                     mediaWidth={block.mediaWidth}
                     storyMobileCarousel={storyUsesMobileCarousel(block.mobileCarousel)}
+                    gridAspectRatio={block.gridAspectRatio}
+                    cropFocus={block.cropFocus}
                   />
           </StoryBlockLayout>
         </div>
@@ -310,15 +312,19 @@ function renderStoryBlock(ctx: RenderContext, idx: number): ReactNode {
         </div>
       );
     }
-    case "projectCollage": {
-      if (!block.items?.length) return null;
+    case "projectPhotoCollage": {
+      if (!block.portrait || !block.strips?.length) return null;
       return (
         <div key={key} className={storyBlockWrapperClass(block, spacingClass, mobileOrderClass)}>
           <StoryBlockLayout layout={storyLayoutFromBlock(block)}>
-            <ProjectCollageSection
-              items={block.items}
+            <ProjectPhotoCollageSection
+              portrait={block.portrait}
+              strips={block.strips}
+              portraitSide={block.portraitSide}
               caption={block.caption}
               mediaWidth={block.mediaWidth}
+              gridAspectRatio={block.gridAspectRatio}
+              cropFocus={block.cropFocus}
             />
           </StoryBlockLayout>
         </div>
@@ -374,6 +380,8 @@ function renderStoryBlock(ctx: RenderContext, idx: number): ReactNode {
               caption={block.caption}
               videoAspect={block.videoAspect}
               mediaAlign={block.mediaAlign}
+              gridAspectRatio={block.gridAspectRatio}
+              cropFocus={block.cropFocus}
             />
           </StoryBlockLayout>
         </div>
@@ -508,6 +516,8 @@ function renderStoryBlock(ctx: RenderContext, idx: number): ReactNode {
               <MediaCarousel
                 images={zigzagMedia}
                 caption={bodyImagesEnd ? undefined : block.caption}
+                gridAspectRatio={block.gridAspectRatio}
+                cropFocus={block.cropFocus}
               />
               {bodyImagesEnd && block.caption ? (
                 <p className={`mt-3 text-sm text-zinc-500 md:hidden ${metaClass}`}>

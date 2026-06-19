@@ -1,5 +1,6 @@
 import {defineField, defineType} from 'sanity'
 import {projectStoryLayoutFields} from './projectStoryLayoutFields'
+import {gridAspectRatioField, gridCropFocusField} from './gridMediaFields'
 
 export const projectMedia = defineType({
   name: 'projectMedia',
@@ -22,6 +23,8 @@ export const projectMedia = defineType({
       title: 'Caption',
       type: 'string',
     }),
+    gridAspectRatioField(),
+    gridCropFocusField(),
     ...projectStoryLayoutFields,
   ],
   preview: {

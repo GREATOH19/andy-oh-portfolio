@@ -144,13 +144,13 @@ export const project = defineType({
       type: 'array',
       group: 'story',
       description:
-        'Build top to bottom: chapters, text boxes, media, audio, YouTube, grids, collages, process steps, Instagram feeds, zigzag, two columns, and quotes. Use Width/Alignment on media blocks.',
+        'Build top to bottom: chapters, text boxes, media, audio, YouTube, grids, media collages, process steps, Instagram feeds, zigzag, two columns, and quotes. Use Width/Alignment on media blocks.',
       of: [
         {type: 'projectChapter'},
         {type: 'projectTextBox'},
         {type: 'projectMedia'},
         {type: 'projectGallery'},
-        {type: 'projectCollage'},
+        {type: 'projectPhotoCollage'},
         {type: 'projectProcess'},
         {type: 'projectQuote'},
         {type: 'projectZigzagRow'},

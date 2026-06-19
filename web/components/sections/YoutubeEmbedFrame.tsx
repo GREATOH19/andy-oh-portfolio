@@ -4,6 +4,7 @@ import {
   type GridAspectRatio,
   type GridCropFocus,
   gridAspectRatioBoxStyle,
+  gridUsesUniformCrop,
   normalizeGridAspectRatio,
 } from "@/lib/gridAspectRatio";
 import {gridNaturalTileBoxStyle, portraitEmbedBoxStyle} from "@/lib/imageAspect";
@@ -43,10 +44,13 @@ export function YoutubeEmbedFrame({
   const isPortrait = aspect === "portrait";
   const iframeTitle = title?.trim() || "YouTube video";
 
-  const gridBox = gridAspectRatioBoxStyle(normalizeGridAspectRatio(gridAspectRatio));
-  const rowBox = gridRowAspect
-    ? gridNaturalTileBoxStyle(gridRowAspect.width, gridRowAspect.height)
-    : null;
+  const gridPreset = normalizeGridAspectRatio(gridAspectRatio);
+  const uniformCrop = gridUsesUniformCrop(gridPreset);
+  const gridBox = gridAspectRatioBoxStyle(gridPreset);
+  const rowBox =
+    !uniformCrop && gridRowAspect
+      ? gridNaturalTileBoxStyle(gridRowAspect.width, gridRowAspect.height)
+      : null;
   const boxStyle = fillFrame
     ? {width: "100%", height: "100%"}
     : gridBox ??

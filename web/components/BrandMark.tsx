@@ -27,7 +27,7 @@ export function BrandMark({
   bannerGlowWelcomeSharp = false,
 }: {
   brand?: SiteBrand | null;
-  variant?: "header" | "footer" | "workHome";
+  variant?: "header" | "footer" | "workHome" | "toc";
   /** When false, render logo without a link (e.g. Work homepage fold). */
   linkable?: boolean;
   /** Work fold desktop banner: alpha-outline glow on hover. */
@@ -44,6 +44,8 @@ export function BrandMark({
   const textClassName =
     variant === "header"
       ? `${fontClass} text-[1.6875rem] leading-tight tracking-tight`
+      : variant === "toc"
+        ? `${fontClass} text-[1.2rem] leading-none tracking-tight`
       : variant === "workHome"
         ? `${fontClass} work-home-logo__text leading-[0.95] tracking-tight`
         : `${fontClass} text-4xl leading-[1.08] tracking-tight sm:text-5xl md:text-6xl`;
@@ -53,18 +55,23 @@ export function BrandMark({
   const wrapperClassName =
     variant === "header"
       ? `inline-flex max-w-[min(100%,20rem)] items-center text-foreground ${linkableClass}`
+      : variant === "toc"
+        ? `inline-flex h-full max-w-[min(100%,13rem)] items-center text-foreground ${linkableClass}`
       : variant === "workHome"
         ? `work-home-logo__wrapper relative block h-full w-full min-h-0 min-w-0 text-foreground ${linkableClass}`
         : `inline-flex max-w-[min(100%,min(92vw,32rem))] items-center justify-center text-foreground ${linkableClass}`;
 
-  const pixelH = variant === "header" ? 88 : 150;
-  const imageWidth = variant === "header" ? 280 : 480;
-  const imageHeight = variant === "header" ? 44 : 100;
+  const pixelH = variant === "header" ? 88 : variant === "toc" ? 72 : 150;
+  const imageWidth = variant === "header" ? 280 : variant === "toc" ? 220 : 480;
+  const imageHeight = variant === "header" ? 44 : variant === "toc" ? 32 : 100;
   const imageClassName =
     variant === "header"
       ? "h-11 w-auto max-w-[280px] object-contain object-left"
+      : variant === "toc"
+        ? "block h-8 w-auto max-w-[220px] object-contain object-left"
       : "h-20 w-auto max-w-[min(92vw,480px)] object-contain object-center sm:h-24 md:h-28";
-  const imageSizes = variant === "header" ? "280px" : "(max-width: 768px) 92vw, 480px";
+  const imageSizes =
+    variant === "header" ? "280px" : variant === "toc" ? "220px" : "(max-width: 768px) 92vw, 480px";
 
   const wrap = (children: React.ReactNode) =>
     linkable ? (

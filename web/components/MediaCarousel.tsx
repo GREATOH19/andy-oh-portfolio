@@ -17,6 +17,7 @@ import {
   sanityMediaKey,
 } from "@/lib/sanity/media";
 import type {SanityMediaField} from "@/lib/types/project";
+import type {GridAspectRatio, GridCropFocus} from "@/lib/gridAspectRatio";
 import {resolveYoutubeVideoAspect} from "@/lib/youtube/parseYoutubeUrl";
 
 function estimatedSlideHeight(
@@ -45,12 +46,16 @@ export function MediaCarousel({
   thumbMaxWidth = FULL_WIDTH_MEDIA_DISPLAY_PX,
   sizes = FULL_WIDTH_MEDIA_SIZES,
   quality = 95,
+  gridAspectRatio = "auto",
+  cropFocus = "auto",
 }: {
   images: SanityMediaField[];
   caption?: string | null;
   thumbMaxWidth?: number;
   sizes?: string;
   quality?: number;
+  gridAspectRatio?: GridAspectRatio | null;
+  cropFocus?: GridCropFocus | null;
 }) {
   const metaClass = useTypoClass("meta");
   const validMedia = images.filter(isSanityMedia) as NonNullable<SanityMediaField>[];
@@ -179,6 +184,8 @@ export function MediaCarousel({
         maxWidth={thumbMaxWidth}
         quality={quality}
         sizes={sizes}
+        gridAspectRatio={gridAspectRatio}
+        cropFocus={cropFocus}
       />
     );
 

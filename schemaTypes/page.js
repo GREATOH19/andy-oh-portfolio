@@ -24,7 +24,7 @@ export const page = defineType({
       title: 'More blocks',
       type: 'array',
       description:
-        'Archive, Photography, and Behind the scene blocks (~2-row masonry preview on /more, full views on detail pages). Drag to reorder; toggle “Show on site” per block.',
+        'Archive, Photography, and Behind the scene blocks. Create media albums under More → Media albums (100+ items each), then link them here. Projects use “Add to More archive” from the project document.',
       of: [
         {type: 'archiveBlock'},
         {type: 'photographyBlock'},

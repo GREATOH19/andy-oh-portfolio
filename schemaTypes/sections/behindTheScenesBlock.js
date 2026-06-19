@@ -24,21 +24,21 @@ export const behindTheScenesBlock = defineType({
       initialValue: 'Behind the scene',
     }),
     defineField({
-      name: 'images',
-      title: 'Photos & videos',
+      name: 'albums',
+      title: 'Albums',
       type: 'array',
-      of: [{type: 'cmsMediaItem'}],
+      of: [{type: 'reference', to: [{type: 'mediaAlbum'}]}],
       description:
-        'Unlimited. The More page shows a ~2-row masonry preview; the full grid is on /more/behind-the-scenes (drag order).',
+        'Link media albums (create under More → Media albums). Each album can hold 100+ photos or videos.',
     }),
   ],
   preview: {
-    select: {heading: 'heading', enabled: 'enabled', images: 'images'},
-    prepare({heading, enabled, images}) {
-      const count = Array.isArray(images) ? images.length : 0
+    select: {heading: 'heading', enabled: 'enabled', albums: 'albums'},
+    prepare({heading, enabled, albums}) {
+      const count = Array.isArray(albums) ? albums.length : 0
       return {
         title: heading || 'Behind the scene',
-        subtitle: `${enabled === false ? 'Hidden · ' : ''}${count} item${count === 1 ? '' : 's'}`,
+        subtitle: `${enabled === false ? 'Hidden · ' : ''}${count} album${count === 1 ? '' : 's'}`,
       }
     },
   },

@@ -36,6 +36,8 @@ export function ProjectSections({sections}: {sections: ProjectSection[]}) {
                 image={section.image}
                 item={section.item}
                 caption={section.caption}
+                gridAspectRatio={section.gridAspectRatio}
+                cropFocus={section.cropFocus}
               />
             );
 

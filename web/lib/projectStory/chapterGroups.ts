@@ -35,7 +35,7 @@ function isStoryMediaBlock(block: ProjectStoryBlock): boolean {
   if (
     block._type === "projectMedia" ||
     block._type === "projectGallery" ||
-    block._type === "projectCollage" ||
+    block._type === "projectPhotoCollage" ||
     block._type === "projectProcess" ||
     block._type === "projectYoutube"
   ) {

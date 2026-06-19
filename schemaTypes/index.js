@@ -1,3 +1,4 @@
+import {mediaAlbum} from './mediaAlbum'
 import {project} from './project'
 import {home} from './home'
 import {about} from './about'
@@ -7,7 +8,6 @@ import {siteSettings} from './siteSettings'
 
 import {cmsImage} from './objects/cmsImage'
 import {cmsMediaItem} from './objects/cmsMediaItem'
-import {collageItem} from './objects/collageItem'
 import {photoAlbum} from './objects/photoAlbum'
 import {siteBrand} from './objects/siteBrand'
 
@@ -39,18 +39,19 @@ import {projectColumns} from './project/projectColumns'
 import {projectAudio} from './project/projectAudio'
 import {projectYoutube} from './project/projectYoutube'
 import {projectProcess} from './project/projectProcess'
-import {projectCollage} from './project/projectCollage'
+import {projectPhotoCollage} from './project/projectPhotoCollage'
+import {projectPhotoCollagePair} from './project/projectPhotoCollagePair'
 
 export const schemaTypes = [
   about,
   contact,
   home,
   project,
+  mediaAlbum,
   page,
   siteSettings,
   cmsImage,
   cmsMediaItem,
-  collageItem,
   photoAlbum,
   siteBrand,
   detailLine,
@@ -69,7 +70,8 @@ export const schemaTypes = [
   projectAudio,
   projectYoutube,
   projectProcess,
-  projectCollage,
+  projectPhotoCollage,
+  projectPhotoCollagePair,
   contactCtaSection,
   gallerySection,
   heroSection,

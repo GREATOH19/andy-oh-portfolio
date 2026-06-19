@@ -16,7 +16,7 @@ import {
   normalizeMediaItem,
   sanityMediaKey,
 } from "@/lib/sanity/media";
-import {clampGridTileAspect, type GridAspectRatio, type GridCropFocus} from "@/lib/gridAspectRatio";
+import {clampGridTileAspect, gridUsesUniformCrop, normalizeGridAspectRatio, type GridAspectRatio, type GridCropFocus} from "@/lib/gridAspectRatio";
 import type {
   ProjectProcessBlock,
   ProjectProcessStep,
@@ -202,14 +202,15 @@ function ProcessRow({
   onOpenLightbox: (globalIndex: number) => void;
 }) {
   const [videoAspects, setVideoAspects] = useState<Record<string, MediaAspect>>({});
+  const uniformCrop = gridUsesUniformCrop(normalizeGridAspectRatio(gridAspectRatio));
   const gridRowAspect = useMemo(() => {
-    if (row.length < 2) return undefined;
+    if (uniformCrop || row.length < 2) return undefined;
     return tallestRowAspect(
       row.map((step) => step.media),
       videoAspects,
       (_, index) => row[index].key,
     );
-  }, [row, videoAspects]);
+  }, [row, uniformCrop, videoAspects]);
 
   const onVideoLayout = useCallback((stepKey: string, aspect: MediaAspect) => {
     const clamped = clampGridTileAspect(aspect.width, aspect.height);
@@ -221,7 +222,9 @@ function ProcessRow({
   }, []);
 
   return (
-    <div className="flex w-full items-stretch gap-0.5 sm:gap-1">
+    <div
+      className={`flex w-full gap-0.5 sm:gap-1 ${uniformCrop ? "items-start" : "items-stretch"}`}
+    >
       {row.map((step, stepIndex) => (
         <Fragment key={step.key}>
           {stepIndex > 0 ? <ProcessStepChevron /> : null}
