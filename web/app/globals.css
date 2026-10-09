@@ -1444,3 +1444,8 @@ html body .project-story .project-story-chapter-title {
     font-family: inherit;
   }
 }
+
+/* Monklap project page — slide-style sans headings and weights */
+.monklap-page :is(h1, h2, h3, h4) {
+  font-family: var(--font-sans);
+}

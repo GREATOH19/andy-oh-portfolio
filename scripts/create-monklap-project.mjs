@@ -1,6 +1,6 @@
 /**
- * Create the Monklap project as a draft. The story is the portfolio slides
- * (images/monklap/slide-*.jpg) shown in order, followed by the demo video.
+ * Create the Monklap project document (Work card + intro details) as a draft.
+ * The project page itself is custom: web/app/projects/monklap/page.tsx.
  * Run from repo root: npm run seed:monklap
  * Publish the draft in Studio afterwards. Safe to re-run: replaces the draft.
  */
@@ -26,27 +26,6 @@ async function upload(kind, file) {
   return {_type: 'reference', _ref: assetCache.get(file)}
 }
 
-async function image(file, alt) {
-  return {
-    _type: 'cmsMediaItem',
-    _key: key(),
-    mediaType: 'image',
-    alt,
-    image: {_type: 'image', asset: await upload('image', file), alt},
-  }
-}
-
-async function video(file, alt) {
-  return {
-    _type: 'cmsMediaItem',
-    _key: key(),
-    mediaType: 'video',
-    alt,
-    loop: true,
-    video: {_type: 'file', asset: await upload('file', file)},
-  }
-}
-
 const para = (text) => ({
   _type: 'block',
   _key: key(),
@@ -55,40 +34,7 @@ const para = (text) => ({
   children: [{_type: 'span', _key: key(), text, marks: []}],
 })
 
-const media = (item, caption, extra = {}) => ({
-  _type: 'projectMedia',
-  _key: key(),
-  media: item,
-  caption,
-  mediaWidth: 'full',
-  mediaAlign: 'center',
-  ...extra,
-})
-
-const slides = [
-  'Monklap — portfolio cover',
-  'Overview — scent, on cue',
-  'Target users — Monklap is for…',
-  'ESP32 & sensors — two sensors, two outcomes',
-  'Inside the face — wireframe breakdown',
-  'System & assembly — fill, twist, clap',
-  'Sketch & ideation — from a button to a clap',
-  'Process & lessons',
-  'Final prototype — Monklap, awake',
-]
-
 async function main() {
-  const slideFile = (i) => `slide-0${i + 1}.jpg`
-  // Slide 1 is the cover: it opens the page as the hero.
-  const hero = await image(slideFile(0), slides[0])
-  const demo = await video('monklap-demo.mp4', 'Monklap waking, smiling and misting after a clap')
-
-  const story = []
-  for (let i = 1; i < slides.length; i++) {
-    story.push(media(await image(slideFile(i), slides[i])))
-  }
-  story.push(media(demo, 'Rest → wake → smile → pulse', {mediaWidth: 'medium'}))
-
   const doc = {
     _id: 'drafts.project-monklap',
     _type: 'project',
@@ -101,7 +47,6 @@ async function main() {
       asset: await upload('image', 'render-front.jpg'),
       alt: 'Monklap rendering',
     },
-    heroImage: hero,
     lead: [
       para(
         'Monklap is a wall-mounted or desktop IoT diffuser shaped like a friendly monkey. Clap, and it wakes, smiles back and releases a 1.5-second pulse of mist — no buttons, no app, nothing to touch. Made for the Design Principle class in Industrial Design at RISD.',
@@ -115,7 +60,6 @@ async function main() {
       {_type: 'detailLine', _key: key(), label: 'Material', value: '3D-printed shell, ultrasonic atomizer, 2.8″ OLED'},
     ],
     highlights: ['Industrial design', 'Interaction design', 'Electronics', 'Prototyping', '3D printing'],
-    story,
   }
 
   await client.createOrReplace(doc)
