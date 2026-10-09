@@ -59,7 +59,7 @@ const chapter = (title, paragraphs) => ({
   _key: key(),
   title,
   tocTitle: title,
-  body: paragraphs.map(para),
+  ...(paragraphs.length ? {body: paragraphs.map(para)} : {}),
 })
 
 const media = (item, caption, extra = {}) => ({
@@ -72,95 +72,189 @@ const media = (item, caption, extra = {}) => ({
   ...extra,
 })
 
-const gallery = (images, caption, columns) => ({
-  _type: 'projectGallery',
-  _key: key(),
-  images,
-  caption,
-  columns,
-  mediaWidth: 'full',
-  mediaAlign: 'center',
-})
-
 const hero = await image('render-front.jpg', 'Monklap rendering')
 const demo = await video('monklap-demo.mp4', 'Monklap waking, smiling and misting after a clap')
 
+const heading = (text) => ({...para(text), style: 'h3'})
+const bullet = (text) => ({...para(text), listItem: 'bullet', level: 1})
+const labeled = (label, text) => ({
+  _type: 'block',
+  _key: key(),
+  style: 'normal',
+  markDefs: [],
+  children: [
+    {_type: 'span', _key: key(), text: `${label} `, marks: ['strong']},
+    {_type: 'span', _key: key(), text, marks: []},
+  ],
+})
+
+const zigzag = (layout, body, images, caption, extra = {}) => ({
+  _type: 'projectZigzagRow',
+  _key: key(),
+  layout,
+  body,
+  images,
+  caption,
+  ...extra,
+})
+
+const columns = (ratio, left, right) => ({
+  _type: 'projectColumns',
+  _key: key(),
+  ratio,
+  left,
+  right,
+})
+
+const quote = (text, attribution) => ({
+  _type: 'projectQuote',
+  _key: key(),
+  quote: [para(text)],
+  attribution,
+})
+
+const process = (steps, cols, caption) => ({
+  _type: 'projectProcess',
+  _key: key(),
+  columns: cols,
+  caption,
+  steps,
+})
+
+const step = (media, caption) => ({_type: 'processStep', _key: key(), media, caption})
+
+const faceStates = [
+  ['rest', '01 Rest — nobody near, or no sound'],
+  ['wake', '02 Wake — someone near + clap or noise'],
+  ['smile', '03 Smile — smiles back at the clap'],
+  ['pulse', '04 Pulse — 1.5 s burst of mist'],
+]
+
 const story = [
   chapter('Scent, on cue', [
-    'Monklap is a wall-mounted or desktop diffuser shaped like a friendly monkey. Walk up and clap, and it responds with a pulse of fragrant mist from its mouth. No buttons, no app, nothing to touch.',
-    'Touchless: sound and proximity replace the spray trigger, for moments when your hands are busy, wet or full. Interactive: an OLED face gives it a character and shows visible feedback for every state. Ambient: a wick-fed ultrasonic atomizer releases a 1.5-second burst of mist on demand, not a constant stream.',
+    'Monklap is a wall-mounted or desktop diffuser shaped like a friendly monkey. Walk up and clap, and it responds with a pulse of fragrant mist from its mouth.',
   ]),
-  media(demo, 'Rest → wake → smile → pulse', {mediaWidth: 'medium'}),
-  chapter('Who it is for', [
-    'Three groups who want scent to feel like a moment of play, not another chore.',
-    'Aesthetic & tech enthusiasts: Gen Z and millennials looking for desk-friendly home objects with sound-driven, physical interaction rather than another standard IoT device.',
-    'Touchless, functional users: people who need instant, hands-free odor control while cooking, caring for pets, or whenever their hands are busy.',
-    'Experiential commercial spaces: pop-up stores, cafés and galleries that want interactive, sensory branding at the entrance — a scent that greets visitors.',
-  ]),
+  zigzag(
+    'textLeft',
+    [
+      labeled('Touchless.', 'Sound and proximity replace the spray trigger, for moments when your hands are busy, wet or full.'),
+      labeled('Interactive.', 'An OLED face gives it a character and shows visible feedback for every state.'),
+      labeled('Ambient.', 'A wick-fed ultrasonic atomizer releases a 1.5-second burst of mist on demand, not a constant stream.'),
+    ],
+    [demo],
+    'Rest → wake → smile → pulse',
+  ),
+  quote('No buttons, no app, nothing to touch.', 'Monklap'),
+
+  chapter('Who it is for', ['Three groups who want scent to feel like a moment of play, not another chore.']),
+  columns(
+    '50-50',
+    [
+      heading('Aesthetic & tech enthusiasts'),
+      para('Gen Z and millennials looking for desk-friendly home objects with sound-driven, physical interaction rather than another standard IoT device.'),
+      heading('Touchless, functional users'),
+      para('People who need instant, hands-free odor control while cooking, caring for pets, or whenever their hands are busy.'),
+    ],
+    [
+      heading('Experiential commercial spaces'),
+      para('Pop-up stores, cafés and galleries that want interactive, sensory branding at the entrance — a scent that greets visitors.'),
+      heading('Where it lives'),
+      bullet('Desk setups'),
+      bullet('Kitchens'),
+      bullet('Pop-ups, cafés and galleries'),
+    ],
+  ),
+
   chapter('From a button to a clap', [
     'Monklap began as a “Sound & Scent System”: a comfort tool for public spaces that played music as people walked by, then sprayed fragrance on their wrists at the press of a button.',
-    'What I kept: walk-up wake, a digital face, scent as a reward. What changed: the button became a clap; the form became a monkey.',
+    'I kept the walk-up wake, the digital face and scent as a reward. The button became a clap, and the form became a monkey.',
   ]),
-  gallery(
-    [
-      await image('sketch-concept.jpg', 'Initial concept sketch: walk-by music and wrist spray'),
-      await image('sketch-form.jpg', 'Form studies: head, sensors and tank'),
-    ],
-    'Initial concept — walk-by music & wrist spray · Form studies — head, sensors & tank',
-    2,
-  ),
+  media(await image('sketch-concept.jpg', 'Initial concept sketch'), 'Initial concept — walk-by music & wrist spray', {mediaWidth: 'medium'}),
+  media(await image('sketch-form.jpg', 'Form studies'), 'Form studies — head, sensors & tank', {mediaWidth: 'medium'}),
+
   chapter('Two sensors, two outcomes', [
-    'An ESP32 reads an ultrasonic sensor in the nostrils (is someone near?) and a sound sensor at the lower left (a clap or noise). It picks a face for the 2.8″ OLED eyes and decides when to fire the ultrasonic atomizer in the mouth.',
-    'Interaction logic: Rest (nobody near, or no sound — screen dimmed), Wake (someone near plus a clap or noise — eyes open), Smile (recognizes the clap and smiles back), Pulse (atomizer on for 1.5 s, then back to rest).',
+    'An ESP32 reads two sensors, picks a face for the OLED eyes and decides when to fire the atomizer. It runs on USB 5V.',
   ]),
-  media(await image('diagram-system.jpg', 'ESP32 and sensor system diagram'), 'ESP32 & sensors'),
-  gallery(
+  columns(
+    '50-50',
     [
-      await image('face-rest.jpg', 'Rest face'),
-      await image('face-wake.jpg', 'Wake face'),
-      await image('face-smile.jpg', 'Smile face'),
-      await image('face-pulse.jpg', 'Pulse face'),
+      heading('Input · Sense'),
+      labeled('Ultrasonic sensor (nostrils).', 'Checks that someone is near.'),
+      labeled('Sound sensor (lower left).', 'Listens for a clap or noise.'),
     ],
-    'Face states on the real screen — Rest · Wake · Smile · Pulse',
+    [
+      heading('Output · Respond'),
+      labeled('2.8″ OLED display (eyes).', 'Draws the face state.'),
+      labeled('Ultrasonic atomizer (mouth).', 'Fires a 1.5 s burst of mist through a driver board.'),
+    ],
+  ),
+  process(
+    await Promise.all(
+      faceStates.map(async ([name, cap]) => step(await image(`face-${name}.jpg`, `${name} face on the real screen`), cap)),
+    ),
     4,
+    'Interaction logic — face states on the real screen',
   ),
+
   chapter('Inside the face', [
-    'The eyes are a 2.8″ OLED (62.6 × 33.7 mm), the nostrils hold the ultrasonic sensor, the mouth holds the atomizer and the sound sensor sits lower left. Four snap-fit hooks on the side walls hold the shell together.',
-    'A J-shaped wick draws water up from the bayonet tank to the mouth by capillary action — the widest bend that fits.',
+    'Everything lives inside the monkey’s face: the OLED eyes, ultrasonic sensors in the nostrils, the atomizer in the mouth and the sound sensor at the lower left. Four snap-fit hooks hold the shell together, and a bayonet tank lid and tub print as one piece.',
+    'A J-shaped wick, the widest bend that fits, draws water from the tank up to the mouth by capillary action.',
   ]),
-  media(await image('diagram-wireframe.jpg', 'Wireframe breakdown drawn from the Rhino model'), 'Wireframe breakdown — hidden lines on, drawn from the Rhino model'),
-  chapter('Fill, twist, clap.', [
-    'Fill the tank with water and a water-soluble air freshener. Twist the lid’s bayonet into the head; the wick carries water up to the mouth. A keyhole slot on the back hangs it on a single screw. No buttons — the face does the rest.',
-  ]),
-  media(await image('assembly-exploded.jpg', 'Exploded assembly: fill, twist, hang and clap'), 'System & assembly', {mediaWidth: 'medium'}),
-  chapter('Process & lessons', [
-    'Modeling — Taking Monklap from rough sketches to 3D models in Rhino taught me that the more specific a plan is, the less time I lose troubleshooting changes later.',
-    '3D printing — I printed the parts on a Bambu Lab A1 using Bambu Studio. Printing went smoothly, but some edges warped, so I had to sand those surfaces flat.',
-    'Soldering — I troubleshot shorts caused by broken cords, cold solder joints and tangled stripped wires. Each time, I reopened the board, resoldered the joints and added hot glue so the same problem wouldn’t happen again.',
-    'Assembly — Using the joint structures I designed during modeling, I fitted the sensors, display and atomizer in order. My plans for the circuits and wick didn’t always match reality; after four rounds of printing and fitting, I arrived at the current Monklap.',
-  ]),
-  gallery(
+  media(await image('wireframe.jpg', 'Front and side wireframe breakdown with labels'), 'Wireframe breakdown — hidden lines on, drawn from the Rhino model', {mediaWidth: 'bleed'}),
+
+  zigzag(
+    'textRight',
     [
-      await image('process-modeling.jpg', 'Modeling in Rhino'),
-      await image('process-printing.jpg', '3D printing on a Bambu Lab A1'),
-      await image('process-soldering.jpg', 'Soldering the circuit board'),
-      await image('process-assembly.jpg', 'Fitting the electronics into the shell'),
+      heading('Fill, twist, clap.'),
+      labeled('1. Fill the tank.', 'Fill it with water and a water-soluble air freshener.'),
+      labeled('2. Twist into the head.', 'The lid’s bayonet locks into the head. A wick carries water up to the mouth.'),
+      labeled('3. Hang it and clap.', 'A keyhole slot on the back hangs it on a single screw. No buttons — the face does the rest.'),
     ],
-    'Modeling · Printing · Soldering · Assembly',
-    2,
+    [await image('assembly-exploded.jpg', 'Exploded assembly: fill, twist, hang and clap')],
+    'System & assembly',
   ),
+
+  chapter('Process & lessons', []),
+  process(
+    [
+      step(await image('process-modeling.jpg', 'Modeling in Rhino'), 'Modeling'),
+      step(await image('process-printing.jpg', '3D printing on a Bambu Lab A1'), 'Printing'),
+      step(await image('process-soldering.jpg', 'Soldering the circuit board'), 'Soldering'),
+      step(await image('process-assembly.jpg', 'Fitting the electronics into the shell'), 'Assembly'),
+    ],
+    4,
+    undefined,
+  ),
+  columns(
+    '50-50',
+    [
+      heading('Modeling'),
+      para('Taking Monklap from rough sketches to 3D models in Rhino taught me that the more specific a plan is, the less time I lose troubleshooting changes later. I now understand not only how to model objects for real-world use, but also how to plan a project so each stage flows into the next with less friction.'),
+      heading('3D printing'),
+      para('I printed the parts from my Rhino models on a Bambu Lab A1 using Bambu Studio. Printing itself went smoothly, but some edges warped, so I had to sand those surfaces flat.'),
+    ],
+    [
+      heading('Soldering'),
+      para('I troubleshot shorts caused by broken cords, cold solder joints and tangled stripped wires. Each time, I reopened the board, resoldered the joints and added hot glue so the same problem wouldn’t happen again.'),
+      heading('Assembly'),
+      para('Using the joint structures I designed during modeling, I fitted the sensors, display and atomizer in order. My plans for the circuits and wick didn’t always match reality, so it took a lot of trial and error. After four rounds of printing and fitting, I arrived at the current Monklap.'),
+    ],
+  ),
+
   chapter('Monklap, awake.', [
     'The finished Monklap: live OLED eyes, ultrasonic sensors in the nostrils and an atomizer in the mouth, all running on an ESP32.',
   ]),
-  gallery(
-    [
+  {
+    _type: 'projectPhotoCollage',
+    _key: key(),
+    portraitSide: 'left',
+    portrait: await image('final-mist.jpg', 'A clap triggers a pulse of mist'),
+    strips: [
       await image('final-front.jpg', 'Monklap front, awake'),
       await image('final-three-quarter.jpg', 'Monklap three-quarter view'),
-      await image('final-mist.jpg', 'Clap triggers a pulse of mist'),
     ],
-    'Front — awake · Three-quarter view · Clap → pulse of mist',
-    3,
-  ),
+    caption: 'Clap → pulse of mist · Front — awake · Three-quarter view',
+  },
 ]
 
 const doc = {
