@@ -88,6 +88,9 @@ const labeled = (label, text) => ({
   ],
 })
 
+const textBox = (label, body) => ({_type: 'projectTextBox', _key: key(), label, body})
+const h2 = (text) => ({...para(text), style: 'h2'})
+
 const zigzag = (layout, body, images, caption, extra = {}) => ({
   _type: 'projectZigzagRow',
   _key: key(),
@@ -131,7 +134,7 @@ const faceStates = [
 ]
 
 const story = [
-  chapter('Scent, on cue', [
+  chapter('Concept', [
     'Monklap is a wall-mounted or desktop diffuser shaped like a friendly monkey. Walk up and clap, and it responds with a pulse of fragrant mist from its mouth.',
   ]),
   zigzag(
@@ -146,7 +149,7 @@ const story = [
   ),
   quote('No buttons, no app, nothing to touch.', 'Monklap'),
 
-  chapter('Who it is for', ['Three groups who want scent to feel like a moment of play, not another chore.']),
+  textBox('Who it is for', [h2('Who it is for'), para('Three groups who want scent to feel like a moment of play, not another chore.')]),
   columns(
     '50-50',
     [
@@ -165,14 +168,15 @@ const story = [
     ],
   ),
 
-  chapter('From a button to a clap', [
-    'Monklap began as a “Sound & Scent System”: a comfort tool for public spaces that played music as people walked by, then sprayed fragrance on their wrists at the press of a button.',
-    'I kept the walk-up wake, the digital face and scent as a reward. The button became a clap, and the form became a monkey.',
+  textBox('From a button to a clap', [
+    h2('From a button to a clap'),
+    para('Monklap began as a “Sound & Scent System”: a comfort tool for public spaces that played music as people walked by, then sprayed fragrance on their wrists at the press of a button.'),
+    para('I kept the walk-up wake, the digital face and scent as a reward. The button became a clap, and the form became a monkey.'),
   ]),
   media(await image('sketch-concept.jpg', 'Initial concept sketch'), 'Initial concept — walk-by music & wrist spray', {mediaWidth: 'medium'}),
   media(await image('sketch-form.jpg', 'Form studies'), 'Form studies — head, sensors & tank', {mediaWidth: 'medium'}),
 
-  chapter('Two sensors, two outcomes', [
+  chapter('How it works', [
     'An ESP32 reads two sensors, picks a face for the OLED eyes and decides when to fire the atomizer. It runs on USB 5V.',
   ]),
   columns(
@@ -196,9 +200,10 @@ const story = [
     'Interaction logic — face states on the real screen',
   ),
 
-  chapter('Inside the face', [
-    'Everything lives inside the monkey’s face: the OLED eyes, ultrasonic sensors in the nostrils, the atomizer in the mouth and the sound sensor at the lower left. Four snap-fit hooks hold the shell together, and a bayonet tank lid and tub print as one piece.',
-    'A J-shaped wick, the widest bend that fits, draws water from the tank up to the mouth by capillary action.',
+  textBox('Inside the face', [
+    h2('Inside the face'),
+    para('Everything lives inside the monkey’s face: the OLED eyes, ultrasonic sensors in the nostrils, the atomizer in the mouth and the sound sensor at the lower left. Four snap-fit hooks hold the shell together, and a bayonet tank lid and tub print as one piece.'),
+    para('A J-shaped wick, the widest bend that fits, draws water from the tank up to the mouth by capillary action.'),
   ]),
   media(await image('wireframe.jpg', 'Front and side wireframe breakdown with labels'), 'Wireframe breakdown — hidden lines on, drawn from the Rhino model', {mediaWidth: 'bleed'}),
 
@@ -214,7 +219,9 @@ const story = [
     'System & assembly',
   ),
 
-  chapter('Process & lessons', []),
+  chapter('Process & result', [
+    'Four rounds of printing and fitting took Monklap from rough sketches to a working prototype.',
+  ]),
   process(
     [
       step(await image('process-modeling.jpg', 'Modeling in Rhino'), 'Modeling'),
@@ -241,8 +248,9 @@ const story = [
     ],
   ),
 
-  chapter('Monklap, awake.', [
-    'The finished Monklap: live OLED eyes, ultrasonic sensors in the nostrils and an atomizer in the mouth, all running on an ESP32.',
+  textBox('Monklap, awake.', [
+    h2('Monklap, awake.'),
+    para('The finished Monklap: live OLED eyes, ultrasonic sensors in the nostrils and an atomizer in the mouth, all running on an ESP32.'),
   ]),
   {
     _type: 'projectPhotoCollage',
