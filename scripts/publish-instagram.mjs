@@ -5,8 +5,9 @@
  */
 import fs from 'node:fs'
 import path from 'node:path'
-import sharp from 'sharp'
+import {pathToFileURL} from 'node:url'
 import {createClient} from '@sanity/client'
+import {closingHtml, coverHtml, photoHtml, renderSlides} from '../tools/slides.mjs'
 import {buildCaption, collectImages, loadEnv, readBrief} from '../tools/inbox.mjs'
 
 loadEnv()
@@ -14,10 +15,6 @@ const args = process.argv.slice(2)
 const dir = args.find((a) => !a.startsWith('--'))
 const post = args.includes('--post')
 if (!dir) throw new Error('Usage: npm run publish:instagram -- inbox/<name> [--post]')
-
-const W = 1080, H = 1350
-const BG = {r: 245, g: 245, b: 242}
-const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;'}[c]))
 
 const {meta, paragraphs} = readBrief(dir)
 const files = collectImages(dir)
@@ -28,43 +25,17 @@ const out = path.join(dir, '_out')
 fs.rmSync(out, {recursive: true, force: true})
 fs.mkdirSync(out, {recursive: true})
 
-const textSvg = (lines, size, y, color = '#fff', weight = 600) =>
-  Buffer.from(
-    `<svg width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">${lines
-      .map((l, i) => `<text x="72" y="${y + i * size * 1.25}" font-family="Helvetica, Arial, sans-serif" font-size="${size}" font-weight="${weight}" fill="${color}">${esc(l)}</text>`)
-      .join('')}</svg>`,
-  )
-
-const slides = []
-// 1. cover: full-bleed crop + dark gradient + title
+const url = (f) => pathToFileURL(path.resolve(f)).href
 const coverSrc = files[Math.max(0, Number(meta.cover || 1) - 1)]
-const grad = Buffer.from(
-  `<svg width="${W}" height="${H}"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0.45" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.75"/></linearGradient></defs><rect width="${W}" height="${H}" fill="url(#g)"/></svg>`,
-)
-slides.push(
-  await sharp(coverSrc).rotate().resize(W, H, {fit: 'cover'})
-    .composite([
-      {input: grad},
-      {input: textSvg([meta.title], 84, H - 200)},
-      ...(meta.subtitle ? [{input: textSvg([meta.subtitle], 36, H - 130, '#ddd', 400)}] : []),
-    ]).jpeg({quality: 92}).toBuffer(),
-)
-// 2. photo slides: contain on neutral background (no cropping of work)
-for (const f of body) {
-  const fitted = await sharp(f).rotate().resize(W - 96, H - 96, {fit: 'inside'}).toBuffer()
-  slides.push(
-    await sharp({create: {width: W, height: H, channels: 3, background: BG}})
-      .composite([{input: fitted, gravity: 'centre'}]).jpeg({quality: 92}).toBuffer(),
-  )
-}
-// 3. closing slide
-const closing = [meta.title, '', ...(meta.year ? [meta.year] : []), '@' + (process.env.INSTAGRAM_HANDLE || 'andy_oh')]
-slides.push(
-  await sharp({create: {width: W, height: H, channels: 3, background: {r: 20, g: 20, b: 20}}})
-    .composite([{input: textSvg(closing, 56, H / 2 - 60)}]).jpeg({quality: 92}).toBuffer(),
-)
+const htmls = [
+  coverHtml({img: url(coverSrc), title: meta.title, subtitle: meta.subtitle}),
+  ...body.map((f) => photoHtml({img: url(f), label: meta.title})),
+  closingHtml({title: meta.title, year: meta.year, handle: process.env.INSTAGRAM_HANDLE ? '@' + process.env.INSTAGRAM_HANDLE.replace(/^@/, '') : ''}),
+].slice(0, 10)
 
-const paths = slides.slice(0, 10).map((buf, i) => {
+const buffers = await renderSlides(htmls, path.join(out, '_html'))
+fs.rmSync(path.join(out, '_html'), {recursive: true, force: true})
+const paths = buffers.map((buf, i) => {
   const p = path.join(out, `slide-${String(i + 1).padStart(2, '0')}.jpg`)
   fs.writeFileSync(p, buf)
   return p
