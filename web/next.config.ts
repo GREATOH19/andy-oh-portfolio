@@ -19,10 +19,6 @@ const nextConfig: NextConfig = {
         source: "/monklap",
         destination: "/monklap/index.html",
       },
-      {
-        source: "/projects/monklap",
-        destination: "/monklap/index.html",
-      },
     ];
   },
   async headers() {

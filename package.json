@@ -10,7 +10,8 @@
     "migrate:project-cms": "sanity exec ./scripts/migrate-project-cms.mjs --with-user-token",
     "migrate:lead-pt": "sanity exec ./scripts/migrate-lead-portable-text.mjs --with-user-token",
     "migrate:bento-collage": "sanity exec ./scripts/migrate-bento-collage.mjs --with-user-token",
-    "migrate:more-albums": "sanity exec ./scripts/migrate-more-albums.mjs --with-user-token"
+    "migrate:more-albums": "sanity exec ./scripts/migrate-more-albums.mjs --with-user-token",
+    "seed:monklap-draft": "sanity exec ./scripts/seed-monklap-draft.mjs --with-user-token"
   },
   "dependencies": {
     "@sanity/orderable-document-list": "^1.5.1",
