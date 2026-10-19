@@ -13,6 +13,14 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: "/monklap",
+        destination: "/monklap/index.html",
+      },
+    ];
+  },
   async headers() {
     return [
       {
