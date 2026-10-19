@@ -29,3 +29,6 @@
 *.local
 
 .vercel
+
+# Local Sanity document backups
+/.backups

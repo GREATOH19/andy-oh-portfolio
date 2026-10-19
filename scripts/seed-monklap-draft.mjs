@@ -1,16 +1,40 @@
 /**
- * Creates a Sanity DRAFT project "Monklap (draft)" from the Monklap portfolio slides.
+ * Monklap project content from the portfolio slides, written to Sanity.
  * Reuses image/video assets that already exist in the dataset; uploads nothing.
- * Touches only drafts.project-monklap-draft (createOrReplace, safe to re-run).
- * Run from repo root: npm run seed:monklap-draft
- * Then open Studio → Project → "Monklap (draft)" and publish when ready.
+ *
+ *   npm run seed:monklap-draft    → drafts.project-monklap-draft (new draft, slug monklap-draft)
+ *   npm run seed:monklap-replace  → replaces the story/intro of the live project-monklap
+ *                                   (backs up the old document to .backups/ first)
+ *
+ * Both are safe to re-run. Run from the repo root. Auth: your Sanity CLI login via npm run,
+ * or a SANITY_WRITE_TOKEN (Editor) env var when run directly: node scripts/seed-monklap-draft.mjs [--replace]
  */
+import fs from 'node:fs'
+import path from 'node:path'
 import {randomUUID} from 'node:crypto'
-import {getCliClient} from 'sanity/cli'
+const SANITY_PROJECT_ID = 'sttir3vc'
+const SANITY_DATASET = 'production'
 
-const client = getCliClient({apiVersion: '2025-01-01'})
+async function makeClient() {
+  const token = process.env.SANITY_WRITE_TOKEN?.trim()
+  if (token) {
+    const {createClient} = await import('@sanity/client')
+    return createClient({
+      projectId: SANITY_PROJECT_ID,
+      dataset: SANITY_DATASET,
+      apiVersion: '2025-01-01',
+      token,
+      useCdn: false,
+    })
+  }
+  const {getCliClient} = await import('sanity/cli')
+  return getCliClient({apiVersion: '2025-01-01'})
+}
 
-const DOC_ID = 'drafts.project-monklap-draft'
+const client = await makeClient()
+
+const DRAFT_ID = 'drafts.project-monklap-draft'
+const LIVE_ID = 'project-monklap'
 
 const A = {
   assembly: 'image-4b30ee1c1416ac9564cc61d0e052ae978cf005e4-1500x2000-jpg',
@@ -227,15 +251,10 @@ const story = [
   },
 ]
 
-const doc = {
-  _id: DOC_ID,
-  _type: 'project',
-  title: 'Monklap (draft)',
-  slug: {_type: 'slug', current: 'monklap-draft'},
+// Intro + story content shared by both modes.
+const content = {
   subtitle: 'a touchless ambient scent system that answers a clap',
   year: '2026',
-  coverImage: imageField(A.finalFront, 'Monklap, front view'),
-  heroImage: media(A.finalFront, 'Monklap, front view'),
   lead: [
     block(
       'Monklap is a wall-mounted or desktop IoT diffuser shaped like a friendly monkey. Clap, and it wakes, smiles back and releases a 1.5-second pulse of mist, no buttons, no app, nothing to touch. Made for the Design Principle class in Industrial Design at RISD.',
@@ -258,19 +277,57 @@ const doc = {
   story,
 }
 
-async function main() {
+const draftDoc = {
+  _id: DRAFT_ID,
+  _type: 'project',
+  title: 'Monklap (draft)',
+  slug: {_type: 'slug', current: 'monklap-draft'},
+  coverImage: imageField(A.finalFront, 'Monklap, front view'),
+  heroImage: media(A.finalFront, 'Monklap, front view'),
+  ...content,
+}
+
+async function assertAssetsExist() {
   const refs = [...new Set(Object.values(A))]
   const found = await client.fetch('*[_id in $ids]._id', {ids: refs})
   const missing = refs.filter((id) => !found.includes(id))
   if (missing.length) {
     throw new Error(`Missing assets in dataset (nothing written):\n${missing.join('\n')}`)
   }
+}
 
+async function seedDraft() {
   // createOrReplace only ever touches this one draft document.
-  await client.createOrReplace(doc)
-  console.log(`Draft created: ${DOC_ID}`)
+  await client.createOrReplace(draftDoc)
+  console.log(`Draft created: ${DRAFT_ID}`)
   console.log('Open Studio → Project → "Monklap (draft)" to review, then Publish.')
-  console.log('Preview on the site at /projects/monklap-draft once published.')
+}
+
+async function replaceLive() {
+  const live = await client.getDocument(LIVE_ID)
+  if (!live) throw new Error(`${LIVE_ID} not found in dataset (nothing written)`)
+  const pendingDraft = await client.getDocument(`drafts.${LIVE_ID}`)
+
+  // Back up everything that is about to change.
+  fs.mkdirSync('.backups', {recursive: true})
+  const stamp = new Date().toISOString().replace(/[:.]/g, '-')
+  const file = path.join('.backups', `project-monklap.${stamp}.json`)
+  fs.writeFileSync(file, JSON.stringify({published: live, draft: pendingDraft}, null, 2))
+  console.log(`Backed up current document to ${file}`)
+
+  // Replace the intro + story; title, slug, card thumbnail, hero and order stay as they are.
+  // Any pending draft of the live document is removed so Studio shows the new content.
+  const tx = client.transaction().patch(LIVE_ID, (p) => p.set(content))
+  if (pendingDraft) tx.delete(`drafts.${LIVE_ID}`)
+  await tx.commit()
+  console.log(`Replaced content of ${LIVE_ID}${pendingDraft ? ' (and removed its pending draft)' : ''}.`)
+  console.log('To undo: re-create the document from the backup file above.')
+}
+
+async function main() {
+  await assertAssetsExist()
+  if (process.argv.includes('--replace')) await replaceLive()
+  else await seedDraft()
 }
 
 main().catch((err) => {
