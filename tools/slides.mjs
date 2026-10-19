@@ -12,7 +12,6 @@ const page = (body, extra = '') => `<!doctype html><meta charset="utf-8"><style>
 ${FONT_CSS}${WASH_CSS}${HERO_FADE_CSS}
 *{box-sizing:border-box}
 html,body{margin:0;width:${W}px;height:${H}px;overflow:hidden;position:relative;font-family:${fonts.sans};color:${colors.ink};-webkit-font-smoothing:antialiased}
-.serif{font-family:${fonts.serif}}
 ${extra}
 </style>${body}`
 
@@ -20,7 +19,7 @@ export function coverHtml({img, title, subtitle}) {
   return page(
     `<img src="${img}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">
      <div class="hero-fade"></div>
-     <h1 class="serif card-shadow" style="position:absolute;left:72px;right:72px;bottom:${subtitle ? 190 : 120}px;margin:0;font-weight:500;font-size:104px;line-height:1.02;letter-spacing:-.03em;color:#fff">${esc(title)}</h1>
+     <h1 class="card-shadow" style="position:absolute;left:72px;right:72px;bottom:${subtitle ? 190 : 120}px;margin:0;font-weight:600;font-size:112px;line-height:1.02;letter-spacing:-.03em;color:#fff">${esc(title)}</h1>
      ${subtitle ? `<p class="card-shadow" style="position:absolute;left:72px;right:72px;bottom:104px;margin:0;font-size:38px;line-height:1.3;color:#fff">${esc(subtitle)}</p>` : ''}`,
   )
 }
@@ -37,7 +36,7 @@ export function closingHtml({title, year, handle}) {
   return page(
     `${WASH_HTML}
      <div style="position:absolute;left:72px;right:72px;top:50%;transform:translateY(-62%)">
-       <h1 class="serif" style="margin:0;font-weight:400;font-size:132px;line-height:1;letter-spacing:-.03em;color:${colors.titleTone}">${esc(title)}</h1>
+       <h1 style="margin:0;font-weight:600;font-size:132px;line-height:1;letter-spacing:-.03em;color:${colors.titleTone}">${esc(title)}</h1>
        <div style="width:120px;height:8px;margin-top:48px;background:${colors.highlight}"></div>
        <p style="margin:36px 0 0;font-size:34px;font-weight:500;color:${colors.muted}">${esc([year, handle].filter(Boolean).join('  ·  '))}</p>
      </div>`,

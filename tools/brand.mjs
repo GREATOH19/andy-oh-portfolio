@@ -14,13 +14,12 @@ const fontFile = (pkg, file) =>
 const face = (family, weight, pkg, file) =>
   `@font-face{font-family:"${family}";font-weight:${weight};font-style:normal;src:url("${fontFile(pkg, file)}") format("woff2")}`
 
-// Typography roles. Display default is weight 300 on the site, but Playfair ships 400–700 → renders 400.
+// Typography roles: the site uses Geist for display, heading, body and meta (weights set in CMS).
 export const FONT_CSS = [
-  face('Playfair Display', 400, '@fontsource/playfair-display', 'playfair-display-latin-400-normal.woff2'),
-  face('Playfair Display', 500, '@fontsource/playfair-display', 'playfair-display-latin-500-normal.woff2'),
   face('Geist', 400, '@fontsource/geist-sans', 'geist-sans-latin-400-normal.woff2'),
   face('Geist', 500, '@fontsource/geist-sans', 'geist-sans-latin-500-normal.woff2'),
-  face('Geist Mono', 400, '@fontsource/geist-mono', 'geist-mono-latin-400-normal.woff2'),
+  face('Geist', 600, '@fontsource/geist-sans', 'geist-sans-latin-600-normal.woff2'),
+  face('Geist', 700, '@fontsource/geist-sans', 'geist-sans-latin-700-normal.woff2'),
 ].join('\n')
 
 export const colors = {
@@ -32,9 +31,7 @@ export const colors = {
 }
 
 export const fonts = {
-  serif: '"Playfair Display", Georgia, "Noto Serif KR", serif',
   sans: 'Geist, system-ui, "Noto Sans KR", "Apple SD Gothic Neo", sans-serif',
-  mono: '"Geist Mono", ui-monospace, monospace',
 }
 
 /** The website body background, as three stacked layers (body, body::before, body::after). */
