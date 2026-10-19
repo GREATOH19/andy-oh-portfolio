@@ -19,14 +19,17 @@ if (!dir) throw new Error('Usage: npm run publish:instagram -- inbox/<name> [--p
 const {meta, paragraphs} = readBrief(dir)
 const files = collectImages(dir)
 const max = Math.min(10, Number(meta.instagramMax || 10))
-const body = files.slice(0, Math.max(1, max - 2))
+// instagramPages: 1-based picks from the collected images (e.g. PDF pages); default = first max-2.
+const pick = (meta.instagramPages || []).map(Number).filter((n) => n >= 1 && n <= files.length)
+const body = (pick.length ? pick.map((n) => files[n - 1]) : files).slice(0, Math.max(1, max - 2))
 
 const out = path.join(dir, '_out')
 fs.rmSync(out, {recursive: true, force: true})
 fs.mkdirSync(out, {recursive: true})
 
 const url = (f) => pathToFileURL(path.resolve(f)).href
-const coverSrc = files[Math.max(0, Number(meta.cover || 1) - 1)]
+// instagramCover: a file inside the inbox folder (e.g. a photo pulled from the PDF) overrides the default cover.
+const coverSrc = meta.instagramCover ? path.join(dir, meta.instagramCover) : files[Math.max(0, Number(meta.cover || 1) - 1)]
 const htmls = [
   coverHtml({img: url(coverSrc), title: meta.title, subtitle: meta.subtitle}),
   ...body.map((f) => photoHtml({img: url(f), label: meta.title})),
