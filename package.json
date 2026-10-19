@@ -10,7 +10,9 @@
     "migrate:project-cms": "sanity exec ./scripts/migrate-project-cms.mjs --with-user-token",
     "migrate:lead-pt": "sanity exec ./scripts/migrate-lead-portable-text.mjs --with-user-token",
     "migrate:bento-collage": "sanity exec ./scripts/migrate-bento-collage.mjs --with-user-token",
-    "migrate:more-albums": "sanity exec ./scripts/migrate-more-albums.mjs --with-user-token"
+    "migrate:more-albums": "sanity exec ./scripts/migrate-more-albums.mjs --with-user-token",
+    "publish:project": "node scripts/publish-project.mjs",
+    "publish:instagram": "node scripts/publish-instagram.mjs"
   },
   "dependencies": {
     "@sanity/orderable-document-list": "^1.5.1",
@@ -20,5 +22,9 @@
     "sanity": "^5.28.0",
     "sanity-plugin-media": "^4.3.1",
     "styled-components": "^6.1.15"
+  },
+  "devDependencies": {
+    "@sanity/client": "^7.27.0",
+    "sharp": "^0.35.5"
   }
 }
