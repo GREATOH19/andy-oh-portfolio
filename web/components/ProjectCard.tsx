@@ -140,7 +140,7 @@ export function ProjectCard({project}: {project: ProjectListItem}) {
         onFocus={() => setHovered(true)}
         onBlur={() => setHovered(false)}
       >
-        <div className="work-thumb relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-background shadow-sm ring-1 ring-slate-200/60 transition-[transform,box-shadow] duration-200 ease-out group-hover:-translate-y-1 group-hover:scale-[1.006] group-hover:shadow-xl group-focus-visible:-translate-y-1 group-focus-visible:shadow-xl group-focus-visible:ring-2 group-focus-visible:ring-foreground/40 group-active:translate-y-0 group-active:scale-[0.997] group-active:shadow-lg">
+        <div className="work-thumb relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200/60 transition-[transform,box-shadow] duration-200 ease-out motion-reduce:transition-none group-hover:-translate-y-0.5 group-hover:shadow-lg group-focus-visible:-translate-y-0.5 group-focus-visible:shadow-lg group-focus-visible:ring-2 group-focus-visible:ring-foreground/40 group-active:translate-y-0 group-active:scale-[0.997] group-active:shadow-lg">
           {hasDistinctHero && thumbSrc ? (
             <Image
               src={thumbSrc}
