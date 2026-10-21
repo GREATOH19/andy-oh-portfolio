@@ -50,7 +50,7 @@ export function PhotoLightbox({
 
   const viewportRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
-  const touchTapOutsideRef = useRef(false);
+  const tapOutsideRef = useRef(false);
   const [scale, setScale] = useState(1);
   const [offset, setOffset] = useState({x: 0, y: 0});
   const [isDragging, setIsDragging] = useState(false);
@@ -199,13 +199,13 @@ export function PhotoLightbox({
       window.removeEventListener("pointercancel", endPointer);
       setIsDragging(false);
 
-      if (!moved && ev.pointerType === "touch") {
+      if (!moved) {
         const rect = imgRef.current?.getBoundingClientRect();
         if (
           rect &&
           (ev.clientX < rect.left || ev.clientX > rect.right || ev.clientY < rect.top || ev.clientY > rect.bottom)
         ) {
-          touchTapOutsideRef.current = true;
+          tapOutsideRef.current = true;
           return;
         }
       }
@@ -256,8 +256,8 @@ export function PhotoLightbox({
           : `h-[min(100dvh,100vh)] w-[min(100dvw,100vw)] p-4 pt-14 sm:p-8 sm:pt-16`
       } ${isZoomed ? (isDragging ? "cursor-grabbing" : "cursor-grab") : "cursor-zoom-in"}`}
       onClick={(e) => {
-        if (touchTapOutsideRef.current) {
-          touchTapOutsideRef.current = false;
+        if (tapOutsideRef.current) {
+          tapOutsideRef.current = false;
           e.stopPropagation();
           handleBackdropClick();
           return;
