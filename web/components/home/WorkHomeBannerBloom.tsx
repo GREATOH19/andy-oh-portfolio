@@ -2,22 +2,22 @@
 
 import {useEffect, useRef, type RefObject} from "react";
 
-const CELL_PX = 4;
+export const CELL_PX = 4;
 /** Simulate once every N frames (~20 steps/s) so waves creep out slowly. */
-const SIM_EVERY = 3;
+export const SIM_EVERY = 3;
 const PULSE_MS = 5000;
 /** Each pulse eases in over this many sim steps (sine envelope) instead of one hard hit. */
-const RAMP_STEPS = 50;
+export const RAMP_STEPS = 50;
 /** Per-step decay; tied to CELL_PX so waves fade over the same screen distance at any cell size. */
-const DAMPING = 0.988 ** (CELL_PX / 11);
-const FADE_MS = 600;
+export const DAMPING = 0.988 ** (CELL_PX / 11);
+export const FADE_MS = 600;
 /** Crossing the small gaps between letters should not switch the bloom off. */
 const LEAVE_GRACE_MS = 150;
 /** How close (CSS px) the pointer must be to an opaque logo pixel to count as touching the text. */
 const HIT_RADIUS_PX = 4;
 const HIT_ALPHA = 110;
 const MASK_WIDTH = 600;
-const BAYER_4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((n) => (n + 0.5) / 16);
+export const BAYER_4 = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5].map((n) => (n + 0.5) / 16);
 
 type Mask = {img: HTMLImageElement; w: number; h: number; alpha: Uint8ClampedArray};
 type Rect = {left: number; top: number; width: number; height: number};
