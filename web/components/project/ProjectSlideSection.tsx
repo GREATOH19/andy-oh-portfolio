@@ -50,11 +50,11 @@ function sharedRowAspect(items: SanityMediaField[]): MediaAspect | undefined {
   return {width: 1000, height: Math.round(avg * 1000)};
 }
 
-/** Media row under the headline: 2-up on phones, one column per item on desktop. */
-const BELOW_COLS: Record<number, string> = {
+/** Media rows: one column per item on every screen size, so a row stays a row. */
+const ROW_COLS: Record<number, string> = {
   2: "grid-cols-2",
-  3: "grid-cols-2 md:grid-cols-3",
-  4: "grid-cols-2 md:grid-cols-4",
+  3: "grid-cols-3",
+  4: "grid-cols-4",
 };
 
 /** "Columns" items: one column per item on desktop (up to 4). */
@@ -101,7 +101,7 @@ function SlideMedia({
       ) : (
         <div className="w-full">{node}</div>
       )}
-      {alt ? <figcaption className={`mt-3 ${LABEL}`}>{alt}</figcaption> : null}
+      {alt ? <figcaption className={`mt-3 ${LABEL} max-sm:tracking-[0.06em]`}>{alt}</figcaption> : null}
     </figure>
   );
 }
@@ -229,11 +229,14 @@ function SlideItems({items, style}: {items: ProjectSlideItem[]; style: ProjectSl
     );
   }
 
-  const columnAspect = sharedRowAspect(
-    items.map((item) => normalizeMediaItem(item.media)).filter((m): m is NonNullable<SanityMediaField> => m != null),
-  );
+  const columnMedia = items
+    .map((item) => normalizeMediaItem(item.media))
+    .filter((m): m is NonNullable<SanityMediaField> => m != null);
+  const columnAspect = sharedRowAspect(columnMedia);
+  const colCount = Math.min(items.length, 4);
+  const colsClass = columnMedia.length ? `gap-3 sm:gap-8 ${ROW_COLS[colCount] ?? ""}` : `gap-8 ${COLUMN_COLS[colCount] ?? ""}`;
   return (
-    <ul className={`m-0 grid list-none gap-8 border-t p-0 pt-6 ${COLUMN_COLS[Math.min(items.length, 4)] ?? ""} ${RULE}`}>
+    <ul className={`m-0 grid list-none border-t p-0 pt-6 ${colsClass} ${RULE}`}>
       {items.map((item, i) => {
         const media = normalizeMediaItem(item.media);
         return (
@@ -324,8 +327,8 @@ export function ProjectSlideSection({block, anchorId}: {block: ProjectSlideBlock
   const rowAspect = sharedRowAspect(media);
   const mediaRow = media.length ? (
     <div
-      className={`grid gap-4 ${
-        side === "below" ? (BELOW_COLS[mediaCols] ?? "") : mediaCols > 1 ? "grid-cols-2" : ""
+      className={`grid gap-2 sm:gap-4 ${
+        side === "below" ? (ROW_COLS[mediaCols] ?? "") : mediaCols > 1 ? "grid-cols-2" : ""
       }`}
     >
       {media.map((item, i) => (
@@ -335,7 +338,7 @@ export function ProjectSlideSection({block, anchorId}: {block: ProjectSlideBlock
           rowAspect={rowAspect}
           sizes={
             side === "below"
-              ? `(max-width: 768px) 50vw, ${Math.round(100 / mediaCols)}vw`
+              ? `${Math.round(100 / mediaCols)}vw`
               : mediaCols > 1
                 ? "(max-width: 768px) 50vw, 25vw"
                 : "(max-width: 768px) 100vw, 40vw"
