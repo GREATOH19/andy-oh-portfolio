@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {useEffect, useLayoutEffect, useRef, useState} from "react";
 
 import {BrandMark} from "@/components/BrandMark";
@@ -88,13 +89,22 @@ export function WorkHomeBanner({workHomeLogo, headerBrand, welcomeIntro}: WorkHo
                   },
                 })}
           >
-            <BrandMark
-              brand={brand}
-              variant="workHome"
-              linkable={false}
-              bannerGlow={glowEnabled}
-              bannerGlowActive={bannerHover}
-            />
+            <Link
+              href="/about"
+              className={`block h-full w-full ${bannerHover ? "cursor-pointer" : "cursor-default"}`}
+              onClick={(e) => {
+                // The logo image spans the whole banner: a mouse click only counts on the letters (where it glows).
+                if ((e.nativeEvent as PointerEvent).pointerType === "mouse" && !bannerHover) e.preventDefault();
+              }}
+            >
+              <BrandMark
+                brand={brand}
+                variant="workHome"
+                linkable={false}
+                bannerGlow={glowEnabled}
+                bannerGlowActive={bannerHover}
+              />
+            </Link>
           </div>
         ) : null}
         {hasLogo && bloomSrc ? (

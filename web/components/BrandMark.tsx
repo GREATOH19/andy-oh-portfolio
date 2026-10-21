@@ -22,6 +22,7 @@ export function BrandMark({
   brand,
   variant = "header",
   linkable = true,
+  href = "/",
   bannerGlow = false,
   bannerGlowActive = false,
 }: {
@@ -29,6 +30,7 @@ export function BrandMark({
   variant?: "header" | "footer" | "workHome" | "toc";
   /** When false, render logo without a link (e.g. Work homepage fold). */
   linkable?: boolean;
+  href?: string;
   /** Work fold desktop banner: alpha-outline glow on hover. */
   bannerGlow?: boolean;
   /** Set when the banner slot is hovered (from WorkHomeBanner). */
@@ -72,7 +74,7 @@ export function BrandMark({
 
   const wrap = (children: React.ReactNode) =>
     linkable ? (
-      <Link href="/" className={wrapperClassName}>
+      <Link href={href} className={wrapperClassName}>
         {children}
       </Link>
     ) : (
