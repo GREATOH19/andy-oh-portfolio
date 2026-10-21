@@ -2,7 +2,7 @@
 
 import {useEffect, useRef, type RefObject} from "react";
 
-const CELL_PX = 14;
+const CELL_PX = 11;
 const PULSE_MS = 3200;
 /** Each pulse eases in over this many sim steps (sine envelope) instead of one hard hit. */
 const RAMP_STEPS = 40;
