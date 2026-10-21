@@ -4,6 +4,7 @@ import {useMemo, useState} from "react";
 import {MediaLightbox} from "@/components/MediaLightbox";
 import {PortableBody} from "@/components/PortableBody";
 import {SanityAspectMedia} from "@/components/sections/SanityAspectMedia";
+import {type MediaAspect, mediaNaturalAspect} from "@/lib/gridRowAspect";
 import {portableTextHasVisibleContent} from "@/lib/portableText/filterEmptyBlocks";
 import {
   isSanityLightboxMedia,
@@ -38,6 +39,17 @@ const CARD_TONES = [
 
 const pad2 = (n: number) => String(n + 1).padStart(2, "0");
 
+/** One crop for every tile in a row (average of their shapes), so tops, bottoms and captions line up. */
+function sharedRowAspect(items: SanityMediaField[]): MediaAspect | undefined {
+  if (items.length < 2) return undefined;
+  const ratios = items.map((m) => {
+    const {width, height} = mediaNaturalAspect(m);
+    return height / width;
+  });
+  const avg = ratios.reduce((a, b) => a + b, 0) / ratios.length;
+  return {width: 1000, height: Math.round(avg * 1000)};
+}
+
 /** Media row under the headline: 2-up on phones, one column per item on desktop. */
 const BELOW_COLS: Record<number, string> = {
   2: "grid-cols-2",
@@ -57,14 +69,23 @@ function SlideMedia({
   media,
   sizes,
   onOpen,
+  rowAspect,
 }: {
   media: NonNullable<SanityMediaField>;
   sizes: string;
   onOpen?: () => void;
+  rowAspect?: MediaAspect;
 }) {
   const alt = media.alt ?? "";
   const node = (
-    <SanityAspectMedia media={media} alt={alt} maxWidth={1600} quality={92} sizes={sizes} />
+    <SanityAspectMedia
+      media={media}
+      alt={alt}
+      maxWidth={1600}
+      quality={92}
+      sizes={sizes}
+      gridRowAspect={rowAspect}
+    />
   );
   return (
     <figure className="m-0 min-w-0">
@@ -208,6 +229,9 @@ function SlideItems({items, style}: {items: ProjectSlideItem[]; style: ProjectSl
     );
   }
 
+  const columnAspect = sharedRowAspect(
+    items.map((item) => normalizeMediaItem(item.media)).filter((m): m is NonNullable<SanityMediaField> => m != null),
+  );
   return (
     <ul className={`m-0 grid list-none gap-8 border-t p-0 pt-6 ${COLUMN_COLS[Math.min(items.length, 4)] ?? ""} ${RULE}`}>
       {items.map((item, i) => {
@@ -222,6 +246,7 @@ function SlideItems({items, style}: {items: ProjectSlideItem[]; style: ProjectSl
                 maxWidth={640}
                 quality={88}
                 sizes="(max-width: 640px) 100vw, 25vw"
+                gridRowAspect={columnAspect}
               />
             </div>
           ) : null}
@@ -296,6 +321,7 @@ export function ProjectSlideSection({block, anchorId}: {block: ProjectSlideBlock
   ) : null;
 
   const mediaCols = Math.min(media.length, 4);
+  const rowAspect = sharedRowAspect(media);
   const mediaRow = media.length ? (
     <div
       className={`grid gap-4 ${
@@ -306,6 +332,7 @@ export function ProjectSlideSection({block, anchorId}: {block: ProjectSlideBlock
         <SlideMedia
           key={sanityMediaKey(item, i)}
           media={item}
+          rowAspect={rowAspect}
           sizes={
             side === "below"
               ? `(max-width: 768px) 50vw, ${Math.round(100 / mediaCols)}vw`
@@ -330,7 +357,7 @@ export function ProjectSlideSection({block, anchorId}: {block: ProjectSlideBlock
         </>
       ) : (
         <div
-          className={`grid gap-10 md:items-center md:gap-14 ${
+          className={`grid gap-10 md:items-start md:gap-14 ${
             mediaCols > 1
               ? "md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]"
               : "md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]"

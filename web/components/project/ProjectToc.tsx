@@ -46,10 +46,13 @@ function tocFromStory(blocks: ProjectStoryBlock[]): TocItem[] {
   let chapterIndex = 0;
   let h2Index = 0;
   let h3Index = 0;
+  /** Chapters group the slides in the nav; without any, each slide gets its own entry. */
+  const hasChapters = blocks.some((b) => b._type === "projectChapter");
 
   for (let i = 0; i < blocks.length; i++) {
     const b = blocks[i];
     if (b._type === "projectSlide") {
+      if (hasChapters) continue;
       const label =
         b.tocTitle?.trim() || [b.title, b.titleAccent].filter(Boolean).join(" ").trim();
       if (!label) continue;
