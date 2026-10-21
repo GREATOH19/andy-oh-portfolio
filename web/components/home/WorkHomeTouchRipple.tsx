@@ -11,6 +11,8 @@ const DAMPING = 0.988 ** (CELL_PX / 11);
 /** Radius (cells) of the fingertip source — the banner bloom uses the logo outline instead. */
 const SOURCE_RADIUS = 3;
 const SOURCE_AMP = 5;
+/** Dots only show within this distance (CSS px) of where the finger has been, fading out toward the edge. */
+const REACH_PX = 48;
 /** A fingertip makes far less wave energy than the logo outline, so the wash also warms toward this while touched. */
 const TOUCH_WARM = 0.8;
 /** Per-frame easing of the wash back to dark once the touch is over (warming uses the bloom's 0.008). */
@@ -44,6 +46,7 @@ export function WorkHomeTouchRipple() {
     let rows = 0;
     let a = new Float32Array(0);
     let b = new Float32Array(0);
+    let reach = new Float32Array(0);
     let image: ImageData | null = null;
     let finger = {x: 0, y: 0};
     let centre = {x: 0, y: 0};
@@ -68,6 +71,7 @@ export function WorkHomeTouchRipple() {
       cvs.style.height = `${rows * CELL_PX}px`;
       a = new Float32Array(cols * rows);
       b = new Float32Array(cols * rows);
+      reach = new Float32Array(cols * rows);
       image = ctx.createImageData(cols, rows);
     };
 
@@ -82,6 +86,13 @@ export function WorkHomeTouchRipple() {
           if (x > 0 && y > 0 && x < cols - 1 && y < rows - 1) a[y * cols + x] += amp;
         }
       }
+      const r = Math.ceil(REACH_PX / CELL_PX);
+      for (let y = Math.max(0, cy - r); y <= Math.min(rows - 1, cy + r); y++) {
+        for (let x = Math.max(0, cx - r); x <= Math.min(cols - 1, cx + r); x++) {
+          const t = 1 - Math.hypot(x - cx, y - cy) / r;
+          if (t > 0) reach[y * cols + x] = Math.max(reach[y * cols + x], t * t * (3 - 2 * t));
+        }
+      }
     };
 
     const reset = () => {
@@ -89,6 +100,7 @@ export function WorkHomeTouchRipple() {
       raf = null;
       a.fill(0);
       b.fill(0);
+      reach.fill(0);
       ctx.clearRect(0, 0, cvs.width, cvs.height);
       glow = {warm: 0, phase: 0, energy: 0};
       washEl.style.setProperty("--warm", "0");
@@ -128,7 +140,7 @@ export function WorkHomeTouchRipple() {
         for (let y = 0; y < rows; y++) {
           for (let x = 0; x < cols; x++) {
             const i = y * cols + x;
-            const intensity = Math.min(1, Math.abs(a[i]) / 70);
+            const intensity = Math.min(1, Math.abs(a[i]) / 70) * reach[i];
             const on = intensity > 0.08 && intensity > BAYER_4[(y & 3) * 4 + (x & 3)];
             px[i * 4] = 255;
             px[i * 4 + 1] = 255;
@@ -194,7 +206,7 @@ export function WorkHomeTouchRipple() {
       <div
         ref={wash}
         aria-hidden
-        className="work-home-bloom-wash pointer-events-none fixed inset-0 z-[-1] transition-opacity duration-500 ease-out"
+        className="work-home-bloom-wash work-home-bloom-wash--touch pointer-events-none fixed inset-0 z-[-1] transition-opacity duration-500 ease-out"
       />
       <canvas
         ref={canvas}
