@@ -33,6 +33,7 @@ import {ProjectAudioSection} from "@/components/project/ProjectAudioSection";
 import {ProjectYoutubeEmbed} from "@/components/project/ProjectYoutubeEmbed";
 import {ProjectPhotoCollageSection} from "@/components/project/ProjectPhotoCollageSection";
 import {ProjectProcessSection} from "@/components/project/ProjectProcessSection";
+import {ProjectSlideSection} from "@/components/project/ProjectSlideSection";
 import {StoryBlockLayout} from "@/components/project/StoryBlockLayout";
 import {
   galleryColumnWidthClass,
@@ -215,6 +216,12 @@ function renderStoryBlock(ctx: RenderContext, idx: number): ReactNode {
         </div>
       );
     }
+    case "projectSlide":
+      return (
+        <div key={key} className={`w-full ${spacingClass}`.trim()}>
+          <ProjectSlideSection block={block} anchorId={chapterAnchorId(block, idx)} />
+        </div>
+      );
     case "projectMedia":
       return (
         <div key={key} className={storyBlockWrapperClass(block, spacingClass, mobileOrderClass)}>

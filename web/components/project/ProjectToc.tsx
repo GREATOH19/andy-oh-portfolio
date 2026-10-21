@@ -49,6 +49,16 @@ function tocFromStory(blocks: ProjectStoryBlock[]): TocItem[] {
 
   for (let i = 0; i < blocks.length; i++) {
     const b = blocks[i];
+    if (b._type === "projectSlide") {
+      const label =
+        b.tocTitle?.trim() || [b.title, b.titleAccent].filter(Boolean).join(" ").trim();
+      if (!label) continue;
+      chapterIndex += 1;
+      h2Index = 0;
+      h3Index = 0;
+      items.push({id: chapterAnchorId(b, i), label, level: 1, number: pad2(chapterIndex)});
+      continue;
+    }
     if (b._type !== "projectChapter") continue;
 
     chapterIndex += 1;

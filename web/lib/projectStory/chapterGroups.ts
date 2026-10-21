@@ -31,6 +31,11 @@ export type StoryRenderUnit =
   | {kind: "solo"; index: number}
   | {kind: "chapterUnit"; unit: ChapterUnit};
 
+/** Blocks that open a chapter unit (TOC entry + chapter gap). */
+export function isChapterStartBlock(block: ProjectStoryBlock): boolean {
+  return block._type === "projectChapter" || block._type === "projectSlide";
+}
+
 function isStoryMediaBlock(block: ProjectStoryBlock): boolean {
   if (
     block._type === "projectMedia" ||
@@ -75,12 +80,12 @@ export function buildStorySegments(blocks: ProjectStoryBlock[]): StorySegment[] 
   let i = 0;
 
   while (i < blocks.length) {
-    if (blocks[i]._type === "projectChapter") {
+    if (isChapterStartBlock(blocks[i])) {
       const mobileBlockOrder = chapterMobileBlockOrder(blocks, i);
       segments.push({kind: "chapterHead", index: i, mobileBlockOrder});
 
       let end = i + 1;
-      while (end < blocks.length && blocks[end]._type !== "projectChapter") {
+      while (end < blocks.length && !isChapterStartBlock(blocks[end])) {
         end += 1;
       }
       if (end > i + 1) {

@@ -41,6 +41,7 @@ import {projectYoutube} from './project/projectYoutube'
 import {projectProcess} from './project/projectProcess'
 import {projectPhotoCollage} from './project/projectPhotoCollage'
 import {projectPhotoCollagePair} from './project/projectPhotoCollagePair'
+import {projectSlide} from './project/projectSlide'
 
 export const schemaTypes = [
   about,
@@ -72,6 +73,7 @@ export const schemaTypes = [
   projectProcess,
   projectPhotoCollage,
   projectPhotoCollagePair,
+  projectSlide,
   contactCtaSection,
   gallerySection,
   heroSection,
