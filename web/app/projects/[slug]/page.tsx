@@ -69,7 +69,6 @@ export default async function ProjectPage({params}: Props) {
         <ProjectHeader
           project={project}
           titleInHero={Boolean(heroMedia)}
-          titleInImage={heroTitleInImage}
           layout={story.length > 0 ? "full" : "default"}
           belowChapterToc={chapterCount > 1}
         />
