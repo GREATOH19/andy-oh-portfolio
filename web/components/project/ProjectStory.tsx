@@ -203,7 +203,7 @@ function renderStoryBlock(ctx: RenderContext, idx: number): ReactNode {
           key={key}
           className={
             chapterDivider
-              ? "w-full mt-8 border-t border-zinc-300/60 pb-8 md:mt-14 md:pb-14"
+              ? "w-full mt-4 border-t border-zinc-300/60 pb-4 md:mt-7 md:pb-7"
               : `w-full ${tocMarkerOnly ? "" : spacingClass}`.trim()
           }
         >
