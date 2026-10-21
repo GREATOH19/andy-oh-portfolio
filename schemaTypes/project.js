@@ -42,6 +42,14 @@ export const project = defineType({
         'One line under the title on cards and the hero — e.g. "autonomous data collection for precision farming".',
     }),
     defineField({
+      name: 'cardMeta',
+      title: 'Card line',
+      type: 'string',
+      group: 'listing',
+      description:
+        'Small line under the subtitle on cards — e.g. "Personal · Rhino 8, 3D printing, ESP32". Hidden when empty.',
+    }),
+    defineField({
       name: 'year',
       title: 'Year',
       type: 'string',

@@ -24,7 +24,6 @@ export function BrandMark({
   linkable = true,
   bannerGlow = false,
   bannerGlowActive = false,
-  bannerGlowWelcomeSharp = false,
 }: {
   brand?: SiteBrand | null;
   variant?: "header" | "footer" | "workHome" | "toc";
@@ -34,8 +33,6 @@ export function BrandMark({
   bannerGlow?: boolean;
   /** Set when the banner slot is hovered (from WorkHomeBanner). */
   bannerGlowActive?: boolean;
-  /** Welcome frost stack — sharp layer color grade + glow. */
-  bannerGlowWelcomeSharp?: boolean;
 }) {
   const text = brand?.text?.trim() || defaultText;
   const alt = brand?.alt?.trim() || text;
@@ -114,7 +111,6 @@ export function BrandMark({
             aspectRatio={aspectRatio}
             objectPosition={objectPosition}
             active={bannerGlowActive}
-            welcomeSharp={bannerGlowWelcomeSharp}
           />,
         );
       }

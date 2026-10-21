@@ -102,6 +102,8 @@ export type ProjectListItem = {
   title: string;
   slug: string | null;
   subtitle?: string | null;
+  /** Small line under the subtitle on cards (e.g. "Personal · Rhino 8, 3D printing, ESP32") */
+  cardMeta?: string | null;
   year?: string | null;
   coverImage: SanityImageField;
   /** Detail-page hero; used as Work grid thumbnail when coverImage is empty */

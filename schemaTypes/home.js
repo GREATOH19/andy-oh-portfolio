@@ -23,9 +23,9 @@ export const home = defineType({
     }),
     defineField({
       name: 'welcomeIntro',
-      title: 'Welcome intro (first visit)',
+      title: 'Intro under the banner',
       description:
-        'Shown above the Selected Work grid only on a visitor’s first arrival in a browser session — alongside the hero intro animation. Leave Heading and Body both empty to hide.',
+        'Small name + one line shown under the Work homepage banner (desktop) and above the grid (mobile) — only on a visitor’s first arrival in a browser session. Leave Heading and Body both empty to hide.',
       type: 'object',
       options: {collapsible: true, collapsed: false},
       fields: [
@@ -33,15 +33,14 @@ export const home = defineType({
           name: 'heading',
           title: 'Heading',
           type: 'string',
-          description: 'e.g., “Hello! This is Andy.”',
+          description: 'e.g., “Andy Oh”',
         }),
         defineField({
           name: 'body',
           title: 'Body',
           type: 'text',
-          rows: 4,
-          description:
-            'Brief self-introduction. Plain text; line breaks are preserved.',
+          rows: 2,
+          description: 'One line — e.g., “Industrial designer from South Korea, studying at Rhode Island School of Design”.',
         }),
       ],
     }),

@@ -116,6 +116,7 @@ const projectListItemFields = groq`
   title,
   "slug": slug.current,
   subtitle,
+  cardMeta,
   year,
   coverImage,
   cardOverlayScrim,
