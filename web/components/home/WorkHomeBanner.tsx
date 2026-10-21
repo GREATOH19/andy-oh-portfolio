@@ -1,10 +1,12 @@
 "use client";
 
-import {useEffect, useLayoutEffect, useState} from "react";
+import {useEffect, useLayoutEffect, useRef, useState} from "react";
 
 import {BrandMark} from "@/components/BrandMark";
 import {useTypoClass} from "@/components/TypographyProvider";
+import {WorkHomeBannerBloom} from "@/components/home/WorkHomeBannerBloom";
 import {hasSiteBrandContent, resolveWorkHomeLogo} from "@/lib/siteBrand";
+import {workHomeBannerImageUrl} from "@/lib/sanity/workHomeBannerImage";
 import type {HomeWelcomeIntroContent, SiteBrand} from "@/lib/types/project";
 
 const INTRO_SEEN_SESSION_KEY = "portfolio-home-welcome-seen";
@@ -42,7 +44,9 @@ export function WorkHomeBanner({workHomeLogo, headerBrand, welcomeIntro}: WorkHo
   const brand = resolveWorkHomeLogo(workHomeLogo, headerBrand);
   const hasLogo = hasSiteBrandContent(brand);
   const glowEnabled = Boolean(brand?.shadowGlowEnabled && brand?.shadowImage?.asset);
+  const bloomSrc = brand?.mode === "image" && brand.image?.asset ? workHomeBannerImageUrl(brand.image) : null;
 
+  const slotRef = useRef<HTMLDivElement>(null);
   const [bannerHover, setBannerHover] = useState(false);
   const [firstVisit, setFirstVisit] = useState(false);
   const hasIntro = firstVisit && (heading.length > 0 || body.length > 0);
@@ -71,13 +75,18 @@ export function WorkHomeBanner({workHomeLogo, headerBrand, welcomeIntro}: WorkHo
       <div className="work-home-logo hidden md:flex md:flex-col md:items-center md:pb-4" aria-label="Studio logo">
         {hasLogo ? (
           <div
+            ref={slotRef}
             className={`work-home-logo__slot h-auto min-h-0 flex-1${bannerHover ? " work-home-logo__slot--glow" : ""}`}
-            onPointerEnter={() => setBannerHover(true)}
-            onPointerLeave={(e) => {
-              const next = e.relatedTarget;
-              if (next instanceof Node && e.currentTarget.contains(next)) return;
-              setBannerHover(false);
-            }}
+            {...(bloomSrc
+              ? {}
+              : {
+                  onPointerEnter: () => setBannerHover(true),
+                  onPointerLeave: (e: React.PointerEvent<HTMLDivElement>) => {
+                    const next = e.relatedTarget;
+                    if (next instanceof Node && e.currentTarget.contains(next)) return;
+                    setBannerHover(false);
+                  },
+                })}
           >
             <BrandMark
               brand={brand}
@@ -87,6 +96,9 @@ export function WorkHomeBanner({workHomeLogo, headerBrand, welcomeIntro}: WorkHo
               bannerGlowActive={bannerHover}
             />
           </div>
+        ) : null}
+        {hasLogo && bloomSrc ? (
+          <WorkHomeBannerBloom src={bloomSrc} targetRef={slotRef} onActiveChange={setBannerHover} />
         ) : null}
         {hasIntro ? <WorkHomeIntro heading={heading} body={body} /> : null}
       </div>
