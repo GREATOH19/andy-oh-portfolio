@@ -2,11 +2,21 @@
 
 import {useEffect, useRef} from "react";
 
-import {BAYER_4, CELL_PX, DAMPING, FADE_MS, RAMP_STEPS, SIM_EVERY} from "@/components/home/WorkHomeBannerBloom";
+import {BAYER_4, RAMP_STEPS, SIM_EVERY} from "@/components/home/WorkHomeBannerBloom";
 
+/** Half the banner bloom's cell: phone screens are narrow, so 4px dots read as coarse. */
+const CELL_PX = 2;
+/** Same per-distance decay as the banner bloom at this cell size. */
+const DAMPING = 0.988 ** (CELL_PX / 11);
 /** Radius (cells) of the fingertip source — the banner bloom uses the logo outline instead. */
 const SOURCE_RADIUS = 3;
 const SOURCE_AMP = 5;
+/** A fingertip makes far less wave energy than the logo outline, so the wash also warms toward this while touched. */
+const TOUCH_WARM = 0.8;
+/** Per-frame easing of the wash back to dark once the touch is over (warming uses the bloom's 0.008). */
+const COOL = 0.02;
+/** Per-frame easing of the wash centre toward the finger. */
+const FOLLOW = 0.04;
 /** After the finger lifts (and its pulse has finished), the waves linger this long before fading out. */
 const LINGER_MS = 1000;
 /** Where the banner bloom can't run: no room for the banner logo, or no hover. */
@@ -16,7 +26,7 @@ const TOUCH_MEDIA = "(max-width: 767px), (hover: none)";
  * Work home on phones / touch screens: the desktop banner bloom (WorkHomeBannerBloom), driven by the
  * finger instead of the logo. A touch swells a pulse of white dithered pixel waves from the finger
  * (following it while it scrolls) and warms the same background wash; once the finger has lifted and
- * the pulse is done, everything lingers briefly and fades out the way the bloom does on pointer leave.
+ * the pulse is done, the dots linger briefly and fade out while the wash cools back down slowly.
  */
 export function WorkHomeTouchRipple() {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -36,13 +46,14 @@ export function WorkHomeTouchRipple() {
     let b = new Float32Array(0);
     let image: ImageData | null = null;
     let finger = {x: 0, y: 0};
+    let centre = {x: 0, y: 0};
     let touching = false;
     let liftedAt = 0;
     let source = {k: 0, n: 0};
     let glow = {warm: 0, phase: 0, energy: 0};
     let frame = 0;
     let raf: number | null = null;
-    let fadeTimer: number | null = null;
+    let fading = false;
 
     // Sized to the tallest viewport so the mobile address bar showing/hiding doesn't reset the waves.
     const setupGrid = () => {
@@ -82,14 +93,13 @@ export function WorkHomeTouchRipple() {
       glow = {warm: 0, phase: 0, energy: 0};
       washEl.style.setProperty("--warm", "0");
       cvs.style.opacity = "";
-      washEl.style.opacity = "";
-      fadeTimer = null;
+      fading = false;
     };
 
+    // The dots fade out with the canvas opacity transition; the wash cools down in step().
     const fadeOut = () => {
+      fading = true;
       cvs.style.opacity = "0";
-      washEl.style.opacity = "0";
-      fadeTimer = window.setTimeout(reset, FADE_MS);
     };
 
     const step = () => {
@@ -129,34 +139,34 @@ export function WorkHomeTouchRipple() {
         ctx.putImageData(image, 0, 0);
       }
 
-      glow.warm += (Math.min(1, glow.energy / 2) - glow.warm) * 0.008;
-      glow.phase += glow.energy * 0.0015;
+      const held = touching || source.k < source.n ? TOUCH_WARM : 0;
+      if (fading) glow.warm -= glow.warm * COOL;
+      else glow.warm += (Math.max(held, Math.min(1, glow.energy / 2)) - glow.warm) * 0.008;
+      glow.phase += Math.max(glow.energy, held * 0.5) * 0.0015;
+      centre = {x: centre.x + (finger.x - centre.x) * FOLLOW, y: centre.y + (finger.y - centre.y) * FOLLOW};
       washEl.style.setProperty("--warm", glow.warm.toFixed(3));
       washEl.style.setProperty("--hue", (Math.sin(glow.phase) * 26).toFixed(2));
+      washEl.style.setProperty("--cx", `${centre.x.toFixed(1)}px`);
+      washEl.style.setProperty("--cy", `${centre.y.toFixed(1)}px`);
 
-      if (!fadeTimer && !touching && source.k >= source.n && performance.now() - liftedAt > LINGER_MS) fadeOut();
+      if (fading && glow.warm < 0.01) return reset();
+      if (!fading && !touching && source.k >= source.n && performance.now() - liftedAt > LINGER_MS) fadeOut();
       raf = requestAnimationFrame(step);
     };
 
     const onTouch = (e: TouchEvent) => {
       if (!touchMedia.matches || reducedMotion.matches || !e.touches.length) return;
-      if (fadeTimer) {
-        clearTimeout(fadeTimer);
-        fadeTimer = null;
+      if (fading) {
+        fading = false;
         cvs.style.opacity = "";
-        washEl.style.opacity = "";
       }
       setupGrid();
       touching = true;
       finger = {x: e.touches[0].clientX, y: e.touches[0].clientY};
-      if (e.type === "touchstart" || source.k >= source.n) {
-        source = {k: 0, n: RAMP_STEPS};
-        // Re-centre the wash only while it's dark, so it never jumps while lit.
-        if (glow.warm < 0.05) {
-          washEl.style.setProperty("--cx", `${finger.x}px`);
-          washEl.style.setProperty("--cy", `${finger.y}px`);
-        }
-      }
+      // A running pulse is never restarted, so quick taps don't stack waves on top of each other.
+      if (source.k >= source.n) source = {k: 0, n: RAMP_STEPS};
+      // Snap the wash centre only while it's dark; while lit it eases after the finger.
+      if (glow.warm < 0.05) centre = {...finger};
       if (!raf) raf = requestAnimationFrame(step);
     };
 
@@ -176,7 +186,6 @@ export function WorkHomeTouchRipple() {
       removeEventListener("touchend", onLift);
       removeEventListener("touchcancel", onLift);
       if (raf) cancelAnimationFrame(raf);
-      if (fadeTimer) clearTimeout(fadeTimer);
     };
   }, []);
 
