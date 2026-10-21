@@ -6,6 +6,7 @@ import {useEffect, useLayoutEffect, useRef, useState} from "react";
 import {BrandMark} from "@/components/BrandMark";
 import {useTypoClass} from "@/components/TypographyProvider";
 import {WorkHomeBannerBloom} from "@/components/home/WorkHomeBannerBloom";
+import {WorkHomeTouchRipple} from "@/components/home/WorkHomeTouchRipple";
 import {hasSiteBrandContent, resolveWorkHomeLogo} from "@/lib/siteBrand";
 import {workHomeBannerImageUrl} from "@/lib/sanity/workHomeBannerImage";
 import type {HomeWelcomeIntroContent, SiteBrand} from "@/lib/types/project";
@@ -118,6 +119,8 @@ export function WorkHomeBanner({workHomeLogo, headerBrand, welcomeIntro}: WorkHo
           <WorkHomeIntro heading={heading} body={body} />
         </div>
       ) : null}
+
+      <WorkHomeTouchRipple />
     </>
   );
 }
