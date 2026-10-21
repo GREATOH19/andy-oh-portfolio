@@ -2,10 +2,14 @@
 
 import {useEffect, useRef, type RefObject} from "react";
 
-const CELL_PX = 11;
-const PULSE_MS = 3200;
+const CELL_PX = 4;
+/** Simulate once every N frames (~20 steps/s) so waves creep out slowly. */
+const SIM_EVERY = 3;
+const PULSE_MS = 5000;
 /** Each pulse eases in over this many sim steps (sine envelope) instead of one hard hit. */
-const RAMP_STEPS = 40;
+const RAMP_STEPS = 50;
+/** Per-step decay; tied to CELL_PX so waves fade over the same screen distance at any cell size. */
+const DAMPING = 0.988 ** (CELL_PX / 11);
 const FADE_MS = 600;
 /** Crossing the small gaps between letters should not switch the bloom off. */
 const LEAVE_GRACE_MS = 150;
@@ -161,9 +165,8 @@ export function WorkHomeBannerBloom({
       const ctx = cvs.getContext("2d");
       if (!ctx || !image) return;
 
-      // Simulate on every other frame (~30 steps/s) so waves travel slowly.
       frame++;
-      if (frame % 2 === 0) {
+      if (frame % SIM_EVERY === 0) {
         if (source.k < source.n) {
           const amp = 9 * Math.sin((Math.PI * source.k) / source.n);
           for (const i of edge) a[i] += amp;
@@ -173,7 +176,7 @@ export function WorkHomeBannerBloom({
         for (let y = 1; y < rows - 1; y++) {
           for (let x = 1; x < cols - 1; x++) {
             const i = y * cols + x;
-            const v = ((a[i - 1] + a[i + 1] + a[i - cols] + a[i + cols]) / 2 - b[i]) * 0.988;
+            const v = ((a[i - 1] + a[i + 1] + a[i - cols] + a[i + cols]) / 2 - b[i]) * DAMPING;
             b[i] = v;
             energy += Math.abs(v);
           }
@@ -197,8 +200,8 @@ export function WorkHomeBannerBloom({
         ctx.putImageData(image, 0, 0);
       }
 
-      glow.warm += (Math.min(1, glow.energy / 2) - glow.warm) * 0.02;
-      glow.phase += glow.energy * 0.004;
+      glow.warm += (Math.min(1, glow.energy / 2) - glow.warm) * 0.008;
+      glow.phase += glow.energy * 0.0015;
       washEl.style.setProperty("--warm", glow.warm.toFixed(3));
       washEl.style.setProperty("--hue", (Math.sin(glow.phase) * 26).toFixed(2));
 

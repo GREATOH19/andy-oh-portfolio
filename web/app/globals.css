@@ -825,7 +825,7 @@ html[data-chrome-hidden] .project-toc-bar--sticky {
 }
 
 @media (min-width: 768px) {
-  /* Touching the letters (WorkHomeBannerBloom): white → cyan → oh! yellow glow, eased in */
+  /* Touching the letters (WorkHomeBannerBloom): white → cyan → blue glow, eased in */
   .work-home-fold .work-home-logo__image--base {
     transition: filter 1s ease-out;
   }
@@ -833,7 +833,7 @@ html[data-chrome-hidden] .project-toc-bar--sticky {
   .work-home-fold .work-home-logo__art--glow .work-home-logo__image--base {
     opacity: 1;
     filter: drop-shadow(0 0 6px rgb(255 255 255 / 0.9)) drop-shadow(0 0 18px rgb(0 225 238 / 0.8))
-      drop-shadow(0 0 40px rgb(255 199 44 / 0.45));
+      drop-shadow(0 0 40px rgb(56 160 255 / 0.45));
   }
 
   /* Full-screen tint behind the page while the bloom waves run (vars set from WorkHomeBannerBloom) */
@@ -843,7 +843,7 @@ html[data-chrome-hidden] .project-toc-bar--sticky {
     --warm: 0;
     --hue: 0;
     background:
-      radial-gradient(55vw 45vh at var(--cx) var(--cy), rgb(255 199 44 / calc(var(--warm) * 0.3)), transparent 70%),
+      radial-gradient(55vw 45vh at var(--cx) var(--cy), rgb(255 255 255 / calc(var(--warm) * 0.3)), transparent 70%),
       radial-gradient(
         90vw 80vh at var(--cx) var(--cy),
         hsl(calc(192 + var(--hue)) 95% 62% / calc(var(--warm) * 0.55)),
