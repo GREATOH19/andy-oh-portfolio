@@ -11,16 +11,6 @@ const DISSOLVE_MS = 900;
 
 type HomeIntroPhase = "checking" | "intro" | "dissolve" | "done";
 
-function getInitialIntroPhase(): HomeIntroPhase {
-  if (typeof window === "undefined") return "done";
-  try {
-    if (sessionStorage.getItem(INTRO_SEEN_SESSION_KEY) === "1") return "done";
-  } catch {
-    /* private mode / quota */
-  }
-  return "checking";
-}
-
 type HomePageShellProps = {
   children: React.ReactNode;
   /** Optional Sanity-managed Lottie URL. Falls back to /public/lottie/oh-logo.json. */
@@ -30,7 +20,9 @@ type HomePageShellProps = {
 };
 
 export function HomePageShell({children, heroLottieUrl, skipIntro = false}: HomePageShellProps) {
-  const [phase, setPhase] = useState<HomeIntroPhase>(getInitialIntroPhase);
+  // Always start on "done" so the server HTML and the first client render match.
+  // Reading sessionStorage here hydrates a different tree and leaves the intro backdrop up.
+  const [phase, setPhase] = useState<HomeIntroPhase>("done");
   const reduceMotion = useReducedMotion();
 
   const finalizeIntro = useCallback(() => {
@@ -42,20 +34,18 @@ export function HomePageShell({children, heroLottieUrl, skipIntro = false}: Home
     setPhase("done");
   }, []);
 
-  /** Before paint: skip intro when already seen (e.g. back from a project). */
+  /** Before paint: play the intro only when this tab has not seen it yet. */
   useLayoutEffect(() => {
-    if (skipIntro) {
-      setPhase("done");
-      return;
-    }
-    try {
-      if (sessionStorage.getItem(INTRO_SEEN_SESSION_KEY) === "1") {
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- sessionStorage is external; must run before paint.
-        setPhase("done");
+    let seen = skipIntro;
+    if (!seen) {
+      try {
+        seen = sessionStorage.getItem(INTRO_SEEN_SESSION_KEY) === "1";
+      } catch {
+        seen = true; // private mode / quota: skip the intro rather than risk leaving the backdrop up
       }
-    } catch {
-      /* treat as first visit */
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sessionStorage is external; must run before paint.
+    setPhase(seen ? "done" : "intro");
   }, [skipIntro]);
 
   useEffect(() => {
@@ -115,6 +105,13 @@ export function HomePageShell({children, heroLottieUrl, skipIntro = false}: Home
   useEffect(() => {
     if (phase !== "dissolve") return;
     const id = window.setTimeout(finalizeIntro, DISSOLVE_MS);
+    return () => window.clearTimeout(id);
+  }, [phase, finalizeIntro]);
+
+  /** Logo playback is ~4s. Never leave the backdrop up if the animation does not finish. */
+  useEffect(() => {
+    if (phase !== "intro" && phase !== "checking") return;
+    const id = window.setTimeout(finalizeIntro, 8_000);
     return () => window.clearTimeout(id);
   }, [phase, finalizeIntro]);
 

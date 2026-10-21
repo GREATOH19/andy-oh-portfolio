@@ -16,11 +16,14 @@ import type {ProjectDetail} from "@/lib/types/project";
 export function ProjectHeader({
   project,
   titleInHero = false,
+  titleInImage = false,
   layout = "default",
   belowChapterToc = false,
 }: {
   project: ProjectDetail;
   titleInHero?: boolean;
+  /** Hero artwork already shows the title: no title block here on any breakpoint */
+  titleInImage?: boolean;
   /** When true, title/subtitle on full-bleed hero; omitted here except on compact mobile */
   layout?: "default" | "full";
   /** Chapter TOC sits directly above — reduce top padding */
@@ -79,7 +82,11 @@ export function ProjectHeader({
     </div>
   ) : null;
 
-  const titleBlockClass = titleInHero ? `hidden ${PROJECT_HERO_COMPACT}` : "block";
+  const titleBlockClass = titleInImage
+    ? "hidden"
+    : titleInHero
+      ? `hidden ${PROJECT_HERO_COMPACT}`
+      : "block";
 
   const overviewWidthClass =
     layout === "full" ? "project-overview-narrow" : "mx-auto max-w-5xl";

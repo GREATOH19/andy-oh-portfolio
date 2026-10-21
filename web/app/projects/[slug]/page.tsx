@@ -46,6 +46,7 @@ export default async function ProjectPage({params}: Props) {
   const heroMedia =
     normalizedHero ?? (isSanityImage(normalizedCover) ? normalizedCover : null);
   const heroAlt = heroMedia?.alt ?? project.title;
+  const heroTitleInImage = Boolean(heroMedia && project.heroTitleInImage);
   const story = project.story?.filter(Boolean) ?? [];
   const chapterCount = story.filter((b) => b._type === "projectChapter").length;
 
@@ -56,6 +57,7 @@ export default async function ProjectPage({params}: Props) {
         alt={heroAlt}
         title={project.title}
         subtitle={project.subtitle}
+        titleInImage={heroTitleInImage}
         intrinsicWidth={project.projectHeroDimensions?.width}
         intrinsicHeight={project.projectHeroDimensions?.height}
       />
@@ -66,6 +68,7 @@ export default async function ProjectPage({params}: Props) {
         <ProjectHeader
           project={project}
           titleInHero={Boolean(heroMedia)}
+          titleInImage={heroTitleInImage}
           layout={story.length > 0 ? "full" : "default"}
           belowChapterToc={chapterCount > 1}
         />

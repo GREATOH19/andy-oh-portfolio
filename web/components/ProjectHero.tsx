@@ -28,27 +28,39 @@ function HeroBottomGradient({compact = false}: {compact?: boolean}) {
   );
 }
 
-function HeroBottomChrome({title, subtitle}: {title: string; subtitle?: string | null}) {
+function HeroBottomChrome({
+  title,
+  subtitle,
+  titleInImage = false,
+}: {
+  title: string;
+  subtitle?: string | null;
+  titleInImage?: boolean;
+}) {
   const displayClass = useTypoClass("display");
   const bodyClass = useTypoClass("body");
 
   return (
     <div className="project-hero-bottom-bar pointer-events-none absolute inset-x-0 bottom-5 z-10 px-8 sm:bottom-7 md:px-16 lg:px-24">
       <div className="relative flex items-end">
-        <div className="mb-8 max-w-[min(72%,40rem)] pr-14 sm:mb-10 sm:pr-16">
-          <h1
-            className={`project-hero-overlay-text text-4xl leading-[1.05] sm:text-5xl md:text-6xl ${displayClass}`}
-          >
-            {title}
-          </h1>
-          {subtitle ? (
-            <p
-              className={`project-hero-overlay-text mt-1.5 text-lg leading-snug sm:mt-2 sm:text-xl ${bodyClass}`}
+        {titleInImage ? (
+          <h1 className="sr-only">{title}</h1>
+        ) : (
+          <div className="mb-8 max-w-[min(72%,40rem)] pr-14 sm:mb-10 sm:pr-16">
+            <h1
+              className={`project-hero-overlay-text text-4xl leading-[1.05] sm:text-5xl md:text-6xl ${displayClass}`}
             >
-              {subtitle}
-            </p>
-          ) : null}
-        </div>
+              {title}
+            </h1>
+            {subtitle ? (
+              <p
+                className={`project-hero-overlay-text mt-1.5 text-lg leading-snug sm:mt-2 sm:text-xl ${bodyClass}`}
+              >
+                {subtitle}
+              </p>
+            ) : null}
+          </div>
+        )}
         <a
           href="#project-header"
           aria-label="Scroll to project description"
@@ -107,11 +119,19 @@ function HeroMobileScrollNavigator() {
   );
 }
 
-function ProjectHeroChrome({title, subtitle}: {title: string; subtitle?: string | null}) {
+function ProjectHeroChrome({
+  title,
+  subtitle,
+  titleInImage,
+}: {
+  title: string;
+  subtitle?: string | null;
+  titleInImage?: boolean;
+}) {
   return (
     <div className={COMPACT_HIDDEN}>
       <HeroBottomGradient />
-      <HeroBottomChrome title={title} subtitle={subtitle} />
+      <HeroBottomChrome title={title} subtitle={subtitle} titleInImage={titleInImage} />
     </div>
   );
 }
@@ -153,6 +173,7 @@ export function ProjectHero({
   alt,
   title,
   subtitle,
+  titleInImage = false,
   intrinsicWidth,
   intrinsicHeight,
 }: {
@@ -160,6 +181,8 @@ export function ProjectHero({
   alt: string;
   title: string;
   subtitle?: string | null;
+  /** The artwork already shows the title: keep the scroll cue, drop the text overlay. */
+  titleInImage?: boolean;
   /** From Sanity `asset.metadata.dimensions` for correct compact layout */
   intrinsicWidth?: number;
   intrinsicHeight?: number;
@@ -194,7 +217,7 @@ export function ProjectHero({
               className="absolute inset-0 h-full w-full object-cover"
             />
           </button>
-          <ProjectHeroChrome title={title} subtitle={subtitle} />
+          <ProjectHeroChrome title={title} subtitle={subtitle} titleInImage={titleInImage} />
         </section>
 
         <section
@@ -263,7 +286,7 @@ export function ProjectHero({
             unoptimized
           />
         </button>
-        <ProjectHeroChrome title={title} subtitle={subtitle} />
+        <ProjectHeroChrome title={title} subtitle={subtitle} titleInImage={titleInImage} />
       </section>
 
       <section

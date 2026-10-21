@@ -75,6 +75,14 @@ export const project = defineType({
       description:
         'Full-bleed cover at the top of the project page. Falls back to the card thumbnail if empty.',
     }),
+    defineField({
+      name: 'heroTitleInImage',
+      title: 'Title is part of the hero image',
+      type: 'boolean',
+      group: 'cover',
+      initialValue: false,
+      description: 'Turn on when the hero artwork already shows the title (e.g. a cover slide); hides the title overlay.',
+    }),
 
     // —— Intro (below hero) ——
     defineField({

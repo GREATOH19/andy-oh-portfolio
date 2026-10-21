@@ -277,6 +277,7 @@ export const projectBySlugQuery = groq`
     heroImage {
       ${cmsMediaItemFields}
     },
+    heroTitleInImage,
     "projectHeroDimensions": coalesce(
       select(
         heroImage._type == "cmsMediaItem" && heroImage.mediaType == "image" => heroImage.image.asset->metadata.dimensions,

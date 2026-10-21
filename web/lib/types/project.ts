@@ -343,6 +343,8 @@ export type ProjectStoryBlock =
 export type ProjectDetail = ProjectListItem & {
   /** Width/height of the asset used for the detail hero (for compact layout). */
   projectHeroDimensions?: {width: number; height: number} | null;
+  /** CMS: the hero artwork already shows the title, so no title overlay/header title. */
+  heroTitleInImage?: boolean | null;
   /** Portable text; legacy projects may still return a plain string until re-saved. */
   lead?: PortableTextBlock[] | string | null;
   details?: DetailLine[] | null;

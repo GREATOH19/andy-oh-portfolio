@@ -12,7 +12,16 @@
     "migrate:bento-collage": "sanity exec ./scripts/migrate-bento-collage.mjs --with-user-token",
     "migrate:more-albums": "sanity exec ./scripts/migrate-more-albums.mjs --with-user-token",
     "seed:monklap-draft": "sanity exec ./scripts/seed-monklap-draft.mjs --with-user-token",
-    "seed:monklap-replace": "sanity exec ./scripts/seed-monklap-draft.mjs --with-user-token -- --replace"
+    "seed:monklap-replace": "sanity exec ./scripts/seed-monklap-draft.mjs --with-user-token -- --replace",
+    "publish:project": "sanity exec ./scripts/publish-project.mjs --with-user-token --",
+    "publish:instagram": "node scripts/publish-instagram.mjs",
+    "publish:figma": "node scripts/publish-figma.mjs",
+    "figma:diff": "node tools/figma/diff-rest.mjs",
+    "test:brief": "node tools/brief.test.mjs",
+    "setup:claude": "node scripts/setup-claude.mjs",
+    "apply:text-edits": "sanity exec ./scripts/apply-text-edits.mjs --with-user-token --",
+    "test:text-edits": "node tools/text-edits.test.mjs",
+    "test:figma-sync": "node figma-plugin/code.test.mjs"
   },
   "dependencies": {
     "@sanity/orderable-document-list": "^1.5.1",
@@ -22,5 +31,8 @@
     "sanity": "^5.28.0",
     "sanity-plugin-media": "^4.3.1",
     "styled-components": "^6.1.15"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.1"
   }
 }
