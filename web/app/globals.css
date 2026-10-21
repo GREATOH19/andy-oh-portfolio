@@ -844,6 +844,17 @@ html[data-chrome-hidden] .project-toc-bar--sticky {
     );
 }
 
+/* Touch ripple: the same white → blue glow, kept close around the finger */
+.work-home-bloom-wash--touch {
+  background:
+    radial-gradient(circle 80px at var(--cx) var(--cy), rgb(255 255 255 / calc(var(--warm) * 0.35)), transparent),
+    radial-gradient(
+      circle 170px at var(--cx) var(--cy),
+      hsl(calc(192 + var(--hue)) 95% 62% / calc(var(--warm) * 0.55)),
+      transparent
+    );
+}
+
 @media (min-width: 768px) {
   /* Touching the letters (WorkHomeBannerBloom): white → cyan → blue glow, eased in */
   .work-home-fold .work-home-logo__image--base {

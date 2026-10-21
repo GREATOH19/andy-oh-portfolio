@@ -2,11 +2,25 @@
 
 import {useEffect, useRef} from "react";
 
-import {BAYER_4, CELL_PX, DAMPING, FADE_MS, RAMP_STEPS, SIM_EVERY} from "@/components/home/WorkHomeBannerBloom";
+import {BAYER_4, RAMP_STEPS, SIM_EVERY} from "@/components/home/WorkHomeBannerBloom";
 
+/** Half the banner bloom's cell: phone screens are narrow, so 4px dots read as coarse. */
+const CELL_PX = 2;
+/** Same per-distance decay as the banner bloom at this cell size. */
+const DAMPING = 0.988 ** (CELL_PX / 11);
 /** Radius (cells) of the fingertip source — the banner bloom uses the logo outline instead. */
 const SOURCE_RADIUS = 3;
 const SOURCE_AMP = 5;
+/** Dots only show within this distance (CSS px) of where the finger has been, fading out toward the edge. */
+const REACH_PX = 48;
+/** A fingertip makes far less wave energy than the logo outline, so the wash also warms toward this while touched. */
+const TOUCH_WARM = 0.8;
+/** Once the touch is over, dots and wash ease out together (smoothstep) over this long. */
+const FADE_OUT_MS = 1800;
+/** Per-frame easing of the dots back to full strength when a new touch interrupts the fade-out. */
+const DOTS_RECOVER = 0.05;
+/** Per-frame easing of the wash centre toward the finger. */
+const FOLLOW = 0.04;
 /** After the finger lifts (and its pulse has finished), the waves linger this long before fading out. */
 const LINGER_MS = 1000;
 /** Where the banner bloom can't run: no room for the banner logo, or no hover. */
@@ -16,7 +30,7 @@ const TOUCH_MEDIA = "(max-width: 767px), (hover: none)";
  * Work home on phones / touch screens: the desktop banner bloom (WorkHomeBannerBloom), driven by the
  * finger instead of the logo. A touch swells a pulse of white dithered pixel waves from the finger
  * (following it while it scrolls) and warms the same background wash; once the finger has lifted and
- * the pulse is done, everything lingers briefly and fades out the way the bloom does on pointer leave.
+ * the pulse is done, the dots linger briefly, then thin out and fade together with the wash.
  */
 export function WorkHomeTouchRipple() {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -34,15 +48,19 @@ export function WorkHomeTouchRipple() {
     let rows = 0;
     let a = new Float32Array(0);
     let b = new Float32Array(0);
+    let reach = new Float32Array(0);
     let image: ImageData | null = null;
     let finger = {x: 0, y: 0};
+    let centre = {x: 0, y: 0};
     let touching = false;
     let liftedAt = 0;
     let source = {k: 0, n: 0};
     let glow = {warm: 0, phase: 0, energy: 0};
     let frame = 0;
     let raf: number | null = null;
-    let fadeTimer: number | null = null;
+    let fadeStart: number | null = null;
+    let fadeFrom = 0;
+    let dots = 1;
 
     // Sized to the tallest viewport so the mobile address bar showing/hiding doesn't reset the waves.
     const setupGrid = () => {
@@ -57,6 +75,7 @@ export function WorkHomeTouchRipple() {
       cvs.style.height = `${rows * CELL_PX}px`;
       a = new Float32Array(cols * rows);
       b = new Float32Array(cols * rows);
+      reach = new Float32Array(cols * rows);
       image = ctx.createImageData(cols, rows);
     };
 
@@ -71,6 +90,13 @@ export function WorkHomeTouchRipple() {
           if (x > 0 && y > 0 && x < cols - 1 && y < rows - 1) a[y * cols + x] += amp;
         }
       }
+      const r = Math.ceil(REACH_PX / CELL_PX);
+      for (let y = Math.max(0, cy - r); y <= Math.min(rows - 1, cy + r); y++) {
+        for (let x = Math.max(0, cx - r); x <= Math.min(cols - 1, cx + r); x++) {
+          const t = 1 - Math.hypot(x - cx, y - cy) / r;
+          if (t > 0) reach[y * cols + x] = Math.max(reach[y * cols + x], t * t * (3 - 2 * t));
+        }
+      }
     };
 
     const reset = () => {
@@ -78,24 +104,21 @@ export function WorkHomeTouchRipple() {
       raf = null;
       a.fill(0);
       b.fill(0);
+      reach.fill(0);
       ctx.clearRect(0, 0, cvs.width, cvs.height);
       glow = {warm: 0, phase: 0, energy: 0};
       washEl.style.setProperty("--warm", "0");
-      cvs.style.opacity = "";
-      washEl.style.opacity = "";
-      fadeTimer = null;
-    };
-
-    const fadeOut = () => {
-      cvs.style.opacity = "0";
-      washEl.style.opacity = "0";
-      fadeTimer = window.setTimeout(reset, FADE_MS);
+      fadeStart = null;
+      dots = 1;
     };
 
     const step = () => {
       if (!image) return;
 
       frame++;
+      const out = fadeStart === null ? 0 : Math.min(1, (performance.now() - fadeStart) / FADE_OUT_MS);
+      const keep = 1 - out * out * (3 - 2 * out);
+      dots = fadeStart === null ? dots + (1 - dots) * DOTS_RECOVER : Math.min(dots, keep);
       if (frame % SIM_EVERY === 0) {
         if (source.k < source.n) {
           emit(SOURCE_AMP * Math.sin((Math.PI * source.k) / source.n));
@@ -118,7 +141,7 @@ export function WorkHomeTouchRipple() {
         for (let y = 0; y < rows; y++) {
           for (let x = 0; x < cols; x++) {
             const i = y * cols + x;
-            const intensity = Math.min(1, Math.abs(a[i]) / 70);
+            const intensity = Math.min(1, Math.abs(a[i]) / 70) * reach[i] * dots;
             const on = intensity > 0.08 && intensity > BAYER_4[(y & 3) * 4 + (x & 3)];
             px[i * 4] = 255;
             px[i * 4 + 1] = 255;
@@ -129,34 +152,34 @@ export function WorkHomeTouchRipple() {
         ctx.putImageData(image, 0, 0);
       }
 
-      glow.warm += (Math.min(1, glow.energy / 2) - glow.warm) * 0.008;
-      glow.phase += glow.energy * 0.0015;
+      const held = touching || source.k < source.n ? TOUCH_WARM : 0;
+      if (fadeStart !== null) glow.warm = fadeFrom * keep;
+      else glow.warm += (Math.max(held, Math.min(1, glow.energy / 2)) - glow.warm) * 0.008;
+      glow.phase += Math.max(glow.energy, held * 0.5) * 0.0015;
+      centre = {x: centre.x + (finger.x - centre.x) * FOLLOW, y: centre.y + (finger.y - centre.y) * FOLLOW};
       washEl.style.setProperty("--warm", glow.warm.toFixed(3));
       washEl.style.setProperty("--hue", (Math.sin(glow.phase) * 26).toFixed(2));
+      washEl.style.setProperty("--cx", `${centre.x.toFixed(1)}px`);
+      washEl.style.setProperty("--cy", `${centre.y.toFixed(1)}px`);
 
-      if (!fadeTimer && !touching && source.k >= source.n && performance.now() - liftedAt > LINGER_MS) fadeOut();
+      if (out >= 1) return reset();
+      if (fadeStart === null && !touching && source.k >= source.n && performance.now() - liftedAt > LINGER_MS) {
+        fadeStart = performance.now();
+        fadeFrom = glow.warm;
+      }
       raf = requestAnimationFrame(step);
     };
 
     const onTouch = (e: TouchEvent) => {
       if (!touchMedia.matches || reducedMotion.matches || !e.touches.length) return;
-      if (fadeTimer) {
-        clearTimeout(fadeTimer);
-        fadeTimer = null;
-        cvs.style.opacity = "";
-        washEl.style.opacity = "";
-      }
+      fadeStart = null;
       setupGrid();
       touching = true;
       finger = {x: e.touches[0].clientX, y: e.touches[0].clientY};
-      if (e.type === "touchstart" || source.k >= source.n) {
-        source = {k: 0, n: RAMP_STEPS};
-        // Re-centre the wash only while it's dark, so it never jumps while lit.
-        if (glow.warm < 0.05) {
-          washEl.style.setProperty("--cx", `${finger.x}px`);
-          washEl.style.setProperty("--cy", `${finger.y}px`);
-        }
-      }
+      // A running pulse is never restarted, so quick taps don't stack waves on top of each other.
+      if (source.k >= source.n) source = {k: 0, n: RAMP_STEPS};
+      // Snap the wash centre only while it's dark; while lit it eases after the finger.
+      if (glow.warm < 0.05) centre = {...finger};
       if (!raf) raf = requestAnimationFrame(step);
     };
 
@@ -176,7 +199,6 @@ export function WorkHomeTouchRipple() {
       removeEventListener("touchend", onLift);
       removeEventListener("touchcancel", onLift);
       if (raf) cancelAnimationFrame(raf);
-      if (fadeTimer) clearTimeout(fadeTimer);
     };
   }, []);
 
@@ -185,12 +207,12 @@ export function WorkHomeTouchRipple() {
       <div
         ref={wash}
         aria-hidden
-        className="work-home-bloom-wash pointer-events-none fixed inset-0 z-[-1] transition-opacity duration-500 ease-out"
+        className="work-home-bloom-wash work-home-bloom-wash--touch pointer-events-none fixed inset-0 z-[-1]"
       />
       <canvas
         ref={canvas}
         aria-hidden
-        className="pointer-events-none fixed left-0 top-0 z-[-1] transition-opacity duration-500 ease-out [image-rendering:pixelated]"
+        className="pointer-events-none fixed left-0 top-0 z-[-1] [image-rendering:pixelated]"
       />
     </>
   );
