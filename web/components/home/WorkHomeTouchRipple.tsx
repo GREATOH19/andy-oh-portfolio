@@ -2,25 +2,21 @@
 
 import {useEffect, useRef} from "react";
 
-const CELL_PX = 4;
-/** Simulate once every N frames (~20 steps/s), same pace as the desktop bloom. */
-const SIM_EVERY = 3;
-const DAMPING = 0.965;
-/** Wave height added (Gaussian, centre weight) around each touch point per touch event. */
-const SPLASH = 6;
-const PIXEL_ALPHA = 0.25;
-/** Background wash strength while touching (desktop bloom goes up to 1). */
-const WARM_MAX = 0.45;
-const WARM_IN = 0.03;
-const WARM_OUT = 0.018;
-/** The wash stays lit this long after the last touch event. */
-const HOLD_MS = 250;
+import {BAYER_4, CELL_PX, DAMPING, FADE_MS, RAMP_STEPS, SIM_EVERY} from "@/components/home/WorkHomeBannerBloom";
+
+/** Radius (cells) of the fingertip source — the banner bloom uses the logo outline instead. */
+const SOURCE_RADIUS = 3;
+const SOURCE_AMP = 5;
+/** After the finger lifts (and its pulse has finished), the waves linger this long before fading out. */
+const LINGER_MS = 1000;
 /** Where the banner bloom can't run: no room for the banner logo, or no hover. */
 const TOUCH_MEDIA = "(max-width: 767px), (hover: none)";
 
 /**
- * Work home on phones / touch screens: touching or scrolling softly tints the page around the finger
- * (same wash as the desktop banner bloom) and leaves faint white pixel ripples that fade out.
+ * Work home on phones / touch screens: the desktop banner bloom (WorkHomeBannerBloom), driven by the
+ * finger instead of the logo. A touch swells a pulse of white dithered pixel waves from the finger
+ * (following it while it scrolls) and warms the same background wash; once the finger has lifted and
+ * the pulse is done, everything lingers briefly and fades out the way the bloom does on pointer leave.
  */
 export function WorkHomeTouchRipple() {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -39,12 +35,14 @@ export function WorkHomeTouchRipple() {
     let a = new Float32Array(0);
     let b = new Float32Array(0);
     let image: ImageData | null = null;
+    let finger = {x: 0, y: 0};
+    let touching = false;
+    let liftedAt = 0;
+    let source = {k: 0, n: 0};
+    let glow = {warm: 0, phase: 0, energy: 0};
     let frame = 0;
-    let peak = 0;
     let raf: number | null = null;
-    let lastTouch = 0;
-    let target = {x: innerWidth / 2, y: innerHeight / 2};
-    let glow = {warm: 0, phase: 0, x: target.x, y: target.y};
+    let fadeTimer: number | null = null;
 
     // Sized to the tallest viewport so the mobile address bar showing/hiding doesn't reset the waves.
     const setupGrid = () => {
@@ -62,95 +60,137 @@ export function WorkHomeTouchRipple() {
       image = ctx.createImageData(cols, rows);
     };
 
-    const splash = (x: number, y: number) => {
-      const cx = Math.floor(x / CELL_PX);
-      const cy = Math.floor(y / CELL_PX);
-      for (let dy = -2; dy <= 2; dy++) {
-        for (let dx = -2; dx <= 2; dx++) {
-          const px = cx + dx;
-          const py = cy + dy;
-          if (px > 0 && py > 0 && px < cols - 1 && py < rows - 1) {
-            a[py * cols + px] += SPLASH * Math.exp(-(dx * dx + dy * dy) / 2);
-          }
+    const emit = (amp: number) => {
+      const cx = Math.floor(finger.x / CELL_PX);
+      const cy = Math.floor(finger.y / CELL_PX);
+      for (let dy = -SOURCE_RADIUS; dy <= SOURCE_RADIUS; dy++) {
+        for (let dx = -SOURCE_RADIUS; dx <= SOURCE_RADIUS; dx++) {
+          const x = cx + dx;
+          const y = cy + dy;
+          if (dx * dx + dy * dy > SOURCE_RADIUS * SOURCE_RADIUS) continue;
+          if (x > 0 && y > 0 && x < cols - 1 && y < rows - 1) a[y * cols + x] += amp;
         }
       }
     };
 
+    const reset = () => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = null;
+      a.fill(0);
+      b.fill(0);
+      ctx.clearRect(0, 0, cvs.width, cvs.height);
+      glow = {warm: 0, phase: 0, energy: 0};
+      washEl.style.setProperty("--warm", "0");
+      cvs.style.opacity = "";
+      washEl.style.opacity = "";
+      fadeTimer = null;
+    };
+
+    const fadeOut = () => {
+      cvs.style.opacity = "0";
+      washEl.style.opacity = "0";
+      fadeTimer = window.setTimeout(reset, FADE_MS);
+    };
+
     const step = () => {
+      if (!image) return;
+
       frame++;
-      if (frame % SIM_EVERY === 0 && image) {
-        peak = 0;
+      if (frame % SIM_EVERY === 0) {
+        if (source.k < source.n) {
+          emit(SOURCE_AMP * Math.sin((Math.PI * source.k) / source.n));
+          source.k++;
+        }
+        let energy = 0;
         for (let y = 1; y < rows - 1; y++) {
           for (let x = 1; x < cols - 1; x++) {
             const i = y * cols + x;
             const v = ((a[i - 1] + a[i + 1] + a[i - cols] + a[i + cols]) / 2 - b[i]) * DAMPING;
             b[i] = v;
-            peak = Math.max(peak, Math.abs(v));
+            energy += Math.abs(v);
           }
         }
         [a, b] = [b, a];
+        glow.energy = energy / (cols * rows);
 
-        // Continuous alpha (no dither): wave height fades the pixel in and out smoothly.
+        // Ordered (Bayer) dither: wave height decides how many cells in each 4×4 block light up.
         const px = image.data;
-        for (let i = 0; i < cols * rows; i++) {
-          const intensity = Math.min(1, Math.abs(a[i]) / 10);
-          px[i * 4] = 255;
-          px[i * 4 + 1] = 255;
-          px[i * 4 + 2] = 255;
-          px[i * 4 + 3] = intensity * PIXEL_ALPHA * 255;
+        for (let y = 0; y < rows; y++) {
+          for (let x = 0; x < cols; x++) {
+            const i = y * cols + x;
+            const intensity = Math.min(1, Math.abs(a[i]) / 70);
+            const on = intensity > 0.08 && intensity > BAYER_4[(y & 3) * 4 + (x & 3)];
+            px[i * 4] = 255;
+            px[i * 4 + 1] = 255;
+            px[i * 4 + 2] = 255;
+            px[i * 4 + 3] = on ? 0.3 * 255 + intensity * 0.3 * 255 : 0;
+          }
         }
         ctx.putImageData(image, 0, 0);
       }
 
-      const touching = performance.now() - lastTouch < HOLD_MS;
-      const goal = touching ? WARM_MAX : 0;
-      glow.warm += (goal - glow.warm) * (goal > glow.warm ? WARM_IN : WARM_OUT);
-      glow.phase += glow.warm * 0.01;
-      glow.x += (target.x - glow.x) * 0.06;
-      glow.y += (target.y - glow.y) * 0.06;
+      glow.warm += (Math.min(1, glow.energy / 2) - glow.warm) * 0.008;
+      glow.phase += glow.energy * 0.0015;
       washEl.style.setProperty("--warm", glow.warm.toFixed(3));
       washEl.style.setProperty("--hue", (Math.sin(glow.phase) * 26).toFixed(2));
-      washEl.style.setProperty("--cx", `${glow.x.toFixed(1)}px`);
-      washEl.style.setProperty("--cy", `${glow.y.toFixed(1)}px`);
 
-      if (touching || peak > 1 || glow.warm > 0.005) {
-        raf = requestAnimationFrame(step);
-      } else {
-        raf = null;
-        a.fill(0);
-        b.fill(0);
-        ctx.clearRect(0, 0, cvs.width, cvs.height);
-        glow.warm = 0;
-        washEl.style.setProperty("--warm", "0");
-      }
+      if (!fadeTimer && !touching && source.k >= source.n && performance.now() - liftedAt > LINGER_MS) fadeOut();
+      raf = requestAnimationFrame(step);
     };
 
     const onTouch = (e: TouchEvent) => {
       if (!touchMedia.matches || reducedMotion.matches || !e.touches.length) return;
+      if (fadeTimer) {
+        clearTimeout(fadeTimer);
+        fadeTimer = null;
+        cvs.style.opacity = "";
+        washEl.style.opacity = "";
+      }
       setupGrid();
-      for (const t of Array.from(e.touches)) splash(t.clientX, t.clientY);
-      target = {x: e.touches[0].clientX, y: e.touches[0].clientY};
-      if (glow.warm < 0.005) glow = {...glow, x: target.x, y: target.y};
-      lastTouch = performance.now();
+      touching = true;
+      finger = {x: e.touches[0].clientX, y: e.touches[0].clientY};
+      if (e.type === "touchstart" || source.k >= source.n) {
+        source = {k: 0, n: RAMP_STEPS};
+        // Re-centre the wash only while it's dark, so it never jumps while lit.
+        if (glow.warm < 0.05) {
+          washEl.style.setProperty("--cx", `${finger.x}px`);
+          washEl.style.setProperty("--cy", `${finger.y}px`);
+        }
+      }
       if (!raf) raf = requestAnimationFrame(step);
+    };
+
+    const onLift = (e: TouchEvent) => {
+      if (e.touches.length) return;
+      touching = false;
+      liftedAt = performance.now();
     };
 
     addEventListener("touchstart", onTouch, {passive: true});
     addEventListener("touchmove", onTouch, {passive: true});
+    addEventListener("touchend", onLift, {passive: true});
+    addEventListener("touchcancel", onLift, {passive: true});
     return () => {
       removeEventListener("touchstart", onTouch);
       removeEventListener("touchmove", onTouch);
+      removeEventListener("touchend", onLift);
+      removeEventListener("touchcancel", onLift);
       if (raf) cancelAnimationFrame(raf);
+      if (fadeTimer) clearTimeout(fadeTimer);
     };
   }, []);
 
   return (
     <>
-      <div ref={wash} aria-hidden className="work-home-bloom-wash pointer-events-none fixed inset-0 z-[-1]" />
+      <div
+        ref={wash}
+        aria-hidden
+        className="work-home-bloom-wash pointer-events-none fixed inset-0 z-[-1] transition-opacity duration-500 ease-out"
+      />
       <canvas
         ref={canvas}
         aria-hidden
-        className="pointer-events-none fixed left-0 top-0 z-[-1] [image-rendering:pixelated]"
+        className="pointer-events-none fixed left-0 top-0 z-[-1] transition-opacity duration-500 ease-out [image-rendering:pixelated]"
       />
     </>
   );
