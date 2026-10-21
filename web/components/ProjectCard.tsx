@@ -2,9 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import {useCallback, useEffect, useLayoutEffect, useRef, useState} from "react";
+import {useEffect, useLayoutEffect, useRef, useState} from "react";
 
-import {grainTileStyle} from "@/lib/grain";
 import {
   getProjectCardImage,
   getProjectCardImageUrl,
@@ -17,43 +16,25 @@ import {
   normalizeMediaItem,
   sanityInlineLoopVideoUrl,
 } from "@/lib/sanity/media";
-import {useSiteTypography, useTypoClass} from "@/components/TypographyProvider";
+import {useTypoClass} from "@/components/TypographyProvider";
 import type {ProjectListItem} from "@/lib/types/project";
 
-function useTouchPrimary() {
-  const [touchPrimary, setTouchPrimary] = useState(false);
+const TAGLINE_MIN_FONT_PX = 10;
 
-  useEffect(() => {
-    const mq = window.matchMedia("(hover: none)");
-    const sync = () => setTouchPrimary(mq.matches);
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
-  }, []);
-
-  return touchPrimary;
-}
-
-function ProjectCardOverlayTitle({title, className}: {title: string; className: string}) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
+/** One line: shrinks the font until the text fits, down to TAGLINE_MIN_FONT_PX, then truncates. */
+function ProjectCardTagline({text, className}: {text: string; className: string}) {
+  const ref = useRef<HTMLParagraphElement>(null);
 
   useLayoutEffect(() => {
-    const container = containerRef.current;
-    const el = titleRef.current;
-    if (!container || !el) return;
+    const el = ref.current;
+    if (!el) return;
 
     const fit = () => {
       el.style.fontSize = "";
-      const maxPx = parseFloat(getComputedStyle(el).fontSize);
-      if (!maxPx) return;
-
-      const minPx = Math.max(13, maxPx * 0.45);
-      let size = maxPx;
-      el.style.fontSize = `${size}px`;
-
-      while (el.scrollWidth > container.clientWidth && size > minPx) {
-        size -= 0.5;
+      let size = parseFloat(getComputedStyle(el).fontSize);
+      if (!size) return;
+      while (el.scrollWidth > el.clientWidth && size > TAGLINE_MIN_FONT_PX) {
+        size = Math.max(TAGLINE_MIN_FONT_PX, size - 0.25);
         el.style.fontSize = `${size}px`;
       }
     };
@@ -62,16 +43,14 @@ function ProjectCardOverlayTitle({title, className}: {title: string; className: 
     void document.fonts?.ready.then(fit);
 
     const observer = new ResizeObserver(fit);
-    observer.observe(container);
+    observer.observe(el);
     return () => observer.disconnect();
-  }, [title]);
+  }, [text]);
 
   return (
-    <div ref={containerRef} className="w-full min-w-0 px-2">
-      <h2 ref={titleRef} className={`whitespace-nowrap ${className}`}>
-        {title}
-      </h2>
-    </div>
+    <p ref={ref} className={`truncate ${className}`} title={text}>
+      {text}
+    </p>
   );
 }
 
@@ -115,30 +94,11 @@ function ProjectCardHeroVideo({
   );
 }
 
-export function ProjectCard({
-  project,
-  touchOverlayOpen: touchOverlayOpenControlled,
-  onTouchOverlayToggle,
-}: {
-  project: ProjectListItem;
-  /** When set with onTouchOverlayToggle, only one card in the grid can be open (mobile). */
-  touchOverlayOpen?: boolean;
-  onTouchOverlayToggle?: () => void;
-}) {
+export function ProjectCard({project}: {project: ProjectListItem}) {
   const displayClass = useTypoClass("display");
   const bodyClass = useTypoClass("body");
-  const typography = useSiteTypography();
-  const overlayTitleClass =
-    typography?.display === "gloock"
-      ? "project-card-gloock-title tracking-tight"
-      : "tracking-tight";
+  const metaClass = useTypoClass("meta");
   const href = project.slug ? `/projects/${project.slug}` : "#";
-  const touchPrimary = useTouchPrimary();
-  const [touchOverlayOpenLocal, setTouchOverlayOpenLocal] = useState(false);
-  const touchControlled = onTouchOverlayToggle !== undefined;
-  const touchOverlayOpen = touchControlled
-    ? (touchOverlayOpenControlled ?? false)
-    : touchOverlayOpenLocal;
   const [hovered, setHovered] = useState(false);
 
   const heroMedia = normalizeMediaItem(project.heroImage);
@@ -161,157 +121,101 @@ export function ProjectCard({
   const hasDistinctHeroVideo = Boolean(heroVideoSrc && thumbSrc);
   const hasVideoOnlyHero = projectCardHasVideoHero(project) && Boolean(heroVideoSrc && !thumbSrc);
   const hasDistinctHero = hasDistinctHeroImage || hasDistinctHeroVideo;
-  const overlayOpen = touchPrimary && touchOverlayOpen;
-  const heroVideoActive = hovered || overlayOpen;
-  const thumbHiddenClass = overlayOpen
-    ? "opacity-0"
-    : "opacity-100 [@media(hover:hover)]:group-hover:opacity-0 group-focus-within:opacity-0";
-  const heroOverlayClass = overlayOpen
-    ? "opacity-100 blur-[1px]"
-    : "opacity-0 blur-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-hover:blur-[1px] group-focus-within:opacity-100 group-focus-within:blur-[1px]";
+  const thumbHiddenClass =
+    "opacity-100 [@media(hover:hover)]:group-hover:opacity-0 group-focus-visible:opacity-0";
+  const heroOverlayClass =
+    "opacity-0 [@media(hover:hover)]:group-hover:opacity-100 group-focus-visible:opacity-100";
 
   const tagline = project.subtitle?.trim() || null;
-
-  const onImageAreaClick = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!touchPrimary) return;
-      if ((e.target as HTMLElement).closest("a[data-project-card-link]")) return;
-      e.preventDefault();
-      if (touchControlled) {
-        onTouchOverlayToggle!();
-      } else {
-        setTouchOverlayOpenLocal((o) => !o);
-      }
-    },
-    [touchPrimary, touchControlled, onTouchOverlayToggle],
-  );
+  const year = project.year?.trim() || null;
+  const cardMeta = project.cardMeta?.trim() || null;
 
   return (
     <article className="block" aria-label={project.title}>
-      <div
-        className="work-thumb group relative aspect-[4/3] w-full cursor-pointer overflow-hidden rounded-2xl bg-background shadow-sm ring-1 ring-slate-200/60 transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:scale-[1.006] hover:shadow-xl focus-within:-translate-y-1 focus-within:scale-[1.006] focus-within:shadow-xl active:translate-y-0 active:scale-[0.997] active:shadow-lg"
-        onClick={onImageAreaClick}
+      <Link
+        href={href}
+        className="group block rounded-2xl outline-none"
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        onFocusCapture={() => setHovered(true)}
-        onBlurCapture={(e) => {
-          if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-            setHovered(false);
-          }
-        }}
+        onFocus={() => setHovered(true)}
+        onBlur={() => setHovered(false)}
       >
-        {hasDistinctHero && thumbSrc ? (
-          <Image
-            src={thumbSrc}
-            alt={thumbAlt}
-            fill
-            className={`object-cover transition-opacity duration-500 ease-out ${thumbHiddenClass}`}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            unoptimized
-          />
-        ) : null}
-        {hasDistinctHeroVideo && heroVideoSrc ? (
-          <ProjectCardHeroVideo
-            src={heroVideoSrc}
-            loop={heroVideo?.loop ?? true}
-            alt={heroAlt}
-            active={heroVideoActive}
-            className={`absolute inset-0 z-0 h-full w-full object-cover transition-opacity duration-500 ease-out ${heroOverlayClass}`}
-          />
-        ) : null}
-        {heroImageSrc ? (
-          <Image
-            src={heroImageSrc}
-            alt={heroAlt}
-            fill
-            className={`object-cover transition-opacity duration-500 ease-out ${heroOverlayClass}`}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            unoptimized
-          />
-        ) : null}
-        {hasVideoOnlyHero && heroVideoSrc ? (
-          <ProjectCardHeroVideo
-            src={heroVideoSrc}
-            loop={heroVideo?.loop ?? true}
-            alt={heroAlt}
-            active
-            className={`absolute inset-0 h-full w-full object-cover transition-[filter] duration-500 ease-out ${overlayOpen ? "blur-[1px]" : "blur-0"} [@media(hover:hover)]:group-hover:blur-[1px] group-focus-within:blur-[1px]`}
-          />
-        ) : null}
-        {!hasDistinctHero && !hasVideoOnlyHero && thumbSrc ? (
-          <Image
-            src={thumbSrc}
-            alt={thumbAlt}
-            fill
-            className={`object-cover transition-[filter] duration-500 ease-out ${overlayOpen ? "blur-[1px]" : "blur-0"} [@media(hover:hover)]:group-hover:blur-[1px] group-focus-within:blur-[1px]`}
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            unoptimized
-          />
-        ) : null}
-        {!hasDistinctHero && !hasVideoOnlyHero && !thumbSrc ? (
-          <div className="flex h-full items-center justify-center text-[10px] uppercase tracking-[0.2em] text-muted">
-            Project Image
-          </div>
-        ) : null}
-
-        {/* Use next/link here too (not a raw <a>): matches touch “View project” path so client navigation / history stays consistent. */}
-        <Link
-          href={href}
-          tabIndex={touchPrimary ? -1 : 0}
-          aria-hidden={touchPrimary}
-          aria-label={touchPrimary ? undefined : `View project: ${project.title}`}
-          className={`absolute inset-0 z-[1] outline-offset-[-2px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground/40 ${
-            touchPrimary ? "pointer-events-none" : ""
-          }`}
-        />
-
-        {/* Centered title + tagline over hero image */}
-        <div
-          className={`pointer-events-none absolute inset-0 z-[2] transition-opacity duration-500 ease-out ${
-            touchPrimary
-              ? touchOverlayOpen
-                ? "opacity-100"
-                : "opacity-0"
-              : "opacity-0 [@media(hover:hover)]:group-hover:opacity-100 group-focus-within:opacity-100"
-          }`}
-        >
-          <div className="project-card-glass" aria-hidden>
-            <div className="project-card-glass__backdrop" />
-            <div className="project-card-glass__tint" />
-            <div className="project-card-glass__specular" />
-            <div className="project-card-glass__grain" style={grainTileStyle} />
-          </div>
-          <div
-            className={`project-card-overlay-body relative z-10 flex h-full flex-col items-center justify-center px-6 text-center text-white${
-              project.cardOverlayScrim ? " project-card-overlay-body--scrim" : ""
-            }`}
-          >
-            <ProjectCardOverlayTitle
-              title={project.title}
-              className={`project-card-overlay-title project-card-overlay-title-shadow text-white ${overlayTitleClass} ${displayClass}`}
+        <div className="work-thumb relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-background shadow-sm ring-1 ring-slate-200/60 transition-[transform,box-shadow] duration-200 ease-out group-hover:-translate-y-1 group-hover:scale-[1.006] group-hover:shadow-xl group-focus-visible:-translate-y-1 group-focus-visible:shadow-xl group-focus-visible:ring-2 group-focus-visible:ring-foreground/40 group-active:translate-y-0 group-active:scale-[0.997] group-active:shadow-lg">
+          {hasDistinctHero && thumbSrc ? (
+            <Image
+              src={thumbSrc}
+              alt={thumbAlt}
+              fill
+              className={`object-cover transition-opacity duration-500 ease-out ${thumbHiddenClass}`}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              unoptimized
             />
-            {tagline ? (
-              <p
-                className={`project-card-overlay-tagline mt-3 max-w-md text-base leading-relaxed sm:text-lg ${bodyClass}`}
-              >
-                {tagline}
-              </p>
-            ) : null}
+          ) : null}
+          {hasDistinctHeroVideo && heroVideoSrc ? (
+            <ProjectCardHeroVideo
+              src={heroVideoSrc}
+              loop={heroVideo?.loop ?? true}
+              alt={heroAlt}
+              active={hovered}
+              className={`absolute inset-0 z-0 h-full w-full object-cover transition-opacity duration-500 ease-out ${heroOverlayClass}`}
+            />
+          ) : null}
+          {heroImageSrc ? (
+            <Image
+              src={heroImageSrc}
+              alt={heroAlt}
+              fill
+              className={`object-cover transition-opacity duration-500 ease-out ${heroOverlayClass}`}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              unoptimized
+            />
+          ) : null}
+          {hasVideoOnlyHero && heroVideoSrc ? (
+            <ProjectCardHeroVideo
+              src={heroVideoSrc}
+              loop={heroVideo?.loop ?? true}
+              alt={heroAlt}
+              active
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          ) : null}
+          {!hasDistinctHero && !hasVideoOnlyHero && thumbSrc ? (
+            <Image
+              src={thumbSrc}
+              alt={thumbAlt}
+              fill
+              className="object-cover"
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              unoptimized
+            />
+          ) : null}
+          {!hasDistinctHero && !hasVideoOnlyHero && !thumbSrc ? (
+            <div className="flex h-full items-center justify-center text-[10px] uppercase tracking-[0.2em] text-muted">
+              Project Image
+            </div>
+          ) : null}
+        </div>
 
-            {touchPrimary && touchOverlayOpen ? (
-              <Link
-                href={href}
-                data-project-card-link
-                aria-label={`View project: ${project.title}`}
-                className="pointer-events-auto relative z-10 mt-8 inline-flex rounded-sm border border-white/50 bg-white/10 px-5 py-2.5 text-[0.6875rem] font-semibold uppercase tracking-[0.2em] text-white/95 transition-[border-color,background-color,color] duration-300 active:border-white/75 active:bg-white/20 active:text-white"
-                onClick={(e) => e.stopPropagation()}
-              >
-                View project
-              </Link>
+        <div className="project-card-caption mt-3 px-0.5">
+          <div className="flex items-baseline justify-between gap-4">
+            <h2 className={`cms-title-tone text-base font-semibold tracking-tight sm:text-lg ${displayClass}`}>
+              {project.title}
+            </h2>
+            {year ? (
+              <span className={`shrink-0 text-xs tabular-nums text-muted ${metaClass}`}>{year}</span>
             ) : null}
           </div>
+          {tagline ? (
+            <ProjectCardTagline
+              text={tagline}
+              className={`mt-1 text-sm leading-snug text-muted ${bodyClass}`}
+            />
+          ) : null}
+          {cardMeta ? (
+            <p className={`mt-1 text-xs font-medium text-muted ${metaClass}`}>{cardMeta}</p>
+          ) : null}
         </div>
-      </div>
+      </Link>
     </article>
   );
 }

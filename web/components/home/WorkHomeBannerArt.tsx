@@ -1,7 +1,5 @@
 "use client";
 
-const WELCOME_GRADE = "saturate(1.06) contrast(1.04)";
-
 const imgProps = {
   decoding: "async" as const,
 };
@@ -18,7 +16,6 @@ type WorkHomeBannerArtProps = {
   aspectRatio: number;
   objectPosition: string;
   active?: boolean;
-  welcomeSharp?: boolean;
 };
 
 /**
@@ -37,11 +34,9 @@ export function WorkHomeBannerArt({
   aspectRatio,
   objectPosition,
   active = false,
-  welcomeSharp = false,
 }: WorkHomeBannerArtProps) {
   const artClass = [
     "work-home-logo__art",
-    welcomeSharp && "work-home-logo__art--welcome-sharp",
     active && "work-home-logo__art--glow",
     shadowOverlaySrc && "work-home-logo__art--has-shadow-overlay",
   ]
@@ -53,7 +48,6 @@ export function WorkHomeBannerArt({
     ["--work-home-banner-object-position" as string]: objectPosition,
     ["--work-home-banner-aspect-ratio" as string]: String(aspectRatio),
   };
-  const baseFilter = welcomeSharp && !active ? WELCOME_GRADE : undefined;
 
   return (
     <span className={artClass} style={artStyle}>
@@ -78,7 +72,7 @@ export function WorkHomeBannerArt({
         width={width}
         height={height}
         className="work-home-logo__image work-home-logo__image--base"
-        style={{...posStyle, filter: baseFilter}}
+        style={posStyle}
       />
       {shadowOverlaySrc ? (
         /* eslint-disable-next-line @next/next/no-img-element */

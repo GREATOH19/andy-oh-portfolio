@@ -1,15 +1,12 @@
 "use client";
 
-import {useEffect, useMemo, useRef, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 
 import {ProjectCard} from "@/components/ProjectCard";
 import {WorkHomeBanner} from "@/components/home/WorkHomeBanner";
 import type {HomeWelcomeIntroContent, ProjectListItem, SiteBrand} from "@/lib/types/project";
 
-/** Close mobile card overlay after this idle period (no taps in #work). */
-const TOUCH_OVERLAY_IDLE_MS = 10_000;
-
-const FOLD_ROW_COUNT_DESKTOP = 3;
+const FOLD_ROW_COUNT_DESKTOP = 2;
 
 export function SelectedWorkSection({
   projects,
@@ -24,18 +21,16 @@ export function SelectedWorkSection({
   workHomeLogo?: SiteBrand | null;
   /** Site Settings → Header logo (fallback when banner logo unset). */
   headerBrand?: SiteBrand | null;
-  /** First-visit welcome copy (replaces desktop banner once; mobile has no fold banner). */
+  /** Short intro (name + one line) under the banner; mobile shows it above the grid. */
   welcomeIntro?: HomeWelcomeIntroContent | null;
   compactBottomPadding?: boolean;
 }) {
   const visibleProjects = projects.filter((p) => p.slug);
-  const [openTouchCardId, setOpenTouchCardId] = useState<string | null>(null);
-  const sectionRef = useRef<HTMLElement>(null);
 
   /**
-   * Desktop-only composition: first viewport shows banner + first 3 cards.
+   * Desktop-only composition: first viewport shows banner + first 2 (large) cards.
    * On mobile / 2-column widths, keep one continuous grid to avoid a “gap jump”
-   * between the 3rd and 4th cards caused by the fold split.
+   * between the fold row and the rest caused by the fold split.
    */
   const [useFoldSplit, setUseFoldSplit] = useState(false);
 
@@ -57,39 +52,7 @@ export function SelectedWorkSection({
     };
   }, [useFoldSplit, visibleProjects]);
 
-  useEffect(() => {
-    if (!openTouchCardId) return;
-
-    const section = sectionRef.current;
-    if (!section) return;
-
-    let timeoutId = window.setTimeout(() => setOpenTouchCardId(null), TOUCH_OVERLAY_IDLE_MS);
-
-    const resetIdleTimer = () => {
-      window.clearTimeout(timeoutId);
-      timeoutId = window.setTimeout(() => setOpenTouchCardId(null), TOUCH_OVERLAY_IDLE_MS);
-    };
-
-    section.addEventListener("touchstart", resetIdleTimer, {passive: true});
-    section.addEventListener("pointerdown", resetIdleTimer);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-      section.removeEventListener("touchstart", resetIdleTimer);
-      section.removeEventListener("pointerdown", resetIdleTimer);
-    };
-  }, [openTouchCardId]);
-
-  const renderCard = (project: ProjectListItem) => (
-    <ProjectCard
-      key={project._id}
-      project={project}
-      touchOverlayOpen={openTouchCardId === project._id}
-      onTouchOverlayToggle={() =>
-        setOpenTouchCardId((id) => (id === project._id ? null : project._id))
-      }
-    />
-  );
+  const renderCard = (project: ProjectListItem) => <ProjectCard key={project._id} project={project} />;
 
   if (visibleProjects.length === 0) {
     return (
@@ -102,7 +65,7 @@ export function SelectedWorkSection({
   const belowFoldPadding = compactBottomPadding ? "pb-12 md:pb-16" : "pb-20 md:pb-32";
 
   return (
-    <section id="work" ref={sectionRef} className="scroll-mt-24">
+    <section id="work" className="scroll-mt-24">
       {useFoldSplit ? (
         <>
           <div className="work-home-fold work-home-fold--fullbleed">
