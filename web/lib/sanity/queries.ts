@@ -204,6 +204,19 @@ const projectStoryFields = groq`
       ${cmsMediaItemFields}
     }
   },
+  eyebrow,
+  titleAccent,
+  mediaSide,
+  itemsStyle,
+  slideItems[] {
+    _key,
+    title,
+    text,
+    tags,
+    media {
+      ${cmsMediaItemFields}
+    }
+  },
   audio {
     asset->{
       _ref,

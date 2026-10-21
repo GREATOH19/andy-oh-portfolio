@@ -326,8 +326,35 @@ export type ProjectZigzagRowBlock = {
   cropFocus?: GridCropFocus | null;
 } & ProjectBodyTypographyFields;
 
+export type ProjectSlideItem = {
+  _key?: string;
+  title?: string | null;
+  text?: string | null;
+  tags?: string[] | null;
+  media?: CmsMediaInput | null;
+};
+
+export type ProjectSlideMediaSide = "left" | "right" | "below";
+export type ProjectSlideItemsStyle = "columns" | "cards" | "list" | "table";
+
+/** A deck slide rebuilt natively; starts a chapter unit like projectChapter. */
+export type ProjectSlideBlock = {
+  _type: "projectSlide";
+  _key?: string;
+  eyebrow?: string | null;
+  title?: string | null;
+  titleAccent?: string | null;
+  tocTitle?: string | null;
+  body?: PortableTextBlock[] | null;
+  mediaSide?: ProjectSlideMediaSide | null;
+  images?: CmsMediaInput[] | null;
+  itemsStyle?: ProjectSlideItemsStyle | null;
+  slideItems?: ProjectSlideItem[] | null;
+};
+
 export type ProjectStoryBlock =
   | ProjectChapterBlock
+  | ProjectSlideBlock
   | ProjectTextBoxBlock
   | ProjectMediaBlock
   | ProjectGalleryBlock

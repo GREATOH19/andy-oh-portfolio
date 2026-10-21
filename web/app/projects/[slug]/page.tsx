@@ -8,6 +8,7 @@ import {fetchProjectBySlug} from "@/lib/sanity/fetchProject";
 import {isSanityImage, normalizeMediaItem} from "@/lib/sanity/media";
 import {projectSlugsQuery, siteSettingsQuery} from "@/lib/sanity/queries";
 import {leadExcerptText} from "@/lib/portableText/leadContent";
+import {isChapterStartBlock} from "@/lib/projectStory/chapterGroups";
 import type {ProjectDetail, SiteSettingsDocument} from "@/lib/types/project";
 import type {Metadata} from "next";
 import {notFound} from "next/navigation";
@@ -48,7 +49,7 @@ export default async function ProjectPage({params}: Props) {
   const heroAlt = heroMedia?.alt ?? project.title;
   const heroTitleInImage = Boolean(heroMedia && project.heroTitleInImage);
   const story = project.story?.filter(Boolean) ?? [];
-  const chapterCount = story.filter((b) => b._type === "projectChapter").length;
+  const chapterCount = story.filter(isChapterStartBlock).length;
 
   return (
     <>
