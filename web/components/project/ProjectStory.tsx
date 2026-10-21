@@ -196,10 +196,16 @@ function renderStoryBlock(ctx: RenderContext, idx: number): ReactNode {
         );
       }
 
+      /** Nav-only chapter after other content: a rule with extra space marks the break between chapters. */
+      const chapterDivider = tocMarkerOnly && idx > 0;
       return (
         <div
           key={key}
-          className={`w-full ${tocMarkerOnly ? "" : spacingClass}`.trim()}
+          className={
+            chapterDivider
+              ? "w-full mt-8 border-t border-zinc-300/60 pb-8 md:mt-14 md:pb-14"
+              : `w-full ${tocMarkerOnly ? "" : spacingClass}`.trim()
+          }
         >
           <RichTextSection
             title={block.title}
