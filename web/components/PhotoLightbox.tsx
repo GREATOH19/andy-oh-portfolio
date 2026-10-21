@@ -49,6 +49,8 @@ export function PhotoLightbox({
   const hasMultiple = images.length > 1;
 
   const viewportRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const touchTapOutsideRef = useRef(false);
   const [scale, setScale] = useState(1);
   const [offset, setOffset] = useState({x: 0, y: 0});
   const [isDragging, setIsDragging] = useState(false);
@@ -197,6 +199,17 @@ export function PhotoLightbox({
       window.removeEventListener("pointercancel", endPointer);
       setIsDragging(false);
 
+      if (!moved && ev.pointerType === "touch") {
+        const rect = imgRef.current?.getBoundingClientRect();
+        if (
+          rect &&
+          (ev.clientX < rect.left || ev.clientX > rect.right || ev.clientY < rect.top || ev.clientY > rect.bottom)
+        ) {
+          touchTapOutsideRef.current = true;
+          return;
+        }
+      }
+
       if (!moved && scaleRef.current <= 1.05) {
         zoomAtPoint(ev.clientX, ev.clientY, CLICK_ZOOM_SCALE);
       }
@@ -243,6 +256,12 @@ export function PhotoLightbox({
           : `h-[min(100dvh,100vh)] w-[min(100dvw,100vw)] p-4 pt-14 sm:p-8 sm:pt-16`
       } ${isZoomed ? (isDragging ? "cursor-grabbing" : "cursor-grab") : "cursor-zoom-in"}`}
       onClick={(e) => {
+        if (touchTapOutsideRef.current) {
+          touchTapOutsideRef.current = false;
+          e.stopPropagation();
+          handleBackdropClick();
+          return;
+        }
         if (!embedded) e.stopPropagation();
       }}
       onDoubleClick={(e) => {
@@ -258,6 +277,7 @@ export function PhotoLightbox({
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
+        ref={imgRef}
         src={src}
         alt={alt}
         draggable={false}

@@ -22,6 +22,7 @@ export function MediaLightbox({
   const hasMultiple = items.length > 1;
   const [photoZoomed, setPhotoZoomed] = useState(false);
   const photoResetRef = useRef<(() => void) | null>(null);
+  const pointerTypeRef = useRef("");
 
   const goPrev = useCallback(() => {
     onIndexChange((index - 1 + items.length) % items.length);
@@ -123,7 +124,13 @@ export function MediaLightbox({
 
       <div
         className="relative flex h-[min(100dvh,100vh)] w-[min(100dvw,100vw)] items-center justify-center p-4 pt-14 sm:p-8 sm:pt-16"
-        onClick={(e) => e.stopPropagation()}
+        onPointerDown={(e) => {
+          pointerTypeRef.current = e.pointerType;
+        }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget && pointerTypeRef.current === "touch") return;
+          e.stopPropagation();
+        }}
       >
         {isSanityImage(item) ? (
           <PhotoLightbox
